@@ -1,0 +1,15 @@
+artifacts/
+**/bin/
+**/obj/
+.vs/
+.idea/
+*.user
+*.suo
+settings.json
+settings.json.tmp
+*.fit
+*.gpx
+.env
+.env.*
+!.env.example
+
