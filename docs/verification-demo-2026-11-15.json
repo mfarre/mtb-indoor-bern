@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-15",
+  "selfTest": "PASS: BLE and FTMS packets; all 2448 visual slopes match physics; hill restart; MTB 1x12 load and low-cadence release; 600 W cap; demo 1x/2x/4x/8x, pause/resume and finish; pause/reset; settings persistence and device identity.",
+  "visualDemo": {
+    "action": "stats",
+    "demoSpeed": 2,
+    "demoSpeedLabel": "⏩ Demo ×2",
+    "demoSpeedHidden": false,
+    "fps": 30,
+    "triangles": 565863,
+    "drawCalls": 57,
+    "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "frames": 295,
+    "pixelRatio": 0.9,
+    "photoTexture": [
+      4864,
+      3840
+    ],
+    "terrainVertices": 195321,
+    "season": "late-autumn",
+    "surface": "leaves",
+    "surveyDetails": {
+      "shrubs": 1820,
+      "saplings": 121,
+      "roots": 7,
+      "rocks": 90
+    },
+    "width": 1440,
+    "height": 852,
+    "routePoints": 2449,
+    "trees": 12182,
+    "distance": 4330.89708088,
+    "mode": "demo",
+    "maxGradeErrorPercent": 4.998676210599129e-05,
+    "errors": []
+  },
+  "packaging": "All Scene assets verified against published output by build.ps1",
+  "comparison": {
+    "frames": 80,
+    "uniqueFrames": 80,
+    "durationMs": 8000,
+    "dimensions": [
+      800,
+      279
+    ],
+    "bytes": 7995677,
+    "startMeters": 4300,
+    "endMeters": 4349.083333333333,
+    "twoRendererVersions": true,
+    "matchedCameraAndPositions": true
+  }
+}
