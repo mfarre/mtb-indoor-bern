@@ -1,0 +1,125 @@
+{
+  "date": "2026-11-15",
+  "originals": {
+    "files": 5,
+    "bytes": 28531728314,
+    "sha256Verified": true
+  },
+  "render": {
+    "forest": {
+      "action": "stats",
+      "fps": 30,
+      "triangles": 539273,
+      "drawCalls": 52,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "frames": 291,
+      "pixelRatio": 0.9,
+      "photoTexture": [
+        4864,
+        3840
+      ],
+      "terrainVertices": 195321,
+      "season": "late-autumn",
+      "surface": "leaves",
+      "surveyDetails": {
+        "shrubs": 1820,
+        "saplings": 121,
+        "roots": 7,
+        "rocks": 90
+      },
+      "width": 1440,
+      "height": 852,
+      "routePoints": 2449,
+      "trees": 12182,
+      "distance": 4364.413027599997,
+      "mode": "demo",
+      "maxGradeErrorPercent": 4.998676210599129e-05,
+      "errors": []
+    },
+    "asphalt": {
+      "action": "stats",
+      "fps": 30,
+      "triangles": 455909,
+      "drawCalls": 55,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "frames": 296,
+      "photoTexture": [
+        4864,
+        3840
+      ],
+      "terrainVertices": 195321,
+      "season": "late-autumn",
+      "surface": "asphalt",
+      "surveyDetails": {
+        "shrubs": 1820,
+        "saplings": 121,
+        "roots": 7,
+        "rocks": 90
+      },
+      "width": 1440,
+      "height": 852,
+      "routePoints": 2449,
+      "trees": 12182,
+      "distance": 2164.9976727199996,
+      "mode": "demo",
+      "maxGradeErrorPercent": 4.998676210599129e-05,
+      "errors": []
+    },
+    "publicWithoutPrivateTexture": {
+      "action": "stats",
+      "fps": 30,
+      "triangles": 539273,
+      "drawCalls": 52,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "frames": 290,
+      "pixelRatio": 0.9,
+      "photoTexture": [
+        4864,
+        3840
+      ],
+      "terrainVertices": 195321,
+      "season": "late-autumn",
+      "surface": "leaves",
+      "surveyDetails": {
+        "shrubs": 1820,
+        "saplings": 121,
+        "roots": 7,
+        "rocks": 90
+      },
+      "width": 1440,
+      "height": 852,
+      "routePoints": 2449,
+      "trees": 12182,
+      "distance": 4364.17265608,
+      "mode": "demo",
+      "maxGradeErrorPercent": 4.998676210599129e-05,
+      "errors": []
+    }
+  },
+  "trackLab": {
+    "frames": 65,
+    "videoWidth": 1280,
+    "videoHeight": 720,
+    "rotation": 180,
+    "offset": -226,
+    "errors": []
+  },
+  "detailCapture": {
+    "width": 2688,
+    "height": 1512,
+    "savedInAnnotations": true
+  },
+  "pipeline": {
+    "fitDirect": true,
+    "fitZip": true,
+    "videoShort": true,
+    "noReferenceCourse": true
+  },
+  "physics": "PASS: BLE and FTMS packets; all 2448 visual slopes match physics; hill restart; MTB 1x12 load and low-cadence release; 600 W cap; pause/reset; settings persistence and device identity.",
+  "limitations": [
+    "Widths and surface transitions are visual estimates.",
+    "Camera offset is estimated, approximately +/- 10 seconds.",
+    "The central video route differs from the original course.",
+    "Vegetation is recreated, not photogrammetry."
+  ]
+}
