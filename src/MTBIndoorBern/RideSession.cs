@@ -87,12 +87,18 @@ internal sealed class RideSession
     public bool Live => Mode == "ride";
     public bool Busy { get; private set; }
     public bool IsDemo { get; private set; }
+    public int DemoSpeed { get; private set; } = 1;
 
     public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null)
     { this.course = course; this.trainer = trainer; this.heart = heart; this.log = log;this.preferences=preferences;
       if(preferences is not null){RiderKg=preferences.Data.RiderKg;Difficulty=preferences.Data.Difficulty;Chainring=preferences.Data.Chainring;} }
 
     public void Shift(int delta) { Gear = Math.Clamp(Gear + Math.Sign(delta), 1, 12); }
+    public void CycleDemoSpeed()
+    {
+        if (!IsDemo || Busy || Mode is not ("demo" or "paused")) return;
+        DemoSpeed = DemoSpeed == 8 ? 1 : DemoSpeed * 2;
+    }
     public void JumpDemo(double distance)
     {
         if (Mode != "demo") return;
@@ -155,7 +161,7 @@ internal sealed class RideSession
         await PauseAsync("Ruta aturada");
         ResetProgress(); Mode = "ready";
     }
-    private void ResetProgress() { Distance = 0; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; }
+    private void ResetProgress() { Distance = 0; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; }
     private async Task<string?> ReleaseControlAsync()
     {
         rideToken?.Cancel();
@@ -176,7 +182,7 @@ internal sealed class RideSession
         if (watts > 10) pedalled = true;
         if (pedalled)
         {
-            Velocity = IsDemo ? 6.2 : RidePhysics.Speed(Velocity, watts, before.Grade, RiderKg, dt);
+            Velocity = IsDemo ? 6.2 * DemoSpeed : RidePhysics.Speed(Velocity, watts, before.Grade, RiderKg, dt);
             Distance = Math.Min(course.Length, Distance + Velocity * dt);
             Elapsed += dt;
             Climbed += Math.Max(0, course.At(Distance).Alt - before.Alt);
@@ -219,7 +225,7 @@ internal sealed class RideSession
             heart = hrFresh ? heart.HeartRate : null, trainer = trainer.Connected, hr = hrFresh,
             control = activeControl?.IsControlling == true, targetPower = activeControl?.AppliedPower,
             controlStatus = trainer.Control?.Status ?? trainer.ControlInfo,
-            length = course.Length, demo = IsDemo };
+            length = course.Length, demo = IsDemo, demoSpeed = DemoSpeed };
     }
 
     public static void Verify(string routeFile)
@@ -242,15 +248,29 @@ internal sealed class RideSession
         using var trainer = new SensorConnection(SensorRole.Trainer);
         using var heart = new SensorConnection(SensorRole.HeartRate);
         var ride = new RideSession(course, trainer, heart, _ => { });
+        ride.CycleDemoSpeed(); if(ride.DemoSpeed != 1) throw new Exception("Demo speed outside demo");
         ride.StartAsync(false).GetAwaiter().GetResult();
         if (ride.Running || ride.Distance != 0) throw new Exception("Live start without trainer");
         ride.StartAsync(true).GetAwaiter().GetResult();
         for(int i=0;i<100;i++) ride.Tick(.1);
         if (Math.Abs(ride.Distance - 62) > .01 || trainer.Control is not null) throw new Exception("Demo must advance without controlling trainer");
+        foreach(int multiplier in new[]{2,4,8,1})
+        {
+            double previous=ride.Distance, elapsed=ride.Elapsed;
+            ride.CycleDemoSpeed(); for(int i=0;i<10;i++)ride.Tick(.1);
+            if(ride.DemoSpeed!=multiplier || Math.Abs(ride.Distance-previous-6.2*multiplier)>.001 || Math.Abs(ride.Elapsed-elapsed-1)>.001 || trainer.Control is not null)
+                throw new Exception("Demo acceleration must change travel only and wrap to 1x");
+        }
         ride.PauseAsync().GetAwaiter().GetResult(); double pausedDistance = ride.Distance;
         ride.Tick(.1); if(ride.Distance != pausedDistance || ride.Velocity != 0) throw new Exception("Pause drift");
+        ride.CycleDemoSpeed(); ride.Tick(.1);
+        if(ride.DemoSpeed!=2 || ride.Distance!=pausedDistance)throw new Exception("Paused demo speed must not advance");
+        ride.StartAsync(true).GetAwaiter().GetResult(); ride.Tick(.1);
+        if(ride.DemoSpeed!=2 || Math.Abs(ride.Distance-pausedDistance-1.24)>.001)throw new Exception("Resume demo speed");
+        ride.JumpDemo(course.Length-10);ride.CycleDemoSpeed();ride.CycleDemoSpeed();ride.Tick(.25);
+        if(ride.Mode!="finished" || ride.Distance!=course.Length || ride.Velocity!=0)throw new Exception("Fast demo must stop at finish");
         for(int i=0;i<30;i++) ride.Shift(1); if(ride.Gear != 12) throw new Exception("Gear upper bound");
         for(int i=0;i<30;i++) ride.Shift(-1); if(ride.Gear != 1) throw new Exception("Gear lower bound");
-        ride.ResetAsync().GetAwaiter().GetResult(); if(ride.Distance != 0 || ride.Elapsed != 0) throw new Exception("Route reset");
+        ride.ResetAsync().GetAwaiter().GetResult(); if(ride.Distance != 0 || ride.Elapsed != 0 || ride.DemoSpeed!=1) throw new Exception("Route reset");
     }
 }
