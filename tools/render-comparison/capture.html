@@ -1,0 +1,23 @@
+<!doctype html><html lang="ca"><meta charset="utf-8"><title>MTB Indoor · Render capture</title>
+<style>html,body{margin:0;background:#17291f;overflow:hidden}canvas{display:block;width:100vw;height:100vh}</style>
+<canvas id="world"></canvas><script type="module">
+import {ForestRenderer} from './forest.js';
+const send=data=>window.chrome.webview.postMessage(data);
+addEventListener('error',e=>send({error:String(e.error??e.message)}));
+addEventListener('unhandledrejection',e=>send({error:String(e.reason)}));
+try{
+ const catalog=await fetch('./courses.json').then(r=>r.json());
+ const id=new URLSearchParams(location.search).get('course');
+ const info=catalog.find(c=>c.id===id)??catalog[0];
+ const [course,world]=await Promise.all(['route.json','world.json'].map(file=>fetch(`./${info.folder}/${file}`).then(r=>r.json())));
+ const engine=new ForestRenderer(document.getElementById('world'),course,world,info);await engine.initialize();
+ engine.renderer.setPixelRatio(1);
+ window.renderCaptureFrame=({distance,dt})=>{
+  if(distance>=course.length){send({error:'Capture exceeds course length'});return;}
+  // Fixed positions and camera timing make both renderer versions directly comparable.
+  engine.distance=distance;engine.render(distance,dt,'demo',false);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>send({type:'frame',distance,...engine.stats()})));
+ };
+ send({type:'ready'});
+}catch(error){send({error:String(error.stack??error)});}
+</script></html>
