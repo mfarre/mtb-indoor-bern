@@ -10,6 +10,14 @@ Projecte en desenvolupament, provat amb un KICKR CORE, un Zwift Click 2 dret i u
 
 La gravació d'una sortida real ha servit per revisar l'aspecte del circuit: asfalt, grava i corriol estret amb fulles, arbres de tardor, sotabosc i marges. La instal·lació local utilitza una mostra del terra extreta del vídeo; aquest recurs es manté privat i el motor disposa d'una textura alternativa generada amb codi. La vegetació es recrea amb geometria i textures; no és una reconstrucció fotogramètrica. Les captures següents mostren la instal·lació local.
 
+**Comparació en moviment · corriol del bosc, km 4,30–4,35.** Vuit segons, les dues versions en paral·lel amb la mateixa posició, càmera i velocitat. El GIF mostra el motor anterior i el nou estil de la instal·lació local.
+
+![Al Dente: corriol en moviment, versió anterior i nou estil de tardor](docs/images/al-dente-before-after.gif)
+
+**Demo accelerada:** el botó **⏩ Demo ×1**, al costat de Pausa, alterna **×1 → ×2 → ×4 → ×8 → ×1**. La velocitat es conserva en pausar i reprendre; Atura / reinicia torna a ×1. Només modifica el desplaçament de la demo; el temps mostra segons reals i el KICKR continua inactiu. A ×8 pots revisar la volta completa en aproximadament quatre minuts. S'han comprovat les quatre velocitats, la pausa, la represa, l'arribada al final i la compilació amb tots els recursos gràfics.
+
+Les [eines de captura i muntatge](tools/render-comparison/README.md) permeten repetir la comparació amb altres versions o trams. [Verificació de la demo i del GIF](docs/verification-demo-2026-11-15.json).
+
 **Abans i després**, al mateix sector del bosc, aproximadament al km 4,37:
 
 | Versió anterior | Nou estil de tardor |
@@ -55,7 +63,7 @@ Les captures són del mode demo. La fotografia del terreny és real; els arbres 
 - Connexió directa al Click 2 dret: no cal BikeControl.
 - Dispositius recordats, indicadors d’estat a la pantalla principal i cerca automàtica cada 5 segons.
 - Pes, dificultat del pendent, plat i circuit desats automàticament.
-- Primera persona, vista aèria i demo sense controlar el KICKR.
+- Primera persona, vista aèria i demo accelerable ×1 / ×2 / ×4 / ×8 sense controlar el KICKR.
 - Catàleg de circuits separat de l’app, preparat per incorporar altres rutes.
 - Superfícies i ambient de tardor basats en referències de vídeo, amb perfil d'aspecte editable per circuit.
 - [Track Lab](docs/track-lab.md) per importar, alinear, revisar i anotar FIT i vídeos locals.
