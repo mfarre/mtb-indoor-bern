@@ -52,7 +52,7 @@ function drawProfile(){
 }
 
 function animate(now){requestAnimationFrame(animate);if(!engine||errors.length)return;if(now-lastFrame<1000/30-.4)return;const dt=Math.min(.12,(now-lastFrame)/1000);lastFrame=now;engine.render(state.distance,dt,state.mode,overview);frames++;totalFrames++;
- if(now-lastStats>=3000){const fps=Math.round(frames*1000/(now-lastStats));frames=0;lastStats=now;$('performance').textContent=`${fps} fps · ${overview?'foto aèria real':'primera persona'}`;engine.adjustQuality(fps);send('stats',{fps,...engine.stats(),width:innerWidth,height:innerHeight,routePoints:course.points.length,trees:world.trees.length,distance:state.distance,mode:state.mode,maxGradeErrorPercent:gradeError,errors});}}
+ if(now-lastStats>=3000){const fps=Math.round(frames*1000/(now-lastStats));frames=0;lastStats=now;$('performance').textContent=`${fps} fps · ${overview?'foto aèria real':'primera persona'}`;engine.adjustQuality(fps);send('stats',{fps,...engine.stats(),width:innerWidth,height:innerHeight,routePoints:course.points.length,trees:engine.world.trees.length,distance:state.distance,mode:state.mode,maxGradeErrorPercent:gradeError,errors});}}
 let gradeError=0;
 try{
  const catalog=await fetch('./courses.json').then(r=>r.json()),id=new URLSearchParams(location.search).get('course');info=catalog.find(c=>c.id===id)??catalog[0];
