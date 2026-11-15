@@ -9,6 +9,7 @@ window.addEventListener('error',e=>fail(e.error??e.message));window.addEventList
 bridge?.addEventListener('message',event=>{if(event.data?.type==='state'){state=event.data;refreshHud();}});
 $('start').onclick=()=>send('start');$('demo').onclick=()=>send('demo');$('pause').onclick=()=>send('pause');$('stop').onclick=()=>send('stop');$('devices').onclick=()=>send('devices');
 $('up').onclick=()=>send('gear',{delta:1});$('down').onclick=()=>send('gear',{delta:-1});
+$('demo-speed').onclick=()=>send('demo-speed');
 const settings=()=>send('settings',{weight:Number($('weight').value),difficulty:Number($('difficulty').value),chainring:Number($('chainring').value)});
 $('weight').onchange=settings;$('difficulty').onchange=settings;$('chainring').onchange=settings;
 $('course-choice').onchange=()=>send('course',{id:$('course-choice').value});
@@ -29,6 +30,10 @@ function refreshHud(){
  $('status').textContent=state.settingsWarning??state.message??'Preparant el circuit…';$('connection-dot').classList.toggle('on',state.control);$('mode-tag').textContent=state.demo&&running?'DEMO · SENSE RODILLO':'CIRCUITS DE BERNA';
  $('start').textContent=state.mode==='paused'&&state.distance>0?'Reprèn la ruta →':state.mode==='finished'?'Torna a començar →':'Inicia la ruta →';
  $('pause').disabled=!running||state.busy;for(const id of['start','demo','stop'])$(id).disabled=!!state.busy;
+ const demoSpeed=$('demo-speed'),rate=state.demoSpeed??1,nextRate=rate===8?1:rate*2;
+ demoSpeed.hidden=!(state.demo&&(state.mode==='demo'||state.mode==='paused'));demoSpeed.disabled=!!state.busy;
+ demoSpeed.textContent=`⏩ Demo ×${rate}`;demoSpeed.title=`Velocitat ×${rate}. Prem per passar a ×${nextRate}`;
+ demoSpeed.setAttribute('aria-label',`Velocitat de demo ×${rate}. Canvia a ×${nextRate}`);
  for(const [id,value] of[['weight',state.weight],['difficulty',state.difficulty],['chainring',state.chainring]]){const el=$(id);el.disabled=running||state.busy;if(value!=null&&document.activeElement!==el)el.value=String(value);}
  $('course-choice').disabled=running||state.busy;refreshDevices();if(course){drawMap();drawProfile();}
 }
