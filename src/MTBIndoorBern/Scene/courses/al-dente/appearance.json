@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "season": "late-autumn",
+  "source": "Sortida del 14/11/2026 · DJI Osmo Action 5 Pro + ELEMNT ROAM",
+  "cameraOffsetSeconds": -226,
+  "clockUncertaintySeconds": 10,
+  "texture": "textures/forest-floor.jpg",
+  "foliageTexture": "textures/beech-branch.png",
+  "textureSource": {"video": "DJI_20261114081041_0001_D.MP4", "seconds": 1925, "rotation": 180, "crop": [1040,850,440,320]},
+  "notes": "Amplades i límits estimats visualment. Altitud i pendent no s'alteren: es conserva el perfil original. La variant central del 14/11 no coincideix amb el traçat antic; el seu aspecte s'extrapola, sense traslladar-hi obstacles puntuals.",
+  "segments": [
+    {"from": 0, "to": 1800, "surface": "asphalt", "width": 3.1, "forest": false, "confidence": "observed"},
+    {"from": 1800, "to": 2360, "surface": "asphalt", "width": 2.8, "forest": true, "confidence": "observed"},
+    {"from": 2360, "to": 3590, "surface": "asphalt", "width": 3.1, "forest": false, "confidence": "observed"},
+    {"from": 3590, "to": 3820, "surface": "gravel", "width": 2.2, "forest": false, "confidence": "observed"},
+    {"from": 3820, "to": 4450, "surface": "leaves", "width": 0.95, "forest": true, "confidence": "observed"},
+    {"from": 4450, "to": 6430, "surface": "leaves", "width": 1.1, "forest": true, "confidence": "inferred", "note": "Variant de vídeo fora del circuit original; ambient extrapolat."},
+    {"from": 6430, "to": 6480, "surface": "leaves", "width": 1.5, "forest": true, "confidence": "observed"},
+    {"from": 6480, "to": 6900, "surface": "asphalt", "width": 2.8, "forest": true, "confidence": "observed"},
+    {"from": 6900, "to": 9170, "surface": "asphalt", "width": 3.0, "forest": false, "confidence": "observed"},
+    {"from": 9170, "to": 9840, "surface": "gravel", "width": 2.5, "forest": false, "confidence": "observed"},
+    {"from": 9840, "to": 12237.26, "surface": "asphalt", "width": 3.0, "forest": false, "confidence": "observed"}
+  ]
+}
