@@ -2,10 +2,13 @@ import * as T from './vendor/three.module.js';
 const rng=(seed=61)=>()=>((seed=(1664525*seed+1013904223)>>>0)/4294967296);
 function texture(paint){const c=document.createElement('canvas');c.width=c.height=512;paint(c.getContext('2d'),512);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=8;return t;}
 function aggregate(kind){const r=rng(kind==='asphalt'?44:97);return texture((c,s)=>{c.fillStyle=kind==='asphalt'?'#555955':'#827e6d';c.fillRect(0,0,s,s);for(let i=0;i<45000;i++){const v=r()*65+35;c.fillStyle=kind==='asphalt'?`rgba(${v},${v+3},${v+2},.35)`:`rgba(${v+45},${v+40},${v+25},.6)`;const w=kind==='asphalt'?.4+r()*1.5:1+r()*4;c.fillRect(r()*s,r()*s,w,w*.65);}if(kind==='asphalt'){c.strokeStyle='#323735';c.lineWidth=.8;for(let i=0;i<4;i++){c.beginPath();let x=r()*s;c.moveTo(x,0);for(let y=0;y<s;y+=20){x+=(r()-.5)*12;c.lineTo(x,y);}c.stroke();}}});}
+function genericLeafFloor(){const r=rng(771);return texture((c,s)=>{c.fillStyle='#625444';c.fillRect(0,0,s,s);for(let i=0;i<26000;i++){c.fillStyle=`rgba(${35+r()*60},${30+r()*45},${22+r()*30},.3)`;c.fillRect(r()*s,r()*s,1+r()*3,1+r()*3);}for(let i=0;i<2000;i++){c.save();c.translate(r()*s,r()*s);c.rotate(r()*Math.PI*2);c.fillStyle=['#7c6245','#a68c61','#9a784c','#b39e76','#675640'][i%5];c.beginPath();c.ellipse(0,0,2+r()*5,1+r()*2,0,0,Math.PI*2);c.fill();c.restore();}});}
 export function surfaceAt(renderer,d){const segs=renderer.survey?.segments;return segs?.find(s=>d>=s.from&&d<s.to)??segs?.at(-1)??{surface:'gravel',width:2.8,forest:false};}
 export async function loadSurvey(renderer){
  const response=await fetch(`${renderer.info.folder}/appearance.json`);if(response.status===404)return;if(!response.ok)throw Error('No es pot llegir l’aspecte del circuit');
- renderer.survey=await response.json();const source=await new T.TextureLoader().loadAsync(`${renderer.info.folder}/${renderer.survey.texture}`);
+ renderer.survey=await response.json();let source;
+ try{source=await new T.TextureLoader().loadAsync(`${renderer.info.folder}/${renderer.survey.texture}`);renderer.groundSource='video';}
+ catch{source=genericLeafFloor();renderer.groundSource='procedural';}
  if(renderer.survey.foliageTexture){renderer.beech=await new T.TextureLoader().loadAsync(`${renderer.info.folder}/${renderer.survey.foliageTexture}`);renderer.beech.colorSpace=T.SRGBColorSpace;renderer.beech.anisotropy=4;}
  // Mirror the extracted ground patch at the borders, preserving its real leaf detail.
  const floor=texture((c,s)=>{for(let y=0;y<2;y++)for(let x=0;x<2;x++){c.save();c.translate(x?s:0,y?s:0);c.scale(x?-1:1,y?-1:1);c.drawImage(source.image,0,0,s/2,s/2);c.restore();}
