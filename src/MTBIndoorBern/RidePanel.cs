@@ -90,6 +90,7 @@ internal sealed class RidePanel : Panel
                 case "heartbeat": heartbeat = DateTime.UtcNow; break;
                 case "start": await Ride.StartAsync(false); break;
                 case "demo": await Ride.StartAsync(true); break;
+                case "demo-speed": Ride.CycleDemoSpeed(); break;
                 case "pause": await Ride.PauseAsync(); break;
                 case "stop": await Ride.ResetAsync(); break;
                 case "devices": await Ride.PauseAsync("Ruta en pausa per configurar dispositius"); devices(); break;
