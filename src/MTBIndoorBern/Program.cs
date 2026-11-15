@@ -23,7 +23,7 @@ internal static class Program
         }
         if (args.Length >= 2 && args[0] == "--self-test")
         {
-            try { Packets.Verify(); RideSession.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])); PreferencesStore.Verify(); File.WriteAllText(args[1], "PASS: BLE and FTMS packets; all 2448 visual slopes match physics; hill restart; MTB 1x12 load and low-cadence release; 600 W cap; pause/reset; settings persistence and device identity."); }
+            try { Packets.Verify(); RideSession.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])); PreferencesStore.Verify(); File.WriteAllText(args[1], "PASS: BLE and FTMS packets; all 2448 visual slopes match physics; hill restart; MTB 1x12 load and low-cadence release; 600 W cap; demo 1x/2x/4x/8x, pause/resume and finish; pause/reset; settings persistence and device identity."); }
             catch (Exception e) { File.WriteAllText(args[1], e.ToString()); Environment.ExitCode = 1; }
             return;
         }
