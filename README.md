@@ -1,10 +1,40 @@
 # MTB Indoor - Bern
 
-Simulador de MTB indoor per a Windows, amb circuits 3D de Berna, connexió Bluetooth al Wahoo KICKR, canvi virtual MTB i pulsòmetre. **Al Dente** és el primer circuit inclòs: 12,24 km sobre fotografia aèria i relleu reals.
+Simulador de MTB indoor per a Windows, amb circuits 3D de Berna, connexió Bluetooth al Wahoo KICKR, canvi virtual MTB i pulsòmetre. **Al Dente** és el primer circuit preparat: 12,24 km sobre fotografia aèria i relleu reals.
 
 Projecte en desenvolupament, provat amb un KICKR CORE, un Zwift Click 2 dret i un Garmin HRM-Dual.
 
-## Captures
+## Evolució del projecte
+
+### 15 de novembre de 2026 · Al Dente de tardor i Track Lab
+
+La gravació d'una sortida real ha servit per revisar l'aspecte del circuit: asfalt, grava i corriol estret amb fulles, arbres de tardor, sotabosc i marges. La instal·lació local utilitza una mostra del terra extreta del vídeo; aquest recurs es manté privat i el motor disposa d'una textura alternativa generada amb codi. La vegetació es recrea amb geometria i textures; no és una reconstrucció fotogramètrica. Les captures següents mostren la instal·lació local.
+
+**Abans i després**, al mateix sector del bosc, aproximadament al km 4,37:
+
+| Versió anterior | Nou estil de tardor |
+| --- | --- |
+| ![Abans: camí ample i vegetació uniforme](docs/images/circuit-3d.png) | ![Després: corriol, fulles, sotabosc i arbres de tardor](docs/images/autumn-forest.png) |
+
+El terreny proper al camí ara té una malla més fina perquè els marges no tapin l'asfalt en pendents fortes. Es conserven les altituds del traçat que fa servir la física. Les superfícies, amplades estimades, trams de bosc i grau de confiança es defineixen a `appearance.json`.
+
+![Asfalt en pujada amb marges adaptats al camí](docs/images/asphalt-climb.png)
+
+**Track Lab** és el nou visor independent per preparar futurs circuits. Copia i verifica els originals amb SHA-256, descodifica el FIT, mostra el vídeo girat 180°, permet ajustar el rellotge, veure la posició al mapa, extreure fotogrames del MP4 a màxima resolució i desar/exportar observacions dels trams.
+
+![Track Lab: vídeo corregit, posició GPS, ajust horari i anotacions](docs/images/track-lab.png)
+
+La sessió de treball conté 28,5 GB d'originals, 64 minuts de vídeo i 65 fotogrames inicials. S'ha estimat un desfasament de −226 s entre la càmera i el FIT; és ajustable i té una incertesa aproximada de 10 s. El tram central del vídeo segueix una variant diferent de la ruta anterior: es marca com a variant, i el seu aspecte s'extrapola sense situar-hi obstacles com si s'haguessin mesurat.
+
+Validació d'aquesta entrega: còpies verificades, compilació del visor, reproducció H.264 corregida, extracció de detall a **2688×1512**, persistència de la captura, importació de prova amb un FIT i un vídeo curt, i proves de física/FTMS superades. Les escenes comprovades de bosc i asfalt mantenen **30 FPS** en una vista de **1440×852**, amb resolució adaptativa. L'error màxim entre pendent visual i físic és inferior a **0,00005 punts percentuals** en els 2.448 segments. Les proves visuals s'han fet en demo, sense controlar el KICKR.
+
+Guies: [Track Lab: ús i compilació](docs/track-lab.md) · [Textures i procedència](docs/render-assets.md) · [Resultats de verificació](docs/verification-2026-11-15.json).
+
+### 12 de novembre de 2026 · Primera versió funcional
+
+Circuit 3D amb fotografia aèria, connexió directa al KICKR CORE, Click 2 dret i HRM-Dual, canvi MTB 1×12, ajustos persistents i reconnexió dels dispositius. La reducció de càrrega en passar de marxa 3 a marxa 1 es va comprovar pedalant.
+
+## Captures de la primera versió
 
 ### Primera persona
 
@@ -27,6 +57,8 @@ Les captures són del mode demo. La fotografia del terreny és real; els arbres 
 - Pes, dificultat del pendent, plat i circuit desats automàticament.
 - Primera persona, vista aèria i demo sense controlar el KICKR.
 - Catàleg de circuits separat de l’app, preparat per incorporar altres rutes.
+- Superfícies i ambient de tardor basats en referències de vídeo, amb perfil d'aspecte editable per circuit.
+- [Track Lab](docs/track-lab.md) per importar, alinear, revisar i anotar FIT i vídeos locals.
 
 ## Requisits
 
@@ -89,7 +121,9 @@ El percentatge de pendent seleccionat modifica l’esforç al KICKR. La geometri
 
 `Scene/courses.json` defineix el catàleg. Cada circuit té una carpeta pròpia amb `route.json`, `world.json` i `aerial.jpg`. Al Dente s’ha preparat a partir d’un FIT: s’han interpolat les altituds absents, suavitzat el soroll i adaptat el terreny proper al mateix perfil que fa servir la simulació. El FIT original no està inclòs.
 
-La portada mostra un tram de bosc; la ruta comença al km 0. La importació automàtica de FIT/GPX encara no està disponible a la interfície.
+**Dades locals:** el repositori públic actual conté el codi, el perfil d'aspecte, textures i captures. Els fitxers de geometria i cartografia del circuit (`route.json`, `world.json`, `aerial.jpg`) es mantenen a la instal·lació local; cal aportar-los a `Scene/courses/al-dente/` per executar aquesta ruta. Els FIT, els vídeos complets i les sessions de treball tampoc es publiquen.
+
+La portada mostra un tram de bosc; la ruta comença al km 0. Track Lab importa FIT i vídeo per analitzar-los, però la creació automàtica d'un circuit jugable des d'un FIT/GPX encara no està disponible.
 
 ## Estructura
 
@@ -103,6 +137,8 @@ src/MTBIndoorBern/
   RidePanel.cs          Connexió entre WinForms i la vista 3D
   Scene/               Interfície, motor Three.js i circuits
 docs/images/           Captures de l’app
+src/TrackLab/           Visor i editor d'observacions de vídeo/FIT
+tools/track-lab/        Importació verificada, descodificació i extracció
 build.ps1              Compilació i proves bàsiques
 ```
 

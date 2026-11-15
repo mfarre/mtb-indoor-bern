@@ -19,3 +19,8 @@ Referències:
 - [WebView2 a NuGet](https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.4314.35)
 
 La publicació d’aquest repositori no concedeix drets addicionals sobre marques de tercers.
+## Track Lab i nous recursos visuals
+
+Track Lab utilitza FFmpeg/FFprobe com a eines externes i el Garmin FIT SDK per a JavaScript. No s'inclouen els binaris de FFmpeg ni el SDK al repositori; cal obtenir-los separadament i conservar les seves llicències. La instal·lació local de treball utilitza FFmpeg 9.0.2 i Garmin FIT SDK 21.221.0. Python/Pillow s'utilitza per preparar els fulls de contacte.
+
+La textura fotogràfica de fulles del terra es manté a la instal·lació local i no es publica. El motor públic inclou una alternativa generada amb codi. La textura RGBA de branquillons de faig s'ha generat amb l'eina integrada ImageGen. Vegeu [textures i procedència](docs/render-assets.md) per a les rutes i el prompt. Les captures de Track Lab mostren un fragment de bosc; els vídeos originals complets es mantenen locals.

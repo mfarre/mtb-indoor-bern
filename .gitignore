@@ -13,3 +13,17 @@ settings.json.tmp
 .env.*
 !.env.example
 
+# Sessions i dades locals del recorregut
+**/config.json
+**/annotations.json
+**/session-manifest.json
+**/reference-route.json
+sessions/
+*.MP4
+*.mp4
+*.LRF
+*.lrf
+src/MTBIndoorBern/Scene/courses/*/route.json
+src/MTBIndoorBern/Scene/courses/*/world.json
+src/MTBIndoorBern/Scene/courses/*/aerial.jpg
+src/MTBIndoorBern/Scene/courses/*/textures/forest-floor.jpg
