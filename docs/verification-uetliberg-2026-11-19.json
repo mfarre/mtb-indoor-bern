@@ -1,0 +1,116 @@
+{
+  "date": "2026-11-19",
+  "track": {
+    "name": "Uetliberg",
+    "summitDistance": 11330,
+    "descentEnd": 14565,
+    "appearanceSegments": 61,
+    "ascent": 581.3899999999985,
+    "points": 5152,
+    "length": 25754.977207062486,
+    "geoLength": 25426.61973318704,
+    "terrainVertices": 20507,
+    "triangles": 38614,
+    "forests": 174,
+    "trees": 7067,
+    "roads": 0,
+    "buildings": 2836,
+    "heightMisses": 0,
+    "gradeMin": -21.4723,
+    "gradeMax": 26.945,
+    "tiles": 70
+  },
+  "elevation": {
+    "datumOffsetM": 0.08899999999999864,
+    "terrainGridVertices": 228879,
+    "maxGradeErrorPercent": 4.993332586966659e-05,
+    "oppositeGrades": 0,
+    "profileSource": "Smoothed GPX altitude, shared by road mesh, HUD, physics and trainer"
+  },
+  "selfTest": "PASS: Dentenberg, Uetliberg; route geometry/physics; BLE/FTMS; MTB gearing; demo speed, pause/resume, profile seeking and finish; settings; braking, grip and personal records.",
+  "publicWithoutPrivateDentenberg": "PASS: Uetliberg; route geometry/physics; BLE/FTMS; MTB gearing; demo speed, pause/resume, profile seeking and finish; settings; braking, grip and personal records.",
+  "profileUiModule": "PASS: click coordinate mapping, bounds, invalid inputs, arrow/shift/home/end keys, disabled seeking and ARIA state",
+  "ground": {
+    "course": "uetliberg",
+    "samples": 140,
+    "terrainAboveRider": 0,
+    "maxRoadErrorMeters": 0.06202911615366702,
+    "localGroundVertices": 289631
+  },
+  "nativeWebViewCaptures": {
+    "demoPaused": {
+      "action": "stats",
+      "fps": 30,
+      "renderVersion": "trail-2026-11-19",
+      "localGroundVertices": 289631,
+      "triangles": 1303522,
+      "drawCalls": 116,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "frames": 413,
+      "pixelRatio": 0.9,
+      "photoTexture": [
+        4352,
+        5120
+      ],
+      "terrainVertices": 228879,
+      "season": "late-autumn",
+      "surface": "gravel",
+      "surveyDetails": {
+        "shrubs": 3050,
+        "saplings": 203,
+        "roots": 0,
+        "rocks": 0
+      },
+      "width": 1440,
+      "height": 852,
+      "routePoints": 5152,
+      "trees": 10714,
+      "distance": 11680,
+      "mode": "paused",
+      "maxGradeErrorPercent": 4.993332586966659e-05,
+      "errors": []
+    },
+    "aerial": {
+      "action": "stats",
+      "fps": 30,
+      "renderVersion": "trail-2026-11-19",
+      "localGroundVertices": 289631,
+      "triangles": 891220,
+      "drawCalls": 63,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "frames": 413,
+      "pixelRatio": 0.9,
+      "photoTexture": [
+        4352,
+        5120
+      ],
+      "terrainVertices": 228879,
+      "season": "late-autumn",
+      "surface": "asphalt",
+      "surveyDetails": {
+        "shrubs": 3050,
+        "saplings": 203,
+        "roots": 0,
+        "rocks": 0
+      },
+      "width": 1440,
+      "height": 852,
+      "routePoints": 5152,
+      "trees": 10714,
+      "distance": 11330,
+      "mode": "paused",
+      "maxGradeErrorPercent": 4.993332586966659e-05,
+      "errors": []
+    }
+  },
+  "installation": {
+    "installed": true,
+    "allPublishedFilesMatch": true,
+    "preferencesAndRecordsPreserved": true
+  },
+  "limitations": [
+    "Planned GPX, not a surveyed activity; surface widths inferred from OSM.",
+    "Vegetation recreated; no Uetliberg video survey.",
+    "Hardware resistance was not retested in this software-only update."
+  ]
+}
