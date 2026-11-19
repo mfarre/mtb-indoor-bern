@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "notes": "Tram de joc dins el circuit Al Dente existent. Adherència calibrada per a la simulació; no és una mesura del terreny real.",
+  "descent": {
+    "id": "dentenberg-forest",
+    "name": "Dentenberg · baixada del bosc",
+    "start": 4480,
+    "end": 6980
+  }
+}
