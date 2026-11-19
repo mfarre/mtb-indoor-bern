@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-19",
+  "hardware": {
+    "model": "Zwift Click 2 right",
+    "presses": 6,
+    "releases": 6,
+    "unintendedShifts": 0,
+    "errors": 0
+  },
+  "tests": {
+    "passed": true,
+    "corners": 28,
+    "descentComparison": {
+      "noBrake": {
+        "Seconds": 384.32499999992433,
+        "OffTracks": 4
+      },
+      "skilled": {
+        "Seconds": 365.0999999999418,
+        "OffTracks": 0
+      },
+      "differentStep": {
+        "Seconds": 365.0999999999579,
+        "OffTracks": 0
+      }
+    }
+  },
+  "terrain": {
+    "samples": 55,
+    "terrainAboveRider": 0,
+    "maxRoadErrorMeters": 0.062031023779354655,
+    "localGroundVertices": 164931
+  },
+  "render": {
+    "brake": {
+      "fps": 30,
+      "width": 1440,
+      "height": 852,
+      "errors": [],
+      "maxGradeErrorPercent": 4.998676210599129e-05
+    },
+    "runout": {
+      "fps": 30,
+      "width": 1440,
+      "height": 852,
+      "errors": [],
+      "maxGradeErrorPercent": 4.998676210599129e-05
+    },
+    "climb": {
+      "fps": 30,
+      "width": 1440,
+      "height": 852,
+      "errors": [],
+      "maxGradeErrorPercent": 4.998676210599129e-05
+    }
+  },
+  "gif": {
+    "frames": 64,
+    "uniqueFrames": 64,
+    "durationMs": 8010,
+    "width": 800,
+    "height": 474,
+    "bytes": 11161849
+  },
+  "trainerControlledDuringCaptures": false
+}
