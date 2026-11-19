@@ -29,7 +29,13 @@ internal static class Program
         }
         if (args.Length >= 2 && args[0] == "--self-test")
         {
-            try { Packets.Verify(); RideSession.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])); PreferencesStore.Verify(); TrailTests.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])); File.WriteAllText(args[1], "PASS: BLE and FTMS packets; all 2448 visual slopes match physics; hill restart; MTB 1x12 load and low-cadence release; 600 W cap; demo 1x/2x/4x/8x, pause/resume and finish; pause/reset; settings persistence and device identity; Click A press/release; downhill braking, grip and run-outs; descent timing and persistent personal records."); }
+            try
+            {
+                Packets.Verify(); PreferencesStore.Verify();
+                var courses=CourseCatalog.Load();
+                foreach(var course in courses) { RideSession.Verify(CourseCatalog.RouteFile(course)); TrailTests.Verify(CourseCatalog.RouteFile(course)); }
+                File.WriteAllText(args[1], "PASS: " + string.Join(", ",courses.Select(c=>c.Name)) + "; route geometry/physics; BLE/FTMS; MTB gearing; demo speed, pause/resume, profile seeking and finish; settings; braking, grip and personal records.");
+            }
             catch (Exception e) { File.WriteAllText(args[1], e.ToString()); Environment.ExitCode = 1; }
             return;
         }
@@ -92,7 +98,7 @@ internal static class Program
             return;
         }
         ApplicationConfiguration.Initialize();
-        using var instance = new Mutex(true, "Local\\MTBIndoorBern.App", out bool firstInstance);
+        using var instance = new Mutex(true, "Local\\AlDente.MtbIndoor", out bool firstInstance);
         if (!firstInstance) { MessageBox.Show("MTB Indoor - Bern ja està obert. Fes servir la finestra existent per evitar dues connexions al KICKR.", "MTB Indoor - Bern"); return; }
         try { Application.Run(new MainForm(args.Length >= 2 && args[0] is "--render-smoke" or "--render-welcome" ? args[1] : null, args.Length == 0 || args[0] != "--render-welcome")); }
         catch (Exception e) { MessageBox.Show("No s’ha pogut iniciar MTB Indoor - Bern. Mantén la carpeta Scene al costat de l’executable.\n\n" + e.Message, "MTB Indoor - Bern"); }

@@ -112,9 +112,20 @@ internal sealed class RideSession
     public void JumpDemo(double distance)
     {
         if (Mode != "demo") return;
-        Distance = Math.Clamp(distance, 0, course.Length - 10); Velocity = 0; Elapsed = 0; Climbed = 0;
-        Handling.Reset(); Descent.Reset();
+        SeekDemo(Math.Clamp(distance, 0, course.Length - 10)); Elapsed = 0; Climbed = 0;
     }
+    public bool CanSeek => IsDemo && !Busy && Mode is "demo" or "paused" or "finished";
+    public void SeekDemo(double distance)
+    {
+        if (!CanSeek || !double.IsFinite(distance)) return;
+        bool wasFinished = Mode == "finished";
+        Distance = Math.Clamp(distance, 0, course.Length); Velocity = 0;
+        Handling.Reset(); Descent.Reset(); screenBrake = controllerBrake = false;
+        if (Distance >= course.Length) { Mode = "finished"; Message = "Final de la demo · clica el perfil per tornar a un altre punt"; }
+        else if (wasFinished) { Mode = "paused"; Message = "Demo en pausa · prem Reprèn per continuar des d’aquest punt"; }
+        else Message = Mode == "paused" ? "Demo en pausa · posició canviada al perfil" : Practice ? "PRÀCTICA · nova posició · sense rècord" : "DEMO · posició canviada al perfil";
+    }
+    public Task ResumeAsync() => Mode == "paused" && !Busy ? StartAsync(IsDemo) : Task.CompletedTask;
     public async Task StartPracticeAsync()
     {
         if (Trail.Stage is null || Busy || Running) return;
@@ -150,7 +161,7 @@ internal sealed class RideSession
                 await activeControl!.StartAsync(rideToken.Token,true);
             }
             Mode = demo ? "demo" : "ride";
-            Message = demo ? "DEMO · recorregut automàtic, sense controlar el KICKR" : "MTB 1×12 · + puja marxa · B baixa marxa";
+            Message = Practice ? "PRÀCTICA · A / Espai: mantén per frenar · sense KICKR ni rècord" : demo ? "DEMO · recorregut automàtic, sense controlar el KICKR" : "MTB 1×12 · + puja marxa · B baixa marxa";
             pedalled = demo || pedalled; lastControl = DateTime.MinValue; lastConfirmation = DateTime.UtcNow;
             log(demo ? "Demo 3D iniciada. KICKR sense control." : "Ruta iniciada. Control del KICKR confirmat.");
         }
@@ -252,7 +263,7 @@ internal sealed class RideSession
             heart = hrFresh ? heart.HeartRate : null, trainer = trainer.Connected, hr = hrFresh,
             control = activeControl?.IsControlling == true, targetPower = activeControl?.AppliedPower,
             controlStatus = trainer.Control?.Status ?? trainer.ControlInfo,
-            length = course.Length, demo = IsDemo, demoSpeed = DemoSpeed, practice = Practice,
+            length = course.Length, demo = IsDemo, demoSpeed = DemoSpeed, practice = Practice, canSeek = CanSeek,
             brake = BrakePressed, brakePressure = Handling.Brake, slip = Handling.Slip, recovery = Handling.Recovery, skidSide = Handling.Side,
             corner = CornerSnapshot(), descent = Descent.Snapshot(Distance, Handling.OffTracks) };
     }
@@ -283,9 +294,11 @@ internal sealed class RideSession
         using var trainer = new SensorConnection(SensorRole.Trainer);
         using var heart = new SensorConnection(SensorRole.HeartRate);
         var ride = new RideSession(course, trainer, heart, _ => { });
+        ride.SeekDemo(100); if(ride.Distance!=0||ride.CanSeek)throw new Exception("Seeking before demo");
         ride.CycleDemoSpeed(); if(ride.DemoSpeed != 1) throw new Exception("Demo speed outside demo");
         ride.StartAsync(false).GetAwaiter().GetResult();
         if (ride.Running || ride.Distance != 0) throw new Exception("Live start without trainer");
+        ride.SeekDemo(100); if(ride.Distance!=0||ride.CanSeek)throw new Exception("Seeking a real paused session");
         ride.StartAsync(true).GetAwaiter().GetResult();
         for(int i=0;i<100;i++) ride.Tick(.1);
         if (Math.Abs(ride.Distance - 62) > .01 || trainer.Control is not null) throw new Exception("Demo must advance without controlling trainer");
@@ -300,8 +313,19 @@ internal sealed class RideSession
         ride.Tick(.1); if(ride.Distance != pausedDistance || ride.Velocity != 0) throw new Exception("Pause drift");
         ride.CycleDemoSpeed(); ride.Tick(.1);
         if(ride.DemoSpeed!=2 || ride.Distance!=pausedDistance)throw new Exception("Paused demo speed must not advance");
-        ride.StartAsync(true).GetAwaiter().GetResult(); ride.Tick(.1);
+        double savedElapsed=ride.Elapsed;
+        ride.SeekDemo(course.Length*.4); pausedDistance=ride.Distance; ride.Tick(.1);
+        if(ride.Mode!="paused"||ride.Distance!=pausedDistance||ride.Elapsed!=savedElapsed||ride.Velocity!=0)throw new Exception("Paused seeking must preserve pause and time");
+        foreach(var invalid in new[]{double.NaN,double.PositiveInfinity,double.NegativeInfinity})ride.SeekDemo(invalid);
+        if(ride.Distance!=pausedDistance)throw new Exception("Non-finite seek");
+        ride.ResumeAsync().GetAwaiter().GetResult(); ride.Tick(.1);
         if(ride.DemoSpeed!=2 || Math.Abs(ride.Distance-pausedDistance-1.24)>.001)throw new Exception("Resume demo speed");
+        ride.SeekDemo(1000);ride.Tick(.1);
+        if(ride.Mode!="demo"||Math.Abs(ride.Distance-1001.24)>.001||trainer.Control is not null)throw new Exception("Running seek without trainer control");
+        ride.SeekDemo(-50);if(ride.Distance!=0)throw new Exception("Seek lower bound");
+        ride.SeekDemo(course.Length+100);if(ride.Mode!="finished"||ride.Distance!=course.Length)throw new Exception("Seek upper bound");
+        ride.SeekDemo(1000);if(ride.Mode!="paused"||ride.Distance!=1000)throw new Exception("Seek from finish");
+        ride.ResumeAsync().GetAwaiter().GetResult();
         ride.JumpDemo(course.Length-10);ride.CycleDemoSpeed();ride.CycleDemoSpeed();ride.Tick(.25);
         if(ride.Mode!="finished" || ride.Distance!=course.Length || ride.Velocity!=0)throw new Exception("Fast demo must stop at finish");
         for(int i=0;i<30;i++) ride.Shift(1); if(ride.Gear != 12) throw new Exception("Gear upper bound");

@@ -93,7 +93,7 @@ internal sealed class RidePanel : Panel
             var action = message.GetProperty("action").GetString();
             switch (action)
             {
-                case "ready": ready = true; heartbeat = DateTime.UtcNow; web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
+                case "ready": web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type="catalog", ids=courses.Select(c=>c.Id).ToArray() })); ready = true; heartbeat = DateTime.UtcNow; web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
                 case "heartbeat": heartbeat = DateTime.UtcNow; break;
                 case "start": await Ride.StartAsync(false); break;
                 case "demo": await Ride.StartAsync(true); break;
@@ -101,6 +101,8 @@ internal sealed class RidePanel : Panel
                 case "practice": await Ride.StartPracticeAsync(); break;
                 case "brake": Ride.SetScreenBrake(message.GetProperty("pressed").GetBoolean()); break;
                 case "pause": await Ride.PauseAsync(); break;
+                case "resume": await Ride.ResumeAsync(); break;
+                case "seek": Ride.SeekDemo(message.GetProperty("distance").GetDouble()); break;
                 case "stop": await Ride.ResetAsync(); break;
                 case "devices": await Ride.PauseAsync("Ruta en pausa per configurar dispositius"); devices(); break;
                 case "gear": Ride.Shift(message.GetProperty("delta").GetInt32()); break;
