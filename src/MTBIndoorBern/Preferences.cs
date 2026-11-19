@@ -18,10 +18,12 @@ internal sealed record SavedSensor(SensorRole Role, ulong Address, string Name, 
 
 internal sealed class Preferences
 {
-    public int Version { get; set; } = 2;
+    public int Version { get; set; } = 3;
     public double RiderKg { get; set; } = 75;
     public double Difficulty { get; set; } = .5;
     public int Chainring { get; set; } = 32;
+    public BikeProfile Bike { get; set; } = new();
+    public CalibrationResult? Calibration { get; set; }
     public string CourseId { get; set; } = "al-dente";
     public List<SavedSensor> Sensors { get; set; } = [];
 }
@@ -40,7 +42,9 @@ internal sealed class PreferencesStore
         { Data = new(); Warning = "No s’han pogut llegir els ajustos. " + e.Message; }
         Data.RiderKg = double.IsFinite(Data.RiderKg) ? Math.Clamp(Data.RiderKg, 40, 160) : 75;
         Data.Difficulty = double.IsFinite(Data.Difficulty) ? Math.Clamp(Data.Difficulty, 0, 1) : .5;
-        Data.Chainring = Data.Chainring is 30 or 32 or 34 ? Data.Chainring : 32;
+        Data.Chainring = Data.Chainring is >=20 and <=60 ? Data.Chainring : 32;
+        Data.Bike = (Data.Bike ?? new()).Normalize();
+        Data.Version = 3;
         Data.Sensors ??= [];
 
     }

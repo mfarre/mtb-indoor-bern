@@ -1,0 +1,208 @@
+{
+  "date": "2026-11-19",
+  "feature": "Bicicleta i calibratge",
+  "hardwareTestPerformed": false,
+  "physicalGuidedCalibration": "Pending explicit user start while pedalling",
+  "personalSelfTest": "PASS: Dentenberg, Uetliberg; shared bike physics and custom gearing; torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE/FTMS; demo speed, pause/resume, seeking and finish; braking, grip and personal records.",
+  "publicSelfTest": "PASS: Uetliberg; shared bike physics and custom gearing; torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE/FTMS; demo speed, pause/resume, seeking and finish; braking, grip and personal records.",
+  "uiRegression": {
+    "type": "test-result",
+    "running": false,
+    "total": 27,
+    "failed": 0,
+    "results": [
+      {
+        "name": "Carrega el perfil, converteix metres a mm i mostra 12 marxes",
+        "passed": true
+      },
+      {
+        "name": "La previsualització reflecteix els canvis de transmissió",
+        "passed": true
+      },
+      {
+        "name": "Les actualitzacions periòdiques conserven l’esborrany",
+        "passed": true
+      },
+      {
+        "name": "Rebutja pinyons duplicats i conserva l’error entre actualitzacions",
+        "passed": true
+      },
+      {
+        "name": "Valida ordre, límits, quantitat de marxes i perímetre",
+        "passed": true
+      },
+      {
+        "name": "Desa valors convertits i espera la confirmació del servidor",
+        "passed": true
+      },
+      {
+        "name": "Un error de desament conserva els valors i el missatge",
+        "passed": true
+      },
+      {
+        "name": "settingsWarning persisteix fins a un desament correcte",
+        "passed": true
+      },
+      {
+        "name": "Conserva dificultats existents de 60% i 0% sense arrodonir",
+        "passed": true
+      },
+      {
+        "name": "Els pinyons predefinits actualitzen el nombre de marxes",
+        "passed": true
+      },
+      {
+        "name": "Sense connexió, la prova queda bloquejada malgrat marcar preparat",
+        "passed": true
+      },
+      {
+        "name": "Un calibratge desat espera el KICKR per validar la compatibilitat",
+        "passed": true
+      },
+      {
+        "name": "La prova requereix una confirmació nova en cada obertura",
+        "passed": true
+      },
+      {
+        "name": "Les dades idle periòdiques no desmarquen la confirmació",
+        "passed": true
+      },
+      {
+        "name": "Començar envia una sola ordre i bloqueja el perfil",
+        "passed": true
+      },
+      {
+        "name": "Mostra el pas zero-based, la cadència, els watts i el progrés",
+        "passed": true
+      },
+      {
+        "name": "Aturar cancel·la la prova i no fabrica un resultat",
+        "passed": true
+      },
+      {
+        "name": "Les etiquetes de fase tenen prioritat sobre stepCount",
+        "passed": true
+      },
+      {
+        "name": "Un resultat antic no revalida un perfil incompatible",
+        "passed": true
+      },
+      {
+        "name": "Un resultat vàlid mostra mètriques i es pot esborrar",
+        "passed": true
+      },
+      {
+        "name": "Tancar una prova envia cancel·lació i profile-close",
+        "passed": true
+      },
+      {
+        "name": "Tancar inactiu només envia profile-close",
+        "passed": true
+      },
+      {
+        "name": "Escape cancel·la i no arriba als controls del joc",
+        "passed": true
+      },
+      {
+        "name": "Perdre el focus atura una prova activa",
+        "passed": true
+      },
+      {
+        "name": "Les fletxes canvien de pestanya sense executar dreceres del joc",
+        "passed": true
+      },
+      {
+        "name": "El focus queda dins el diàleg amb Tab i Maj+Tab",
+        "passed": true
+      },
+      {
+        "name": "El diàleg i els controls de tancament caben a la finestra",
+        "passed": true
+      }
+    ],
+    "viewport": {
+      "width": 1100,
+      "height": 772
+    }
+  },
+  "nativeProfileRender": {
+    "action": "stats",
+    "fps": 15,
+    "renderVersion": "trail-2026-11-19",
+    "localGroundVertices": 289631,
+    "triangles": 1174768,
+    "drawCalls": 114,
+    "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "frames": 46,
+    "pixelRatio": 0.9,
+    "photoTexture": [
+      4352,
+      5120
+    ],
+    "terrainVertices": 228879,
+    "season": "late-autumn",
+    "surface": "asphalt",
+    "surveyDetails": {
+      "shrubs": 3050,
+      "saplings": 203,
+      "roots": 0,
+      "rocks": 0
+    },
+    "width": 1440,
+    "height": 852,
+    "routePoints": 5152,
+    "trees": 10714,
+    "distance": 0,
+    "mode": "paused",
+    "maxGradeErrorPercent": 4.993332586966659e-05,
+    "errors": []
+  },
+  "nativeGuideRender": {
+    "action": "stats",
+    "fps": 15,
+    "renderVersion": "trail-2026-11-19",
+    "localGroundVertices": 289631,
+    "triangles": 1174768,
+    "drawCalls": 114,
+    "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "frames": 45,
+    "pixelRatio": 0.9,
+    "photoTexture": [
+      4352,
+      5120
+    ],
+    "terrainVertices": 228879,
+    "season": "late-autumn",
+    "surface": "asphalt",
+    "surveyDetails": {
+      "shrubs": 3050,
+      "saplings": 203,
+      "roots": 0,
+      "rocks": 0
+    },
+    "width": 1440,
+    "height": 852,
+    "routePoints": 5152,
+    "trees": 10714,
+    "distance": 0,
+    "mode": "paused",
+    "maxGradeErrorPercent": 4.993332586966659e-05,
+    "errors": []
+  },
+  "installation": {
+    "filesVerified": 33,
+    "preservedSettingsAndRecords": true,
+    "executableSha256": "702686b492ab29a92ab28614e09abf5d802fd491a4444b9b0637962472b5cff2"
+  },
+  "screenshots": {
+    "profile": "images/bike-profile.png",
+    "guidedTestPending": "images/calibration-guide.png"
+  },
+  "notes": [
+    "Public self-test executed with the private Dentenberg course removed from test output.",
+    "Native screenshots show the uncalibrated state with Bluetooth scanning disabled in the isolated capture build.",
+    "The compact UI regression ran actual public UI assets in WebView2 with a fake message bridge, without Bluetooth.",
+    "Existing settings and records are byte-for-byte preserved at installation. The app migrates settings to version 3 on next launch.",
+    "Guided-test success/cancellation/failure verified against synthetic trainer telemetry only."
+  ]
+}

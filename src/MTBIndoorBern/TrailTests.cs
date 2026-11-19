@@ -70,7 +70,7 @@ internal static class TrailTests
         {
             var p = course.At(d); var next = plan.Next(d);
             bool brake = controlled && next is not null && v > next.Limit * .96 && next.Start - d < Math.Max(3, (v * v - next.Limit * next.Limit) / 6 + v * .75);
-            v = h.Step(v, p.Grade > -1.3 ? 160 : 0, p.Grade, 75, brake, plan.At(d), d, dt);
+            v = h.Step(v, p.Grade > -1.3 ? 160 : 0, p.Grade, 75, brake, plan.At(d), d, dt,new BikeProfile(),plan.SurfaceAt(d));
             d += v * dt; time += dt;
         }
         Check(d >= plan.Stage.End, "Descent must reach finish");

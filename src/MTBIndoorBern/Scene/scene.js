@@ -3,6 +3,7 @@ import {ForestRenderer} from './forest.js';
 import {setupTrail,updateTrail} from './trail-ui.js';
 import {addTrailMarkers} from './trail-markers.js';
 import {setupProfileSeek,updateProfileSeek} from './profile-seek.js';
+import {setupBikeSettings,updateBikeSettings} from './bike-settings.js';
 const $=id=>document.getElementById(id),bridge=window.chrome?.webview;
 const send=(action,extra={})=>bridge?.postMessage({action,...extra});
 const format=(v,n=0)=>Number(v).toLocaleString('ca-ES',{minimumFractionDigits:n,maximumFractionDigits:n});
@@ -10,13 +11,14 @@ let state={mode:'ready',distance:0,speed:0,elapsed:0,climbed:0,gear:8,demo:false
 function fail(error){const message=String(error?.message??error);errors.push(message);$('loading').style.display='flex';$('loading').querySelector('h2').textContent='No s’ha pogut carregar el circuit';$('loading').querySelector('p').textContent=message;send('error',{message});}
 window.addEventListener('error',e=>fail(e.error??e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
 const clearBrake=setupTrail(send);
+const bikeSettings=setupBikeSettings(send);
+$('bike-settings').onclick=()=>bikeSettings.open();
+bridge?.addEventListener('message',event=>{if(event.data?.type==='open-profile')bikeSettings.open();else if(event.data?.type==='bike-profile'||event.data?.type==='calibration')updateBikeSettings(event.data);});
 setupProfileSeek($('profile'),send,()=>state,()=>course);
 bridge?.addEventListener('message',event=>{if(event.data?.type==='state'){const wasRunning=state.mode==='ride'||state.mode==='demo';state=event.data;if(wasRunning&&state.mode!=='ride'&&state.mode!=='demo')clearBrake();refreshHud();}else if(event.data?.type==='catalog'){for(const option of [...$('course-choice').options])if(!event.data.ids.includes(option.value))option.remove();}else if(event.data?.type==='trail'){addTrailMarkers(engine,event.data);$('practice').hidden=!event.data.stage;if(event.data.stage)$('practice').textContent='↓ Practica la baixada · '+event.data.stage.name;}});
 $('start').onclick=()=>send('start');$('demo').onclick=()=>send('demo');$('pause').onclick=()=>send(state.mode==='paused'?'resume':'pause');$('stop').onclick=()=>send('stop');$('devices').onclick=()=>send('devices');
 $('up').onclick=()=>send('gear',{delta:1});$('down').onclick=()=>send('gear',{delta:-1});
 $('demo-speed').onclick=()=>send('demo-speed');
-const settings=()=>send('settings',{weight:Number($('weight').value),difficulty:Number($('difficulty').value),chainring:Number($('chainring').value)});
-$('weight').onchange=settings;$('difficulty').onchange=settings;$('chainring').onchange=settings;
 $('course-choice').onchange=()=>send('course',{id:$('course-choice').value});
 $('view').onclick=()=>{overview=!overview;$('view').textContent=overview?'Primera persona ↙':'Vista aèria ↗';};
 window.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(e.key==='Escape'){send('pause');e.preventDefault();}if(e.key==='+'||e.key==='='){send('gear',{delta:1});e.preventDefault();}if(e.key==='-'||e.key==='b'||e.key==='B'){send('gear',{delta:-1});e.preventDefault();}});
@@ -28,7 +30,7 @@ function refreshHud(){
  for(const id of['watts','cadence','heart'])$(id).textContent=state[id]==null?'—':format(state[id]);$('speed').textContent=format(state.speed,1);$('distance').textContent=format(state.distance/1000,2);
  $('remaining').textContent=`${format(Math.max(0,(state.length??info?.length??0)-state.distance)/1000,2)} km per fer`;
  $('time').textContent=`${Math.floor(state.elapsed/60).toString().padStart(2,'0')}:${Math.floor(state.elapsed%60).toString().padStart(2,'0')}`;
- $('ascent').textContent=`${format(state.climbed)} m`;$('altitude').textContent=`${format(state.altitude??0)} m`;$('gear').innerHTML=`${state.gear}<span>/12</span>`;
+ $('ascent').textContent=`${format(state.climbed)} m`;$('altitude').textContent=`${format(state.altitude??0)} m`;$('gear').innerHTML=`${state.gear}<span>/${state.gearCount??12}</span>`;
  $('ratio').textContent=`${state.chainring??32} × ${state.sprocket??18} · ${format(state.development??4.09,2)} m/volta`;
  $('grade').textContent=`${state.grade>0?'+':''}${format(state.grade??0,1)}%`;$('applied').textContent=state.control?`${format(state.targetPower??0)} W · confirmat`:'Inactiu';
  $('progress').style.width=`${Math.min(100,state.distance/(state.length??info?.length??1)*100)}%`;$('profile-distance').textContent=`${format(state.distance/1000,1)} km`;
@@ -39,7 +41,7 @@ function refreshHud(){
  demoSpeed.hidden=state.practice||!(state.demo&&(state.mode==='demo'||state.mode==='paused'));demoSpeed.disabled=!!state.busy;
  demoSpeed.textContent=`⏩ Demo ×${rate}`;demoSpeed.title=`Velocitat ×${rate}. Prem per passar a ×${nextRate}`;
  demoSpeed.setAttribute('aria-label',`Velocitat de demo ×${rate}. Canvia a ×${nextRate}`);
- for(const [id,value] of[['weight',state.weight],['difficulty',state.difficulty],['chainring',state.chainring]]){const el=$(id);el.disabled=running||state.busy;if(value!=null&&document.activeElement!==el)el.value=String(value);}
+ $('bike-summary').textContent=`${state.bikeName??'La meva MTB'} · ${format(state.weight??75)} + ${format(state.bikeKg??14)} kg · ${state.gearCount??12} marxes`;
  $('course-choice').disabled=running||state.busy;refreshDevices();updateTrail(state);updateProfileSeek($('profile'),state);if(course){drawMap();drawProfile();}
 }
 function pointAt(d){

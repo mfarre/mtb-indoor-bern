@@ -94,6 +94,8 @@ internal sealed class SensorConnection : IDisposable
     public bool Connected => ready && device?.ConnectionStatus == BluetoothConnectionStatus.Connected;
     public bool HasSession => device is not null;
     public DateTime? LastPacket { get; private set; }
+    public DateTime? LastPowerPacket { get; private set; }
+    public DateTime? LastCadencePacket { get; private set; }
     public int? Power { get; private set; }
     public double? Cadence { get; private set; }
     public int? HeartRate { get; private set; }
@@ -275,13 +277,13 @@ internal sealed class SensorConnection : IDisposable
             else if (sender.Uuid == BleIds.Standard(0x2ad2))
             {
                 var data = Packets.ReadIndoorBike(bytes);
-                if (data.Power.HasValue) Power = data.Power;
-                if (data.Cadence.HasValue) Cadence = data.Cadence;
+                if (data.Power.HasValue) { Power = data.Power; LastPowerPacket=DateTime.UtcNow; }
+                if (data.Cadence.HasValue) { Cadence = data.Cadence; LastCadencePacket=DateTime.UtcNow; }
             }
             else if (sender.Uuid == BleIds.Standard(0x2a63))
             {
                 var data = Packets.ReadCyclingPower(bytes);
-                Power = data.Power;
+                Power = data.Power; LastPowerPacket=DateTime.UtcNow;
                 if (data.Revolutions.HasValue && data.Time.HasValue)
                 {
                     if (crankRevolutions.HasValue && crankTime.HasValue)
@@ -290,6 +292,7 @@ internal sealed class SensorConnection : IDisposable
                         var revolutions = unchecked((ushort)(data.Revolutions.Value - crankRevolutions.Value));
                         if (delta > 0) Cadence = revolutions * 60.0 * 1024 / delta;
                         else if (revolutions == 0) Cadence = 0;
+                        LastCadencePacket=DateTime.UtcNow;
                     }
                     crankRevolutions = data.Revolutions;
                     crankTime = data.Time;
@@ -342,7 +345,7 @@ internal sealed class SensorConnection : IDisposable
 
     private void ClearData()
     {
-        Power = null; Cadence = null; HeartRate = null; LastPacket = null;
+        Power = null; Cadence = null; HeartRate = null; LastPacket = LastPowerPacket = LastCadencePacket = null;
         crankRevolutions = null; crankTime = null; buttonStates.Clear(); BrakePressed = false;
     }
 

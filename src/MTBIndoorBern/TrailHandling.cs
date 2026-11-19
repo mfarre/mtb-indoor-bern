@@ -15,9 +15,10 @@ internal sealed class TrailPlan
     public TrailCorner[] Corners { get; }
     public DescentStage? Stage { get; }
     public string RecordKey { get; }
+    private readonly List<(double From,double To,string Surface,double Width)> surfaces = [];
+    public string SurfaceAt(double distance)=>surfaces.FirstOrDefault(s=>distance>=s.From&&distance<s.To).Surface??"gravel";
     public TrailPlan(Course course, string? routeFile = null)
     {
-        var surfaces = new List<(double From, double To, string Surface, double Width)>();
         string appearance = routeFile is null ? "" : Path.Combine(Path.GetDirectoryName(routeFile)!, "appearance.json");
         if (File.Exists(appearance))
         {
@@ -59,7 +60,7 @@ internal sealed class TrailPlan
             if (stage.Start < 0 || stage.End > course.Length || stage.End <= stage.Start + 100) throw new InvalidDataException("Tram de baixada invàlid");
             Stage = stage;
         }
-        string identity = JsonSerializer.Serialize(new { version = 1, course.Points, Corners, Stage });
+        string identity = JsonSerializer.Serialize(new { version = 2, course.Points, Corners, Stage });
         RecordKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(identity)))[..20];
     }
     public TrailCorner? At(double distance) => Corners.FirstOrDefault(c => distance >= c.Start && distance <= c.End);
@@ -78,11 +79,11 @@ internal sealed class TrailHandling
     private double ignoreUntil = -1;
     public void Reset() { Brake = Slip = Recovery = 0; OffTracks = 0; ignoreUntil = -1; }
     public void Release() { Brake = 0; }
-    public double Step(double speed, double watts, double grade, double weight, bool pressed, TrailCorner? corner, double distance, double dt)
+    public double Step(double speed, double watts, double grade, double weight, bool pressed, TrailCorner? corner, double distance, double dt, BikeProfile? bike=null, string surface="gravel")
     {
         Brake = Math.Clamp(Brake + (pressed ? dt * 5 : -dt * 9), 0, 1);
         if (Recovery > 0) { Recovery = Math.Max(0, Recovery - dt); Slip = 0; return 0; }
-        speed = Math.Max(0, RidePhysics.Speed(speed, watts, grade, weight, dt) - Brake * 5.5 * dt);
+        speed = Math.Max(0, BikeDynamics.Speed(speed, watts, grade, weight, dt,bike??new(),surface) - Brake * 5.5 * dt);
         double excess = corner is not null && distance > ignoreUntil ? Math.Max(0, Math.Pow(speed / corner.Limit, 2) - 1.08) : 0;
         Slip = Math.Clamp(Slip + (excess > 0 ? excess * 1.6 : -1.8) * dt, 0, 1);
         if (excess > 0)

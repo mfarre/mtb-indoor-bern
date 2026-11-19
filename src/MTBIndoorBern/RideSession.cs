@@ -38,27 +38,12 @@ internal sealed class Course
 
 internal static class RidePhysics
 {
-    public static double Speed(double speed, double watts, double grade, double riderKg, double dt)
-    {
-        var mass = riderKg + 14;
-        var force = Math.Clamp(watts, 0, 2000) * .96 / Math.Max(speed, .5) - mass * 9.81 * (grade / 100 + .009) - .5 * 1.225 * .51 * speed * speed;
-        return Math.Clamp(speed + Math.Clamp(force / mass, -4, 2.5) * dt, 0, 45 / 3.6);
-    }
+    // Compatibility entry points for diagnostics; active rides use their saved BikeProfile.
     public static readonly int[] Sprockets = [51,45,39,33,28,24,21,18,16,14,12,10];
-    public static double Ratio(int gear,int chainring=32)=>chainring/(double)Sprockets[Math.Clamp(gear,1,12)-1];
-    public static double Development(int gear,int chainring=32)=>2.30*Ratio(gear,chainring);
-    // 29-inch MTB: real 1x12 ratios, 2.30 m wheel rollout. Convert the road force at
-    // cadence-derived geared speed to crank power; update FTMS dynamically, not a fixed ERG workout.
-    public static double TargetPower(double grade,double difficulty,int gear,double cadence,double riderKg,int chainring=32)
-    {
-        if(!double.IsFinite(cadence)||cadence<=30)return 0;
-        cadence=Math.Clamp(cadence,0,170);
-        double speed=cadence/60*Development(gear,chainring);
-        double slope=Math.Clamp(grade,-30,30)*difficulty/100;
-        double force=(riderKg+14)*9.81*(slope+.009)+.5*1.225*.51*speed*speed;
-        double release=Math.Clamp((cadence-30)/15,0,1);
-        return Math.Clamp(Math.Max(0,force)*speed/.96*release*release,0,600);
-    }
+    public static double Ratio(int gear,int chainring=32)=>BikeDynamics.Ratio(gear,chainring,new());
+    public static double Development(int gear,int chainring=32)=>BikeDynamics.Development(gear,chainring,new());
+    public static double Speed(double speed,double watts,double grade,double riderKg,double dt)=>BikeDynamics.Speed(speed,watts,grade,riderKg,dt,new());
+    public static double TargetPower(double grade,double difficulty,int gear,double cadence,double riderKg,int chainring=32)=>BikeDynamics.TargetPower(grade,difficulty,gear,cadence,riderKg,chainring,new());
 }
 
 internal sealed class RideSession
@@ -73,6 +58,11 @@ internal sealed class RideSession
     private DateTime lastControl = DateTime.MinValue;
     private DateTime lastConfirmation = DateTime.MinValue;
     private TrainerControl? activeControl;
+    private readonly TorqueRamp torqueRamp = new();
+    public BikeProfile Bike { get; private set; } = new();
+    public int GearCount => Bike.Sprockets.Length;
+    public Func<string> TrainerIdentity { get; set; } = () => "";
+    private CalibrationResult? ValidCalibration => preferences?.Data.Calibration is { } c && c.IsValidFor(ProfileSettings.Signature(preferences.Data),TrainerIdentity()) ? c : null;
     public string Mode { get; private set; } = "ready";
     public string Message { get; private set; } = "Connecta el KICKR i inicia la ruta, o explora-la en mode demo.";
     public double Distance { get; private set; }
@@ -101,9 +91,9 @@ internal sealed class RideSession
     public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null, string? routeFile=null, PersonalRecords? records=null)
     { this.course = course; this.trainer = trainer; this.heart = heart; this.log = log;this.preferences=preferences;
       Trail = new(course, routeFile); Descent = new(Trail, records ?? new PersonalRecords(null));
-      if(preferences is not null){RiderKg=preferences.Data.RiderKg;Difficulty=preferences.Data.Difficulty;Chainring=preferences.Data.Chainring;} }
+      ReloadProfile(); }
 
-    public void Shift(int delta) { Gear = Math.Clamp(Gear + Math.Sign(delta), 1, 12); }
+    public void Shift(int delta) { Gear = Math.Clamp(Gear + Math.Sign(delta), 1, GearCount); }
     public void CycleDemoSpeed()
     {
         if (!IsDemo || Practice || Busy || Mode is not ("demo" or "paused")) return;
@@ -138,10 +128,16 @@ internal sealed class RideSession
         if (Running || Busy) return;
         if (double.IsFinite(weight)) RiderKg = Math.Clamp(weight, 40, 160);
         if (double.IsFinite(difficulty)) Difficulty = Math.Clamp(difficulty, 0, 1);
-        Chainring=chainring is 30 or 32 or 34?chainring:32;
+        Chainring=chainring is >=20 and <=60?chainring:32;
         if(preferences is not null){preferences.Data.RiderKg=RiderKg;preferences.Data.Difficulty=Difficulty;preferences.Data.Chainring=Chainring;preferences.Save();}
     }
-    private bool Fresh => trainer.Connected && trainer.LastPacket.HasValue && (DateTime.UtcNow - trainer.LastPacket.Value).TotalSeconds < 5 && trainer.Power.HasValue;
+    public void ReloadProfile()
+    {
+        if(Running||Busy)return;
+        if(preferences is not null){RiderKg=preferences.Data.RiderKg;Difficulty=preferences.Data.Difficulty;Chainring=preferences.Data.Chainring;Bike=preferences.Data.Bike.Copy();}
+        Gear=Math.Clamp(Gear,1,GearCount); torqueRamp.Reset(); Descent.Invalidate();
+    }
+    private bool Fresh => trainer.Connected && trainer.LastPowerPacket.HasValue && (DateTime.UtcNow - trainer.LastPowerPacket.Value).TotalSeconds < 5 && trainer.LastCadencePacket.HasValue && (DateTime.UtcNow - trainer.LastCadencePacket.Value).TotalSeconds < 5 && trainer.Power.HasValue;
 
     public async Task StartAsync(bool demo)
     {
@@ -160,8 +156,9 @@ internal sealed class RideSession
                 rideToken?.Dispose(); rideToken = new CancellationTokenSource();
                 await activeControl!.StartAsync(rideToken.Token,true);
             }
+            torqueRamp.Reset();
             Mode = demo ? "demo" : "ride";
-            Message = Practice ? "PRÀCTICA · A / Espai: mantén per frenar · sense KICKR ni rècord" : demo ? "DEMO · recorregut automàtic, sense controlar el KICKR" : "MTB 1×12 · + puja marxa · B baixa marxa";
+            Message = Practice ? "PRÀCTICA · A / Espai: mantén per frenar · sense KICKR ni rècord" : demo ? "DEMO · recorregut automàtic, sense controlar el KICKR" : $"MTB 1×{GearCount} · + puja marxa · B baixa marxa";
             pedalled = demo || pedalled; lastControl = DateTime.MinValue; lastConfirmation = DateTime.UtcNow;
             log(demo ? "Demo 3D iniciada. KICKR sense control." : "Ruta iniciada. Control del KICKR confirmat.");
         }
@@ -218,7 +215,7 @@ internal sealed class RideSession
             if (pedalled)
             {
                 Velocity = IsDemo && !Practice ? (BrakePressed ? Math.Max(0, Velocity - 5.5 * step) : 6.2 * DemoSpeed)
-                    : Handling.Step(Velocity, watts, before.Grade, RiderKg, BrakePressed, Trail.At(Distance), Distance, step);
+                    : Handling.Step(Velocity, watts, before.Grade, RiderKg, BrakePressed, Trail.At(Distance), Distance, step, Bike, Trail.SurfaceAt(Distance));
                 Distance = Math.Min(course.Length, Distance + Velocity * step);
                 Elapsed += step;
                 Climbed += Math.Max(0, course.At(Distance).Alt - before.Alt);
@@ -226,7 +223,7 @@ internal sealed class RideSession
             if (!IsDemo || Practice) Descent.Tick(oldDistance, Distance, step, Live, Handling.OffTracks);
         }
         if (Distance >= course.Length) { _ = PauseAsync("Volta completada. Bona ruta!"); return; }
-        if (Live && !controlBusy && (DateTime.UtcNow - lastControl).TotalSeconds >= 1)
+        if (Live && !controlBusy && (DateTime.UtcNow - lastControl).TotalSeconds >= (ValidCalibration?.UpdateIntervalSeconds ?? 1))
             _ = UpdateResistanceAsync();
     }
 
@@ -234,12 +231,12 @@ internal sealed class RideSession
     {
         var control = activeControl; var token = rideToken?.Token ?? CancellationToken.None;
         if (control is null) return;
-        controlBusy = true; lastControl = DateTime.UtcNow;
+        controlBusy = true; double controlDt=lastControl==DateTime.MinValue?1:Math.Clamp((DateTime.UtcNow-lastControl).TotalSeconds,0,2); lastControl = DateTime.UtcNow;
         try
         {
             double cadence=trainer.Cadence??0;
-            var target = RidePhysics.TargetPower(course.At(Distance).Grade,Difficulty,Gear,cadence,RiderKg,Chainring);
-            target = cadence<=30?0:Math.Min(target,control.AppliedPower+40);
+            var target = BikeDynamics.TargetPower(course.At(Distance).Grade,Difficulty,Gear,cadence,RiderKg,Chainring,Bike,Trail.SurfaceAt(Distance));
+            target = torqueRamp.NextPower(target,cadence,controlDt,ValidCalibration?.TorqueRiseNmPerSecond ?? 5);
             if (Math.Abs(target - control.AppliedPower) >= 2 || (DateTime.UtcNow - lastConfirmation).TotalSeconds >= 5)
             {
                 await control.SetPowerAsync((int)Math.Round(target), token);
@@ -257,7 +254,7 @@ internal sealed class RideSession
         bool hrFresh = heart.Connected && heart.LastPacket.HasValue && (DateTime.UtcNow - heart.LastPacket.Value).TotalSeconds < 8;
         return new { type = "state", mode = Mode, message = Message, distance = Distance, speed = Velocity * 3.6, elapsed = Elapsed,
             climbed = Climbed, grade = p.Grade, altitude = p.Alt, gear = Gear, weight = RiderKg, difficulty = Difficulty, busy = Busy,
-            devices,chainring=Chainring,sprocket=RidePhysics.Sprockets[Gear-1],development=RidePhysics.Development(Gear,Chainring),gearCount=12,settingsWarning=preferences?.Warning,
+            devices,chainring=Chainring,sprocket=Bike.Sprockets[Gear-1],development=BikeDynamics.Development(Gear,Chainring,Bike),gearCount=GearCount,bikeName=Bike.Name,bikeKg=Bike.BikeKg,calibrated=ValidCalibration is not null,settingsWarning=preferences?.Warning,
             watts = Practice ? (Running && p.Grade > -1.3 ? 160 : 0) : IsDemo && Running ? 170 : Fresh ? trainer.Power : null,
             cadence = Practice ? 0 : IsDemo && Running ? 82 : Fresh ? trainer.Cadence : null,
             heart = hrFresh ? heart.HeartRate : null, trainer = trainer.Connected, hr = hrFresh,
@@ -331,5 +328,42 @@ internal sealed class RideSession
         for(int i=0;i<30;i++) ride.Shift(1); if(ride.Gear != 12) throw new Exception("Gear upper bound");
         for(int i=0;i<30;i++) ride.Shift(-1); if(ride.Gear != 1) throw new Exception("Gear lower bound");
         ride.ResetAsync().GetAwaiter().GetResult(); if(ride.Distance != 0 || ride.Elapsed != 0 || ride.DemoSpeed!=1) throw new Exception("Route reset");
+
+        var profileStore = new PreferencesStore(Path.Combine(Path.GetTempPath(), "MtbRideProfile-" + Guid.NewGuid().ToString("N") + ".json"), false);
+        profileStore.Data.RiderKg = 83; profileStore.Data.Difficulty = .6; profileStore.Data.Chainring = 28;
+        profileStore.Data.Bike = new BikeProfile { Name = "Test 1x6", BikeKg = 12.5, WheelCircumferenceM = 2.24,
+            Sprockets = [46, 37, 28, 21, 16, 11], LowCadenceAssist = false };
+        var customRide = new RideSession(course, trainer, heart, _ => { }, profileStore);
+        if(customRide.GearCount!=6 || customRide.Gear!=6 || customRide.Chainring!=28 || customRide.RiderKg!=83 || customRide.Difficulty!=.6 || customRide.Bike.BikeKg!=12.5 || customRide.Bike.LowCadenceAssist)
+            throw new Exception("Saved custom bike profile must initialize the ride and clamp its initial gear");
+        var customState = JsonSerializer.SerializeToElement(customRide.Snapshot());
+        if(customState.GetProperty("gearCount").GetInt32()!=6 || customState.GetProperty("sprocket").GetInt32()!=11 ||
+            customState.GetProperty("bikeName").GetString()!="Test 1x6" || customState.GetProperty("bikeKg").GetDouble()!=12.5 ||
+            Math.Abs(customState.GetProperty("development").GetDouble()-2.24*28/11)>.000001)
+            throw new Exception("Ride snapshot must report the saved transmission and rollout");
+        for(int i=0;i<30;i++)customRide.Shift(-1);
+        customState=JsonSerializer.SerializeToElement(customRide.Snapshot());
+        if(customRide.Gear!=1 || customState.GetProperty("sprocket").GetInt32()!=46 || Math.Abs(customState.GetProperty("development").GetDouble()-2.24*28/46)>.000001)
+            throw new Exception("Custom lowest gear and development");
+        for(int i=0;i<30;i++)customRide.Shift(1);
+        if(customRide.Gear!=6)throw new Exception("Custom highest gear bound");
+        profileStore.Data.Bike.Sprockets[0]=48;
+        if(customRide.Bike.Sprockets[0]!=46)throw new Exception("Ride must own a copy of its saved cassette");
+        customRide.StartAsync(true).GetAwaiter().GetResult();customRide.Tick(.1);
+        profileStore.Data.Bike = new BikeProfile { Name="Test 1x4", BikeKg=10, WheelCircumferenceM=2.15, Sprockets=[50,34,22,11] };
+        profileStore.Data.Chainring=30;profileStore.Data.RiderKg=90;
+        customRide.ReloadProfile();
+        if(customRide.GearCount!=6 || customRide.Bike.BikeKg!=12.5 || customRide.Chainring!=28 || customRide.RiderKg!=83)
+            throw new Exception("Profile reload must not change a running session");
+        customRide.PauseAsync().GetAwaiter().GetResult();customRide.ReloadProfile();
+        customState=JsonSerializer.SerializeToElement(customRide.Snapshot());
+        if(customRide.GearCount!=4 || customRide.Gear!=4 || customRide.Bike.BikeKg!=10 || customRide.Chainring!=30 || customRide.RiderKg!=90 ||
+            Math.Abs(customState.GetProperty("development").GetDouble()-2.15*30/11)>.000001)
+            throw new Exception("Paused profile reload must apply mass, chainring and cassette and clamp gear");
+        customRide.ResetAsync().GetAwaiter().GetResult();
+        if(customRide.Distance!=0 || customRide.Elapsed!=0 || customRide.GearCount!=4 || customRide.Bike.BikeKg!=10 || trainer.Control is not null)
+            throw new Exception("Reset must preserve the selected bike without acquiring trainer control");
+        customRide.StartAsync(false).GetAwaiter().GetResult();
+        if(customRide.Running || trainer.Control is not null)throw new Exception("Custom profile must not bypass the real-trainer start guard");
     }
 }

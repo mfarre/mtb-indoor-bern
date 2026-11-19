@@ -31,10 +31,10 @@ internal static class Program
         {
             try
             {
-                Packets.Verify(); PreferencesStore.Verify();
+                Packets.Verify(); PreferencesStore.Verify(); BikeProfileTests.Verify(); ProfileSettings.Verify(); CalibrationTests.Verify();
                 var courses=CourseCatalog.Load();
                 foreach(var course in courses) { RideSession.Verify(CourseCatalog.RouteFile(course)); TrailTests.Verify(CourseCatalog.RouteFile(course)); }
-                File.WriteAllText(args[1], "PASS: " + string.Join(", ",courses.Select(c=>c.Name)) + "; route geometry/physics; BLE/FTMS; MTB gearing; demo speed, pause/resume, profile seeking and finish; settings; braking, grip and personal records.");
+                File.WriteAllText(args[1], "PASS: " + string.Join(", ",courses.Select(c=>c.Name)) + "; shared bike physics and custom gearing; torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE/FTMS; demo speed, pause/resume, seeking and finish; braking, grip and personal records.");
             }
             catch (Exception e) { File.WriteAllText(args[1], e.ToString()); Environment.ExitCode = 1; }
             return;

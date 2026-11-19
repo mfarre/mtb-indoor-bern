@@ -24,7 +24,7 @@ export function updateTrail(s){
  $('focus-label').textContent=up?'↗ PUJADA':down?'↘ BAIXADA':'→ RODANT';
  $('focus-value').textContent=up?'+'+number(s.grade,1):number(s.speed,1);
  $('focus-unit').textContent=up?'%':'km/h';
- $('focus-detail').textContent=up?`${number(s.speed,1)} km/h · Marxa ${s.gear}/12`:`${s.grade>0?'+':''}${number(s.grade,1)}% · ${s.brake?'Frenant':s.watts>10?(s.practice?'Impuls demo':'Pedalant'):'Roda lliure'}`;
+ $('focus-detail').textContent=up?`${number(s.speed,1)} km/h · Marxa ${s.gear}/${s.gearCount??12}`:`${s.grade>0?'+':''}${number(s.grade,1)}% · ${s.brake?'Frenant':s.watts>10?(s.practice?'Impuls demo':'Pedalant'):'Roda lliure'}`;
  $('demo').textContent=s.practice&&s.mode==='paused'?'Reprèn pràctica':'Explora en demo';
  $('ride-focus').classList.toggle('climbing',up);
  const c=s.corner;

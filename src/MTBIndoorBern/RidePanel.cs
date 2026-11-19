@@ -22,6 +22,11 @@ internal sealed class RidePanel : Panel
     private readonly PreferencesStore preferences;
     private readonly CourseInfo[] courses;
     private CourseInfo selectedCourse;
+    private readonly CalibrationTrainerAdapter trainerAdapter;
+    private readonly CalibrationSession calibration;
+    private bool profileOpen;
+    private double lastProfilePost;
+    public bool CalibrationActive => calibration.Active;
     public RideSession Ride { get; private set; }
 
     public RidePanel(Equipment equipment,PreferencesStore preferences, Action devices, Action<string> log, string? smokeFile = null, bool smokeDemo = true)
@@ -31,6 +36,8 @@ internal sealed class RidePanel : Panel
         selectedCourse=courses.FirstOrDefault(c=>c.Id==preferences.Data.CourseId)??courses.First();
         preferences.Data.CourseId=selectedCourse.Id;preferences.Save();
         Dock = DockStyle.Fill;
+        trainerAdapter=new(equipment);calibration=new(trainerAdapter,log);
+        calibration.Completed+=OnCalibrationCompleted;
         Ride = NewRide();
         Controls.Add(web);
         clock.Tick += (_, _) =>
@@ -40,16 +47,21 @@ internal sealed class RidePanel : Panel
             if (controllerWasConnected && !controller.Connected && Ride.Live) _ = Ride.PauseAsync("Click desconnectat · ruta pausada per recuperar els frens");
             controllerWasConnected = controller.Connected;
             Ride.SetControllerBrake(controller.Connected && controller.BrakePressed);
-            Ride.Tick(now - lastTick); lastTick = now;
-            if (ready && Ride.Running && (DateTime.UtcNow - heartbeat).TotalSeconds > 8)
-                _ = Ride.PauseAsync("Vista 3D interrompuda · ruta pausada");
+            double dt=now-lastTick;lastTick=now;
+            calibration.Tick(dt);
+            if(!calibration.Active)Ride.Tick(dt);
+            if (ready && (Ride.Running||calibration.Active) && (DateTime.UtcNow - heartbeat).TotalSeconds > 8)
+                _ = PauseAllAsync("Vista interrompuda · càrrega alliberada");
             if (ready && web.CoreWebView2 is not null)
+                {
                 web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Snapshot(equipment.Snapshot())));
+                if(profileOpen){PostCalibration();if(now-lastProfilePost>=1){lastProfilePost=now;PostProfile();}}
+            }
         };
         clock.Start();
     }
 
-    private RideSession NewRide()=>new(Course.Load(CourseCatalog.RouteFile(selectedCourse)),equipment.Connections[SensorRole.Trainer],equipment.Connections[SensorRole.HeartRate],log,preferences,CourseCatalog.RouteFile(selectedCourse),new PersonalRecords(Path.Combine(AppContext.BaseDirectory,"records.json")));
+    private RideSession NewRide()=>new(Course.Load(CourseCatalog.RouteFile(selectedCourse)),equipment.Connections[SensorRole.Trainer],equipment.Connections[SensorRole.HeartRate],log,preferences,CourseCatalog.RouteFile(selectedCourse),new PersonalRecords(Path.Combine(AppContext.BaseDirectory,"records.json"))){TrainerIdentity=()=>trainerAdapter.Identity};
     private string CourseUrl=>"https://mtbindoor.local/index.html?course="+Uri.EscapeDataString(selectedCourse.Id);
 
     public async Task InitializeAsync()
@@ -69,7 +81,7 @@ internal sealed class RidePanel : Panel
             core.NavigationStarting += (_, e) => { if (!e.Uri.StartsWith("https://mtbindoor.local/", StringComparison.Ordinal)) e.Cancel = true; };
             core.NewWindowRequested += (_, e) => e.Handled = true;
             core.PermissionRequested += (_, e) => e.State = CoreWebView2PermissionState.Deny;
-            core.ProcessFailed += async (_, _) => { ready = false; await Ride.PauseAsync("El motor 3D s’ha interromput. Reinicia MTB Indoor - Bern."); };
+            core.ProcessFailed += async (_, _) => { ready = false; await PauseAllAsync("El motor 3D s’ha interromput. Reinicia MTB Indoor - Bern."); };
             core.WebMessageReceived += OnMessage;
             // The same virtual origin serves new local assets after an application update.
             await core.Profile.ClearBrowsingDataAsync(CoreWebView2BrowsingDataKinds.DiskCache);
@@ -91,20 +103,47 @@ internal sealed class RidePanel : Panel
             using var json = JsonDocument.Parse(e.WebMessageAsJson);
             var message = json.RootElement;
             var action = message.GetProperty("action").GetString();
+            if(calibration.Active && action is not ("heartbeat" or "stats" or "error" or "pause" or "stop" or "devices" or "profile-request" or "profile-close" or "calibration-cancel" or "profile-save")) {PostCalibration();return;}
+            if(profileOpen && action is ("start" or "demo" or "practice" or "resume" or "course" or "settings"))return;
             switch (action)
             {
                 case "ready": web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type="catalog", ids=courses.Select(c=>c.Id).ToArray() })); ready = true; heartbeat = DateTime.UtcNow; web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
                 case "heartbeat": heartbeat = DateTime.UtcNow; break;
+                case "profile-request":
+                    profileOpen=true;
+                    if(!calibration.Active)await Ride.PauseAsync("Ruta en pausa · configuració de la bicicleta");
+                    PostProfile();PostCalibration();break;
+                case "profile-close": profileOpen=false;await calibration.CancelAsync("Prova aturada en tancar el calibratge");break;
+                case "profile-save":
+                    if(calibration.Active||Ride.Running||Ride.Busy){PostProfile(error:"Atura la prova abans de modificar el perfil.");break;}
+                    try
+                    {
+                        var input=JsonSerializer.Deserialize<ProfileInput>(message.GetProperty("profile").GetRawText(),ProfileSettings.JsonOptions);
+                        if(input is null){PostProfile(error:"Perfil no vàlid.");break;}
+                        if(!ProfileSettings.Save(preferences,input,out var validationError)){PostProfile(error:validationError);break;}
+                        Ride.ReloadProfile();PostProfile(notice:"Perfil desat. Els ajustos s’apliquen a les properes pedalades.",saved:true);
+                    }
+                    catch(JsonException){PostProfile(error:"Revisa els valors del perfil.");}
+                    break;
+                case "calibration-start":
+                    if(!profileOpen||Ride.Running||Ride.Busy||equipment.Busy(SensorRole.Trainer)){PostCalibration();PostProfile();break;}
+                    await calibration.StartAsync(ProfileSettings.Signature(preferences.Data));PostCalibration();break;
+                case "calibration-cancel": await calibration.CancelAsync("Prova aturada · càrrega alliberada");PostCalibration();PostProfile();break;
+                case "calibration-forget":
+                    if(calibration.Active)break;
+                    var previousCalibration=preferences.Data.Calibration;preferences.Data.Calibration=null;preferences.Save();
+                    if(preferences.Warning is not null)preferences.Data.Calibration=previousCalibration;
+                    PostProfile(notice:preferences.Warning is null?"Resultat eliminat. Es fa servir la resposta estàndard.":null,error:preferences.Warning);break;
                 case "start": await Ride.StartAsync(false); break;
                 case "demo": await Ride.StartAsync(true); break;
                 case "demo-speed": Ride.CycleDemoSpeed(); break;
                 case "practice": await Ride.StartPracticeAsync(); break;
                 case "brake": Ride.SetScreenBrake(message.GetProperty("pressed").GetBoolean()); break;
-                case "pause": await Ride.PauseAsync(); break;
+                case "pause": await PauseAllAsync("Ruta en pausa · càrrega alliberada"); break;
                 case "resume": await Ride.ResumeAsync(); break;
                 case "seek": Ride.SeekDemo(message.GetProperty("distance").GetDouble()); break;
-                case "stop": await Ride.ResetAsync(); break;
-                case "devices": await Ride.PauseAsync("Ruta en pausa per configurar dispositius"); devices(); break;
+                case "stop": await calibration.CancelAsync("Prova aturada");await Ride.ResetAsync(); break;
+                case "devices": await PauseAllAsync("Ruta en pausa per configurar dispositius"); devices(); break;
                 case "gear": Ride.Shift(message.GetProperty("delta").GetInt32()); break;
                 case "settings": Ride.Configure(message.GetProperty("weight").GetDouble(), message.GetProperty("difficulty").GetDouble(),message.GetProperty("chainring").GetInt32()); break;
                 case "course":
@@ -112,7 +151,7 @@ internal sealed class RidePanel : Panel
                     var chosen=courses.FirstOrDefault(c=>c.Id==message.GetProperty("id").GetString());
                     if(chosen is null||chosen.Id==selectedCourse.Id)break;
                     await Ride.ResetAsync();selectedCourse=chosen;preferences.Data.CourseId=chosen.Id;preferences.Save();Ride=NewRide();ready=false;web.CoreWebView2.Navigate(CourseUrl);break;
-                case "error": await Ride.PauseAsync("Error 3D: " + message.GetProperty("message").GetString()); break;
+                case "error": await PauseAllAsync("Error 3D: " + message.GetProperty("message").GetString()); break;
                 case "stats":
                     if (smokeFile is not null && !captured && time.Elapsed.TotalSeconds > 12)
                     {
@@ -128,6 +167,27 @@ internal sealed class RidePanel : Panel
         catch (Exception ex) { log("Circuit: " + ex.Message); }
     }
 
-    public async Task ShutdownAsync() { clock.Stop(); await Ride.PauseAsync("MTB Indoor - Bern tancat"); }
+    private void PostProfile(string? notice=null,string? error=null,bool saved=false)
+    {
+        if(web.CoreWebView2 is null)return;
+        var result=preferences.Data.Calibration;
+        web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new {type="bike-profile",profile=ProfileSettings.Snapshot(preferences.Data),
+            calibrationResult=result?.Snapshot(),calibrationValid=result?.IsValidFor(ProfileSettings.Signature(preferences.Data),trainerAdapter.Identity)==true,
+            trainerConnected=trainerAdapter.Connected,canCalibrate=trainerAdapter.Connected&&trainerAdapter.SupportsPower&&!equipment.Busy(SensorRole.Trainer)&&!calibration.Active&&!Ride.Running&&!Ride.Busy,
+            notice,error,saved,settingsWarning=preferences.Warning},ProfileSettings.JsonOptions));
+    }
+    private void PostCalibration(){if(web.CoreWebView2 is not null)web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(calibration.Snapshot(),ProfileSettings.JsonOptions));}
+    private void OnCalibrationCompleted(CalibrationResult result)
+    {
+        if(InvokeRequired){BeginInvoke(()=>OnCalibrationCompleted(result));return;}
+        if(!result.IsValidFor(ProfileSettings.Signature(preferences.Data),trainerAdapter.Identity))return;
+        var previous=preferences.Data.Calibration;preferences.Data.Calibration=result;preferences.Save();
+        if(preferences.Warning is not null)preferences.Data.Calibration=previous;
+        PostProfile(notice:preferences.Warning is null?"Calibratge de resposta completat i desat.":null,error:preferences.Warning);
+    }
+    public async Task PauseAllAsync(string reason){await calibration.CancelAsync(reason);await Ride.PauseAsync(reason);}
+    public void OpenProfile(){if(ready&&web.CoreWebView2 is not null)web.CoreWebView2.PostWebMessageAsJson("{\"type\":\"open-profile\"}");}
+    public Task CancelCalibrationAsync(string reason)=>calibration.CancelAsync(reason);
+    public async Task ShutdownAsync() { clock.Stop(); await PauseAllAsync("MTB Indoor - Bern tancat"); }
     protected override void Dispose(bool disposing) { if (disposing) clock.Dispose(); base.Dispose(disposing); }
 }

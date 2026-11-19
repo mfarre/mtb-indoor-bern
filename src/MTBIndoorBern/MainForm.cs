@@ -47,13 +47,13 @@ internal sealed class SensorCard : Panel
         metrics=Theme.Label("—",29,Theme.Accent,FontStyle.Bold);grid.Controls.Add(metrics,0,5);
         details=Theme.Label("",10,Theme.Muted);grid.Controls.Add(details,0,6);
         forget=Theme.Button("Oblida aquest dispositiu");forget.Font=Theme.Font(9);grid.Controls.Add(forget,0,7);
-        grid.Controls.Add(Theme.Label(role==SensorRole.Controller?"Click 2 dret: + puja marxa, B baixa. Transmissió MTB de 12 velocitats.":role==SensorRole.Trainer?"Es reconnecta automàticament. El control de càrrega només s’activa quan inicies la ruta.":"La banda ha d’estar posada per emetre pulsacions. Es recorda i es reconnecta automàticament.",10,Theme.Muted),0,8);
+        grid.Controls.Add(Theme.Label(role==SensorRole.Controller?"Click 2 dret: + puja marxa, B baixa. Marxes definides al perfil de la bicicleta.":role==SensorRole.Trainer?"Es reconnecta automàticament. El control de càrrega només s’activa quan inicies la ruta.":"La banda ha d’estar posada per emetre pulsacions. Es recorda i es reconnecta automàticament.",10,Theme.Muted),0,8);
         Controls.Add(grid);
         connect.Click+=async(_,_)=>{if(devices.SelectedItem is NearbyDevice d)await equipment.ConnectAsync(role,d);else{equipment.ResumeSearch(role);await equipment.ScanAsync();}};
         disconnect.Click+=async(_,_)=>await equipment.DisconnectAsync(role);
         forget.Click+=async(_,_)=>await equipment.DisconnectAsync(role,true);
     }
-    public void RefreshState(bool showAll,int gear)
+    public void RefreshState(bool showAll,int gear,int gearCount)
     {
         var c=equipment.Connections[role];var saved=equipment.Saved(role);
         var candidates=equipment.Nearby.Where(d=>showAll||d.Matches(role)).ToList();
@@ -72,7 +72,7 @@ internal sealed class SensorCard : Panel
         status.Text=busy?"Connectant…":c.Connected?"● Connectat · recordat":equipment.Paused(role)?"Connexió pausada. Prem Connecta per reprendre.":saved is not null?"◌ Cercant el dispositiu recordat · cada 5 s":"Selecciona un dispositiu per recordar-lo.";
         if(role==SensorRole.Trainer){metrics.Text=fresh&&c.Power.HasValue?$"{c.Power} W":"— W";details.Text=(fresh&&c.Cadence.HasValue?$"{c.Cadence:0} rpm":"— rpm")+"\n"+(c.Control?.SupportsPower==true?"Control MTB disponible":c.ControlInfo);}
         else if(role==SensorRole.HeartRate){metrics.Text=fresh&&c.HeartRate.HasValue?$"{c.HeartRate} bpm":"— bpm";details.Text=c.Battery.HasValue?$"Bateria {c.Battery}%":"";}
-        else{metrics.Text=$"{gear} / 12";details.Text=c.Connected?"Click dret connectat · + / B":"Desperta el Click prement un botó.";}
+        else{metrics.Text=$"{gear} / {gearCount}";details.Text=c.Connected?"Click dret connectat · + / B":"Desperta el Click prement un botó.";}
     }
 }
 
@@ -110,22 +110,25 @@ internal sealed class MainForm : Form
         var nav=new FlowLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(20,4,0,4)};
         var rideButton=Theme.Button("Circuit",true);rideButton.Dock=DockStyle.None;rideButton.Size=new Size(150,38);
         var devicesButton=Theme.Button("Dispositius");devicesButton.Dock=DockStyle.None;devicesButton.Size=new Size(150,38);devicesButton.Margin=new Padding(10,0,0,0);nav.Controls.Add(rideButton);nav.Controls.Add(devicesButton);shell.Controls.Add(nav,0,0);
+        var bikeButton=Theme.Button("Bicicleta i calibratge");bikeButton.Dock=DockStyle.None;bikeButton.Size=new Size(230,38);bikeButton.Margin=new Padding(10,0,0,0);nav.Controls.Add(bikeButton);
         var content=new Panel{Dock=DockStyle.Fill,Margin=Padding.Empty};content.Controls.Add(root);
         circuit=new RidePanel(equipment,preferences,()=>{circuit!.Visible=false;root.Visible=true;root.BringToFront();},AddLog,smokeFile,smokeDemo);
         content.Controls.Add(circuit);circuit.BringToFront();root.Visible=false;shell.Controls.Add(content,0,1);Controls.Add(shell);
         rideButton.Click+=(_,_)=>{root.Visible=false;circuit.Visible=true;circuit.BringToFront();};
-        devicesButton.Click+=async(_,_)=>{if(circuit.Ride.Running||circuit.Ride.Busy)await circuit.Ride.PauseAsync("Ruta en pausa per configurar dispositius");circuit.Visible=false;root.Visible=true;root.BringToFront();};
-        equipment.BeforeTrainerChange=async()=>{if(circuit.Ride.Running||circuit.Ride.Busy)await circuit.Ride.PauseAsync("Ruta pausada per reconnectar el KICKR");};
-        equipment.Connections[SensorRole.Controller].Shift+=d=>Ui(()=>circuit.Ride.Shift(d));
+        devicesButton.Click+=async(_,_)=>{await circuit.PauseAllAsync("Ruta en pausa per configurar dispositius");circuit.Visible=false;root.Visible=true;root.BringToFront();};
+        bikeButton.Click+=(_,_)=>{root.Visible=false;circuit.Visible=true;circuit.BringToFront();circuit.OpenProfile();};
+        equipment.BeforeTrainerChange=async()=>{await circuit.PauseAllAsync("Ruta pausada per reconnectar el KICKR");};
+        equipment.Connections[SensorRole.Controller].Shift+=d=>Ui(()=>{if(!circuit.CalibrationActive)circuit.Ride.Shift(d);});
         equipment.Changed+=()=>Ui(RefreshEquipment);
         scan.Click+=async(_,_)=>await equipment.ScanAsync();showAll.CheckedChanged+=(_,_)=>RefreshEquipment();
         refresh.Tick+=(_,_)=>RefreshEquipment();refresh.Start();
         search.Tick+=async(_,_)=>{if(Equipment.Roles.Any(r=>!equipment.Connections[r].Connected&&!equipment.Paused(r)))await equipment.ScanAsync();};
         Shown+=async(_,_)=>{await circuit.InitializeAsync();if(smokeFile is null){search.Start();await equipment.ScanAsync();}};
-        KeyDown+=async(_,e)=>{if(e.KeyCode==Keys.Escape){e.Handled=true;await circuit.Ride.PauseAsync();}else if(e.KeyCode==Keys.F11){WindowState=WindowState==FormWindowState.Maximized?FormWindowState.Normal:FormWindowState.Maximized;e.Handled=true;}};
+        KeyDown+=async(_,e)=>{if(e.KeyCode==Keys.Escape){e.Handled=true;await circuit.PauseAllAsync("Ruta en pausa · càrrega alliberada");}else if(e.KeyCode==Keys.F11){WindowState=WindowState==FormWindowState.Maximized?FormWindowState.Normal:FormWindowState.Maximized;e.Handled=true;}};
+        Deactivate+=async(_,_)=>await circuit.CancelCalibrationAsync("Prova aturada perquè la finestra ha perdut el focus");
         FormClosing+=async(_,e)=>{if(closing)return;e.Cancel=true;closing=true;search.Stop();refresh.Stop();lifetime.Cancel();Enabled=false;await circuit.ShutdownAsync();await equipment.ShutdownAsync();equipment.Dispose();Close();};
     }
     private void Ui(Action action){if(closing||IsDisposed||!IsHandleCreated)return;try{BeginInvoke(action);}catch(InvalidOperationException){}}
-    private void RefreshEquipment(){if(closing)return;scanStatus.Text=equipment.ScanStatus;scan.Enabled=!equipment.Searching;scan.Text=equipment.Searching?"Cercant…":"Cerca ara";foreach(var card in cards)card.RefreshState(showAll.Checked,circuit.Ride.Gear);}
+    private void RefreshEquipment(){if(closing)return;scanStatus.Text=equipment.ScanStatus;scan.Enabled=!equipment.Searching;scan.Text=equipment.Searching?"Cercant…":"Cerca ara";foreach(var card in cards)card.RefreshState(showAll.Checked,circuit.Ride.Gear,circuit.Ride.GearCount);}
     private void AddLog(string text){if(closing)return;log.AppendText(DateTime.Now.ToString("HH:mm:ss")+"  "+text+Environment.NewLine);if(log.Lines.Length>80)log.Lines=log.Lines.TakeLast(60).ToArray();log.SelectionStart=log.TextLength;log.ScrollToCaret();}
 }

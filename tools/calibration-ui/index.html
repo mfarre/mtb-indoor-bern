@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ca">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>MTB Indoor · proves de bicicleta i calibratge</title>
+ <link rel="stylesheet" href="../../src/MTBIndoorBern/Scene/style.css">
+ <link rel="stylesheet" href="../../src/MTBIndoorBern/Scene/bike-settings.css">
+ <style>
+  body{overflow:auto;min-height:100vh;background:radial-gradient(ellipse at 90% 0,#324f37,transparent 55%),#102119}
+  [hidden]{display:none!important}.harness{max-width:1000px;margin:45px auto;padding:30px}.harness h1{font-size:42px;letter-spacing:-1px}.harness p{color:#b9cbb0;font-size:13px;line-height:1.7}.harness-eyebrow{font-size:10px;letter-spacing:2px;color:#d1ef91}.harness-actions{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}.harness-result{padding:17px 20px;background:#203827;border:1px solid #9bb78244;border-radius:8px;font-size:14px}.harness-result.fail{background:#442c22;color:#ffd1a9}.harness-results{padding:0;list-style:none}.harness-results li{font-size:12px;padding:10px 0;border-bottom:1px solid #b7cb9d22}.harness-results .pass{color:#c3e79e}.harness-results .fail{color:#ffc4a7}.harness-results small{display:block;margin:5px 0 0 43px;color:#e2b5a2}.harness small{font-size:11px;color:#94ab89}
+ </style>
+</head>
+<body>
+ <main class="harness">
+  <span class="harness-eyebrow">BANC DE PROVES UI · SENSORS SIMULATS</span>
+  <h1>Bicicleta i calibratge</h1>
+  <p>Aquesta pàgina importa els fitxers reals de la pantalla i comprova el seu comportament amb un pont local simulat. Cap connexió Bluetooth, cap ordre al KICKR, cap canvi a la configuració de l’app.</p>
+  <div class="harness-actions"><button id="harness-profile" type="button">Obre el perfil de prova</button><button id="harness-guide" type="button">Veure la prova guiada</button><button id="harness-run" type="button">Executa les comprovacions</button></div>
+  <div id="harness-result" class="harness-result" role="status">Preparant les comprovacions…</div>
+  <ol id="harness-results" class="harness-results"></ol>
+  <small>La previsualització sempre comença amb el KICKR desconnectat. Les dades de resposta que apareixen durant les proves són exemples sintètics.</small>
+ </main>
+ <script type="module" src="harness.js"></script>
+</body>
+</html>

@@ -6,6 +6,22 @@ Projecte en desenvolupament, provat amb un KICKR CORE, un Zwift Click 2 dret i u
 
 ## Evolució del projecte
 
+### 19 de novembre de 2026 · Perfil MTB i calibratge guiat
+
+**Nou apartat Bicicleta i calibratge**, accessible des de la barra superior i la portada. Permet desar el pes del ciclista i la bici, el perímetre de roda, el plat, la cassette virtual, el percentatge de pendent i l'ajuda a cadència baixa. Hi ha presets 10–51, 10–52 i 11–46, i pinyons personalitzats; el joc i el Click respecten el nombre de marxes escollit.
+
+| Perfil de la bicicleta | Prova guiada de resposta |
+| --- | --- |
+| ![Pesos, roda, plat, cassette i desenvolupament](docs/images/bike-profile.png) | ![Assistent de calibratge pendent d'iniciar, sense rodillo connectat](docs/images/calibration-guide.png) |
+
+La resistència i el moviment comparteixen ara el model de gravetat, rodament i aire, amb el pes total i la superfície del camí. Els augments de càrrega passen per una rampa de **parell per segon**, mentre que les reduccions s'apliquen directament. Els watts mesurats continuen movent l'avatar.
+
+La **prova opcional d'uns dos minuts** guia una seqüència de 70–110 W a dues cadències. Només comença a aplicar càrrega després de confirmar que estàs a la bici i detectar pedaleig estable. Mesura la resposta, ajusta les transicions i desa el resultat associat al perfil i al KICKR. No corregeix els watts ni certifica la precisió del potenciòmetre. Es pot cancel·lar en qualsevol moment; les proves incompletes o sense dades vàlides no es marquen com a calibrades.
+
+**Verificat:** compilació personal i pública, proves als dos circuits, perfils antics conservats, marxes personalitzades, rampa de parell i protocol complet amb un rodillo simulat, inclosos cancel·lació, senyal antic, desconnexió i fallades de control. Captures natives a 1440×852 i comprovació de la interfície compacta. **La prova guiada amb el KICKR físic queda pendent d'iniciar-la pedalant.** Els rècords antics es conserven; aquesta física inicia una versió nova de les marques de baixada.
+
+[Guia de bicicleta, model i calibratge](docs/bike-calibration.md) · [Verificació d'aquesta entrega](docs/verification-calibration-2026-11-19.json).
+
 ### 19 de novembre de 2026 · Nou track Uetliberg i exploració del perfil
 
 **Ja es pot triar entre Uetliberg i Dentenberg a l'inici.** El nou recorregut del GPX passa per Zuric, Triemli, Uto Kulm i Ringlikon: **25,75 km i 581 m d'ascens** després de suavitzar el perfil. La selecció del circuit es recorda en tornar a obrir l'app. Dentenberg conserva el circuit Al Dente, els ajustos i els rècords anteriors.
@@ -101,12 +117,13 @@ Les captures són del mode demo. La fotografia del terreny és real; els arbres 
 - Circuit 3D amb fotografia aèria SWISSIMAGE, terreny, edificis, vegetació, ombres, camí texturat i manillar.
 - Pendent coherent: el camí dibuixat, la física i el control del rodillo parteixen del mateix perfil d’altitud.
 - Potència, cadència, pulsacions, velocitat, distància, altitud i perfil de la ruta en directe.
-- Transmissió MTB **1×12, cassette 10–51**, amb plat de 30, 32 o 34 dents.
+- Transmissió MTB configurable: presets **10–51, 10–52 i 11–46**, cassette personalitzada i plat de 20–60 dents.
 - Connexió directa al Click 2 dret: no cal BikeControl.
 - Fre virtual amb A / Espai, avisos de revolt, adherència i sortides de traçada.
 - Pràctica del Dentenberg, cronòmetre de baixada i rècords personals persistents.
 - Dispositius recordats, indicadors d’estat a la pantalla principal i cerca automàtica cada 5 segons.
-- Pes, dificultat del pendent, plat i circuit desats automàticament.
+- Perfil de bicicleta persistent i prova guiada opcional de resposta del KICKR.
+- Pesos de ciclista/bici, roda, transmissió, ajuda, pendent, circuit i resultat de calibratge recordats.
 - Primera persona, vista aèria i demo accelerable ×1 / ×2 / ×4 / ×8 sense controlar el KICKR.
 - Catàleg de circuits separat de l’app, preparat per incorporar altres rutes.
 - Superfícies i ambient de tardor basats en referències de vídeo, amb perfil d'aspecte editable per circuit.
@@ -142,7 +159,7 @@ Mantén la carpeta `Scene` al costat de l’executable. Les imatges, el terreny 
 
 1. Encén el KICKR, posa’t el pulsòmetre i prem un botó del Click per despertar-lo.
 2. Obre **Dispositius**, selecciona cada sensor i prem **Connecta**.
-3. Ajusta el pes, el percentatge de pendent al KICKR i el plat.
+3. Obre **Bicicleta i calibratge**, ajusta pesos, roda i transmissió, i prem **Desa el perfil**. La prova guiada és opcional.
 4. Pedala uns segons perquè arribin potència i cadència i prem **Inicia la ruta**.
 
 El repositori comença sense sensors vinculats. Un cop connectats, es recorden a `settings.json`, al costat de l’executable; aquest fitxer està exclòs de Git. Desconnectar manualment pausa la reconnexió fins a prémer Connecta o tornar a obrir l’app. **Oblida** elimina la vinculació desada.
@@ -163,15 +180,11 @@ El repositori comença sense sensors vinculats. Un cop connectats, es recorden a
 
 ## Com funciona el canvi MTB
 
-La marxa 1 és la més curta: **32×51** amb el plat predeterminat. La marxa 12 és **32×10**. El model utilitza un desenvolupament estimat de roda de 2,30 m, corresponent a una MTB de 29 polzades.
+La marxa 1 és la més curta: **32×51** amb el perfil inicial. La cassette, el plat i el perímetre són configurables. La càrrega es calcula amb el pendent, el pes total, la superfície, la marxa i la cadència; la velocitat virtual es calcula amb la potència mesurada i el mateix model de forces.
 
-El pendent, el pes, la relació de canvi i la cadència determinen una potència objectiu que s’actualitza per Bluetooth FTMS. És un control de càrrega dinàmic; no utilitza el protocol propietari de canvi virtual de Zwift.
+Els augments de resistència es limiten per parell i temps; les reduccions són immediates. Es manté el límit de 600 W i l'alliberament a cadència baixa. Pausar o tancar allibera el control; una reconnexió no reinicia l'esforç. El percentatge de pendent afecta el KICKR, mentre que la ruta conserva el pendent complet.
 
-Amb 75 kg, 70 rpm, plat de 32 i una pujada del 12% al 100%, el model calcula aproximadament **199 W en 32×51** i **435 W en 32×24**. Un plat de 30 escurça encara més el desenvolupament.
-
-La càrrega té un límit de 600 W, augmenta gradualment i es redueix amb cadències baixes. A 30 rpm o menys, l’objectiu és 0 W. Pausar o tancar envia càrrega zero i aturada; perdre dades o control pausa la ruta. Una reconnexió no reactiva automàticament l’esforç. El rodillo conserva la seva resistència mecànica mínima i necessita uns segons per estabilitzar els canvis.
-
-El percentatge de pendent seleccionat modifica l’esforç al KICKR. La geometria i la velocitat virtual continuen fent servir el pendent complet del circuit.
+La prova guiada afina les transicions, sense alterar els watts mesurats ni certificar-ne l'exactitud. Consulta la [guia completa de bicicleta i calibratge](docs/bike-calibration.md) per als càlculs, llindars i límits del model.
 
 ## Circuit i dades
 
@@ -202,7 +215,7 @@ build.ps1              Compilació i proves bàsiques
 
 ## Verificació i límits actuals
 
-Les proves comproven paquets BLE/FTMS, totes les pendents dels circuits instal·lats, arrencada en pujada, sentit de les marxes, reducció a baixa cadència, límit de càrrega, pausa, persistència i identitat dels sensors. Una prova real pedalant ha verificat la reducció de càrrega en passar de marxa 3 a marxa 1 i el retorn al pla, amb confirmació de totes les ordres del KICKR.
+Les proves comproven paquets BLE/FTMS, totes les pendents dels circuits instal·lats, arrencada en pujada, sentit de les marxes, reducció a baixa cadència, límit de càrrega, pausa, persistència i identitat dels sensors. En una versió anterior, una prova real pedalant va verificar la reducció de càrrega en passar de marxa 3 a marxa 1 i el retorn al pla, amb confirmació de totes les ordres del KICKR.
 
 El maquinari comprovat és **KICKR CORE**, **Zwift Click 2 dret** i **Garmin HRM-Dual**. El Click esquerre i altres rodillos encara no s’han validat. El projecte no és una reconstrucció fotogramètrica completa ni una integració oficial de Wahoo, Zwift o Garmin.
 
