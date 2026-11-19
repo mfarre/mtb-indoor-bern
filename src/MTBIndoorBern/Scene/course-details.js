@@ -30,22 +30,40 @@ function ribbon(renderer,rows,material,worldUv=false){const p=[],uv=[],colors=[]
 }
 export function buildSurveyRoad(renderer){
  const ps=renderer.course.points;
- // Fine local ground fills the opening in the coarse DEM, so steep banks cannot cover the road.
- ribbon(renderer,q=>[-22,-16,-10,-5,-2,0,2,5,10,16,22].map(off=>({off,lift:-.025})),new T.MeshStandardMaterial({map:renderer.aerial,roughness:1,side:T.DoubleSide,color:'#e1dece'}),'aerial');
+ // A single height field cannot fold over itself at a hairpin, unlike wide road ribbons.
+ buildSurveyGround(renderer);
  // Segment groups share the same centreline and elevations as the physics model.
  const mesh=ribbon(renderer,q=>{const s=surfaceAt(renderer,q.d);const w=s.width*(1+(s.forest ? .07 : .015)*Math.sin(q.d*.13));return [-1,-.82,0,.82,1].map(side=>({off:side*w/2,lift:.062,color:s.surface==='leaves'?'#a09b8c':'#dedbd0'}));},Object.values(renderer.surveyMaterials).slice(0,3),true);
  mesh.geometry.clearGroups();let previous=-1,start=0,count=0;const order=['asphalt','gravel','leaves'];
  for(let i=1;i<ps.length;i++){const kind=order.indexOf(surfaceAt(renderer,(ps[i-1].d+ps[i].d)/2).surface);if(kind!==previous&&count){mesh.geometry.addGroup(start,count,previous);start+=count;count=0;}previous=kind;count+=24;}if(count)mesh.geometry.addGroup(start,count,previous);
- // A forest-floor ribbon replaces the aerial canopy immediately beside the path.
- for(const side of [-1,1])ribbon(renderer,q=>{const s=surfaceAt(renderer,q.d),w=s.width/2,span=s.forest?16:.6;return [0,.22,.7,1].map(t=>({off:side*(w+t*span),lift:.048-t*.024,color:s.surface==='leaves'?'#b9b09a':'#adb0a0'}));},renderer.surveyMaterials.floor,true);
+ // The recorded route revisits the same path with slightly different GPS/barometric heights.
+ // Keep its original elevations, but hide the other pass immediately around the rider.
+ const original=mesh.geometry.index.array.slice(),visible=new original.constructor(original.length);
+ renderer.updateRoadVisibility=(distance,overview=false)=>{const rider=renderer.at(distance);let n=0,group=-1,groupStart=0;mesh.geometry.clearGroups();
+  for(let i=1;i<ps.length;i++){const a=ps[i-1],b=ps[i],d=(a.d+b.d)/2,near=Math.hypot((a.x+b.x)/2-rider.x,(a.z+b.z)/2-rider.z);
+   if(!overview&&near<20&&Math.abs(d-distance)>near*2+8)continue;
+   const kind=order.indexOf(surfaceAt(renderer,d).surface);if(kind!==group){if(n>groupStart)mesh.geometry.addGroup(groupStart,n-groupStart,group);group=kind;groupStart=n;}
+   visible.set(original.subarray((i-1)*24,i*24),n);n+=24;
+  }
+  if(n>groupStart)mesh.geometry.addGroup(groupStart,n-groupStart,group);mesh.geometry.index.array.set(visible);mesh.geometry.index.needsUpdate=true;mesh.geometry.setDrawRange(0,n);
+ };
+}
+function buildSurveyGround(renderer){
+ const spacing=2,cells=new Set(),vertices=new Map(),p=[],uv=[],color=[],indices=[[],[]];
+ for(const q of renderer.course.points){const cx=Math.floor(q.x/spacing),cz=Math.floor(q.z/spacing);for(let dz=-15;dz<=15;dz++)for(let dx=-15;dx<=15;dx++)cells.add(`${cx+dx},${cz+dz}`);}
+ function vertex(ix,iz,forest){const key=`${ix},${iz},${forest}`;if(vertices.has(key))return vertices.get(key);const x=ix*spacing,z=iz*spacing,index=p.length/3;p.push(x,renderer.localGround(x,z)-.025,z);uv.push(...(forest?[x/1.6,z/1.6]:renderer.uv(x,z)));const c=new T.Color(forest?'#b9b09a':'#e1dece');color.push(c.r,c.g,c.b);vertices.set(key,index);return index;}
+ for(const cell of cells){const [ix,iz]=cell.split(',').map(Number),x=(ix+.5)*spacing,z=(iz+.5)*spacing,n=renderer.nearestRoad(x,z);if(n.distance>28)continue;const s=surfaceAt(renderer,n.d),forest=s.forest&&n.distance<17,kind=forest?1:0,a=vertex(ix,iz,forest),b=vertex(ix+1,iz,forest),c=vertex(ix,iz+1,forest),d=vertex(ix+1,iz+1,forest);indices[kind].push(a,c,b,b,c,d);}
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('color',new T.Float32BufferAttribute(color,3));g.setIndex([...indices[0],...indices[1]]);g.addGroup(0,indices[0].length,0);g.addGroup(indices[0].length,indices[1].length,1);g.computeVertexNormals();
+ const material=new T.MeshStandardMaterial({map:renderer.aerial,roughness:1,vertexColors:true});const mesh=new T.Mesh(g,[material,renderer.surveyMaterials.floor]);mesh.receiveShadow=true;renderer.scene.add(mesh);
+ renderer.localGroundVertices=p.length/3;
 }
 export function addSurveyTrees(renderer){
  const r=rng(153),ps=renderer.course.points,cells=new Map(),size=16;
  for(let i=0;i<ps.length-1;i++){const p=ps[i],key=Math.floor(p.x/size)+','+Math.floor(p.z/size);if(!cells.has(key))cells.set(key,[]);cells.get(key).push(i);}
- function nearest(x,z){let best={distance:1e6,y:0,d:0};for(let ix=-1;ix<=1;ix++)for(let iz=-1;iz<=1;iz++)for(const i of cells.get((Math.floor(x/size)+ix)+','+(Math.floor(z/size)+iz))??[]){const a=ps[i],b=ps[i+1],dx=b.x-a.x,dz=b.z-a.z,t=T.MathUtils.clamp(((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz),0,1),distance=Math.hypot(x-a.x-t*dx,z-a.z-t*dz);if(distance<best.distance)best={distance,y:T.MathUtils.lerp(a.y,b.y,t),d:T.MathUtils.lerp(a.d,b.d,t)};}return best;}
+ function nearest(x,z){let best={distance:1e6,y:0,d:0},floor=Infinity;for(let ix=-2;ix<=2;ix++)for(let iz=-2;iz<=2;iz++)for(const i of cells.get((Math.floor(x/size)+ix)+','+(Math.floor(z/size)+iz))??[]){const a=ps[i],b=ps[i+1],dx=b.x-a.x,dz=b.z-a.z,t=T.MathUtils.clamp(((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz),0,1),distance=Math.hypot(x-a.x-t*dx,z-a.z-t*dz);if(distance<4)floor=Math.min(floor,T.MathUtils.lerp(a.y,b.y,t)+Math.max(0,distance-1)*.3);if(distance<best.distance)best={distance,y:T.MathUtils.lerp(a.y,b.y,t),d:T.MathUtils.lerp(a.d,b.d,t)};}return {...best,floor};}
  function clearance(x,z){const n=nearest(x,z);return n.distance-surfaceAt(renderer,n.d).width/2;}
- renderer.roadClearance=clearance;
- renderer.localGround=(x,z)=>{const n=nearest(x,z),raw=renderer.height(x,z);return n.distance>=22?raw:T.MathUtils.lerp(n.y,raw,T.MathUtils.smoothstep(n.distance,surfaceAt(renderer,n.d).width/2+1,22));};
+ renderer.roadClearance=clearance;renderer.nearestRoad=nearest;
+ renderer.localGround=(x,z)=>{const n=nearest(x,z),raw=renderer.height(x,z);const base=n.distance>=22?raw:T.MathUtils.lerp(n.y,raw,T.MathUtils.smoothstep(n.distance,surfaceAt(renderer,n.d).width/2+1,22));return Math.min(base,n.floor-.15);};
  renderer.world={...renderer.world,trees:renderer.world.trees.filter(p=>clearance(p[0],p[2])>1.4).map(p=>[p[0],renderer.localGround(p[0],p[2]),...p.slice(2)])};
  for(let i=2;i<ps.length-2;i+=2){const q=ps[i],s=surfaceAt(renderer,q.d);if(!s.forest)continue;const b=ps[i+1],dx=b.x-q.x,dz=b.z-q.z,l=Math.hypot(dx,dz)||1;
   for(let k=0;k<6;k++){const off=(s.width/2+2+r()*15)*(k%2?1:-1),forward=(r()-.5)*7,x=q.x-dz/l*off+dx/l*forward,z=q.z+dx/l*off+dz/l*forward;if(clearance(x,z)<1.7)continue;renderer.world.trees.push([x,renderer.localGround(x,z),z,14+r()*12,r()<.5?1:0]);}

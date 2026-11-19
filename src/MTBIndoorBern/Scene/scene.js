@@ -1,12 +1,15 @@
 import * as THREE from './vendor/three.module.js';
 import {ForestRenderer} from './forest.js';
+import {setupTrail,updateTrail} from './trail-ui.js';
+import {addTrailMarkers} from './trail-markers.js';
 const $=id=>document.getElementById(id),bridge=window.chrome?.webview;
 const send=(action,extra={})=>bridge?.postMessage({action,...extra});
 const format=(v,n=0)=>Number(v).toLocaleString('ca-ES',{minimumFractionDigits:n,maximumFractionDigits:n});
 let state={mode:'ready',distance:0,speed:0,elapsed:0,climbed:0,gear:8,demo:false},course,world,info,engine,overview=false,lastFrame=0,lastStats=performance.now(),frames=0,totalFrames=0,errors=[],devicesKey='';
 function fail(error){const message=String(error?.message??error);errors.push(message);$('loading').style.display='flex';$('loading').querySelector('h2').textContent='No s’ha pogut carregar el circuit';$('loading').querySelector('p').textContent=message;send('error',{message});}
 window.addEventListener('error',e=>fail(e.error??e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
-bridge?.addEventListener('message',event=>{if(event.data?.type==='state'){state=event.data;refreshHud();}});
+const clearBrake=setupTrail(send);
+bridge?.addEventListener('message',event=>{if(event.data?.type==='state'){const wasRunning=state.mode==='ride'||state.mode==='demo';state=event.data;if(wasRunning&&state.mode!=='ride'&&state.mode!=='demo')clearBrake();refreshHud();}else if(event.data?.type==='trail'){addTrailMarkers(engine,event.data);$('practice').hidden=!event.data.stage;}});
 $('start').onclick=()=>send('start');$('demo').onclick=()=>send('demo');$('pause').onclick=()=>send('pause');$('stop').onclick=()=>send('stop');$('devices').onclick=()=>send('devices');
 $('up').onclick=()=>send('gear',{delta:1});$('down').onclick=()=>send('gear',{delta:-1});
 $('demo-speed').onclick=()=>send('demo-speed');
@@ -31,11 +34,11 @@ function refreshHud(){
  $('start').textContent=state.mode==='paused'&&state.distance>0?'Reprèn la ruta →':state.mode==='finished'?'Torna a començar →':'Inicia la ruta →';
  $('pause').disabled=!running||state.busy;for(const id of['start','demo','stop'])$(id).disabled=!!state.busy;
  const demoSpeed=$('demo-speed'),rate=state.demoSpeed??1,nextRate=rate===8?1:rate*2;
- demoSpeed.hidden=!(state.demo&&(state.mode==='demo'||state.mode==='paused'));demoSpeed.disabled=!!state.busy;
+ demoSpeed.hidden=state.practice||!(state.demo&&(state.mode==='demo'||state.mode==='paused'));demoSpeed.disabled=!!state.busy;
  demoSpeed.textContent=`⏩ Demo ×${rate}`;demoSpeed.title=`Velocitat ×${rate}. Prem per passar a ×${nextRate}`;
  demoSpeed.setAttribute('aria-label',`Velocitat de demo ×${rate}. Canvia a ×${nextRate}`);
  for(const [id,value] of[['weight',state.weight],['difficulty',state.difficulty],['chainring',state.chainring]]){const el=$(id);el.disabled=running||state.busy;if(value!=null&&document.activeElement!==el)el.value=String(value);}
- $('course-choice').disabled=running||state.busy;refreshDevices();if(course){drawMap();drawProfile();}
+ $('course-choice').disabled=running||state.busy;refreshDevices();updateTrail(state);if(course){drawMap();drawProfile();}
 }
 function pointAt(d){
  const ps=course.points;d=THREE.MathUtils.clamp(d,0,course.length);let l=0,r=ps.length-1;while(r-l>1){const m=(l+r)>>1;if(ps[m].d<=d)l=m;else r=m;}const a=ps[l],b=ps[r],t=(d-a.d)/(b.d-a.d);return new THREE.Vector3(THREE.MathUtils.lerp(a.x,b.x,t),THREE.MathUtils.lerp(a.y,b.y,t),THREE.MathUtils.lerp(a.z,b.z,t));
@@ -56,7 +59,7 @@ function drawProfile(){
  const px=x(state.distance);c.save();c.beginPath();c.rect(0,0,px,h);c.clip();c.fillStyle='#b7db8350';c.fill();c.restore();c.strokeStyle='#d7f69b';c.lineWidth=3;c.beginPath();c.moveTo(px,4);c.lineTo(px,h);c.stroke();
 }
 
-function animate(now){requestAnimationFrame(animate);if(!engine||errors.length)return;if(now-lastFrame<1000/30-.4)return;const dt=Math.min(.12,(now-lastFrame)/1000);lastFrame=now;engine.render(state.distance,dt,state.mode,overview);frames++;totalFrames++;
+function animate(now){requestAnimationFrame(animate);if(!engine||errors.length)return;if(now-lastFrame<1000/30-.4)return;const dt=Math.min(.12,(now-lastFrame)/1000);lastFrame=now;engine.render(state.distance,dt,state.mode,overview,state);frames++;totalFrames++;
  if(now-lastStats>=3000){const fps=Math.round(frames*1000/(now-lastStats));frames=0;lastStats=now;$('performance').textContent=`${fps} fps · ${overview?'foto aèria real':'primera persona'}`;engine.adjustQuality(fps);send('stats',{fps,...engine.stats(),width:innerWidth,height:innerHeight,routePoints:course.points.length,trees:engine.world.trees.length,distance:state.distance,mode:state.mode,maxGradeErrorPercent:gradeError,errors});}}
 let gradeError=0;
 try{
@@ -66,5 +69,5 @@ try{
  $('world').setAttribute('aria-label','Circuit 3D: '+info.name);document.querySelectorAll('.profile-axis span').forEach((el,i)=>el.textContent=i===0?'0':format(course.length/1000*i/4,i===4?2:1)+' km');$('course-name').textContent=info.name;$('map-title').textContent=info.name.toUpperCase()+' / VOLTA 01';$('course-km').textContent=format(course.length/1000,2);$('total-km').textContent='/ '+format(course.length/1000,2)+' km';$('course-ascent').textContent=format(course.ascent);
  const xs=course.points.map(p=>p.x),zs=course.points.map(p=>p.z),alts=course.points.map(p=>p.alt);mapBounds={minX:Math.min(...xs),maxX:Math.max(...xs),minZ:Math.min(...zs),maxZ:Math.max(...zs)};profileBounds={min:Math.min(...alts)-10,max:Math.max(...alts)+10};
  for(let i=0;i<course.points.length-1;i++){const a=course.points[i],b=course.points[i+1];gradeError=Math.max(gradeError,Math.abs(a.grade-(b.y-a.y)/Math.hypot(b.x-a.x,b.z-a.z)*100));}if(gradeError>.002)throw Error('El pendent no coincideix amb la geometria del circuit.');
- engine=new ForestRenderer($('world'),course,world,info);await engine.initialize();$('loading').style.display='none';refreshHud();send('ready');requestAnimationFrame(animate);
+ engine=new ForestRenderer($('world'),course,world,info);await engine.initialize();$('loading').style.display='none';refreshHud();lastStats=performance.now();send('ready');requestAnimationFrame(animate);
 }catch(e){fail(e);}
