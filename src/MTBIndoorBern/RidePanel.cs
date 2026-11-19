@@ -104,7 +104,7 @@ internal sealed class RidePanel : Panel
             var message = json.RootElement;
             var action = message.GetProperty("action").GetString();
             if(calibration.Active && action is not ("heartbeat" or "stats" or "error" or "pause" or "stop" or "devices" or "profile-request" or "profile-close" or "calibration-cancel" or "profile-save")) {PostCalibration();return;}
-            if(profileOpen && action is ("start" or "demo" or "practice" or "resume" or "course" or "settings"))return;
+            if(profileOpen && action is ("start" or "demo" or "practice" or "resume" or "course" or "settings" or "preview"))return;
             switch (action)
             {
                 case "ready": web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type="catalog", ids=courses.Select(c=>c.Id).ToArray() })); ready = true; heartbeat = DateTime.UtcNow; web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
@@ -136,6 +136,10 @@ internal sealed class RidePanel : Panel
                     PostProfile(notice:preferences.Warning is null?"Resultat eliminat. Es fa servir la resposta estàndard.":null,error:preferences.Warning);break;
                 case "start": await Ride.StartAsync(false); break;
                 case "demo": await Ride.StartAsync(true); break;
+                case "preview":
+                    if(Ride.Running||Ride.Busy)break;
+                    double preview=message.GetProperty("distance").GetDouble();if(!double.IsFinite(preview))break;
+                    await Ride.ResetAsync();await Ride.StartAsync(true);Ride.JumpDemo(preview);break;
                 case "demo-speed": Ride.CycleDemoSpeed(); break;
                 case "practice": await Ride.StartPracticeAsync(); break;
                 case "brake": Ride.SetScreenBrake(message.GetProperty("pressed").GetBoolean()); break;

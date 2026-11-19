@@ -18,23 +18,29 @@ export async function loadSurvey(renderer){
   for(let y=0;y<s;y++)for(let x=0;x<s;x++){const i=(y*s+x)*4,correction=(mean*2-rows[y]-cols[x])*.8;for(let k=0;k<3;k++)a[i+k]=Math.max(0,Math.min(255,a[i+k]+correction));}c.putImageData(pixels,0,0);
  });source.dispose();
  const worn=texture((c,s)=>{c.drawImage(floor.image,0,0);const r=rng(8);for(let i=0;i<7000;i++){const x=s*.5+(r()+r()-1)*s*.25,y=r()*s;c.fillStyle=`rgba(42,37,30,${r()*.27})`;c.fillRect(x,y,1+r()*9,2+r()*13);}});
- renderer.surfaceTextures={asphalt:aggregate('asphalt'),gravel:aggregate('gravel'),leaves:worn,floor};
+ renderer.surfaceTextures={asphalt:aggregate('asphalt'),gravel:aggregate('gravel'),leaves:worn,earth:renderer.gurtenEarthTexture??aggregate('gravel'),floor};
  renderer.surveyMaterials=Object.fromEntries(Object.entries(renderer.surfaceTextures).map(([key,map])=>[key,new T.MeshStandardMaterial({map,bumpMap:map,bumpScale:key==='asphalt'?.012:.035,roughness:1,side:T.DoubleSide,vertexColors:true})]));
 }
-function ribbon(renderer,rows,material,worldUv=false){const p=[],uv=[],colors=[],idx=[];const ps=renderer.course.points;
+function ribbon(renderer,rows,material,worldUv=false){const p=[],uv=[],colors=[],idx=[];const ps=renderer.roadPoints??renderer.course.points;
  for(let i=0;i<ps.length;i++){const q=ps[i],a=ps[Math.max(0,i-1)],b=ps[Math.min(ps.length-1,i+1)],dx=b.x-a.x,dz=b.z-a.z,l=Math.hypot(dx,dz)||1;const row=rows(q,i);
-  row.forEach(v=>{const x=q.x-dz/l*v.off,z=q.z+dx/l*v.off,w=surfaceAt(renderer,q.d).width/2,t=T.MathUtils.smoothstep(Math.abs(v.off),w+1,22),y=T.MathUtils.lerp(q.y,renderer.height(x,z),t);p.push(x,y+v.lift,z);uv.push(...(worldUv==='aerial'?renderer.uv(x,z):worldUv?[x/1.6,z/1.6]:[v.off/2,q.d/2]));const color=new T.Color(v.color??'#ffffff');colors.push(color.r,color.g,color.b);});
+  row.forEach(v=>{const x=q.x-dz/l*v.off,z=q.z+dx/l*v.off,w=(renderer.featureWidth?.(q.d,surfaceAt(renderer,q.d).width)??surfaceAt(renderer,q.d).width)/2,t=T.MathUtils.smoothstep(Math.abs(v.off),w+1,22),y=T.MathUtils.lerp(q.y+(renderer.featureHeight?.(q.d)??0),renderer.height(x,z),t);p.push(x,y+v.lift,z);uv.push(...(worldUv==='aerial'?renderer.uv(x,z):worldUv?[x/1.6,z/1.6]:[v.off/2,q.d/2]));const color=new T.Color(v.color??'#ffffff');colors.push(color.r,color.g,color.b);});
   if(i){const count=row.length;for(let j=0;j<count-1;j++){const k=(i-1)*count+j;idx.push(k,k+count,k+1,k+1,k+count,k+count+1);}}
  }
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('color',new T.Float32BufferAttribute(colors,3));g.setIndex(idx);g.computeVertexNormals();const mesh=new T.Mesh(g,material);mesh.receiveShadow=true;renderer.scene.add(mesh);return mesh;
 }
 export function buildSurveyRoad(renderer){
- const ps=renderer.course.points;
+ const jumps=renderer.gurtenFeatures?.jumps??[];
+ // Dense ribbon samples follow the same continuous mound profile as the camera.
+ // The geographical course/profile stays unchanged; constructed lips do not pulse the trainer.
+ if(jumps.length){const distances=new Set(renderer.course.points.map(p=>p.d));for(const jump of jumps){for(let d=jump.distance;d<jump.distance+jump.length;d+=1)distances.add(T.MathUtils.clamp(d,0,renderer.course.length));for(const f of[0,jump.crestStart??.34,jump.crestEnd??.6,1])distances.add(T.MathUtils.clamp(jump.distance+jump.length*f,0,renderer.course.length));}renderer.roadPoints=[...distances].sort((a,b)=>a-b).map(d=>{const p=renderer.at(d);return{d,x:p.x,y:p.y,z:p.z};});}
+ const ps=renderer.roadPoints??renderer.course.points;
  // A single height field cannot fold over itself at a hairpin, unlike wide road ribbons.
  buildSurveyGround(renderer);
  // Segment groups share the same centreline and elevations as the physics model.
- const mesh=ribbon(renderer,q=>{const s=surfaceAt(renderer,q.d);const w=s.width*(1+(s.forest ? .07 : .015)*Math.sin(q.d*.13));return [-1,-.82,0,.82,1].map(side=>({off:side*w/2,lift:.062,color:s.surface==='leaves'?'#a09b8c':'#dedbd0'}));},Object.values(renderer.surveyMaterials).slice(0,3),true);
- mesh.geometry.clearGroups();let previous=-1,start=0,count=0;const order=['asphalt','gravel','leaves'];
+ const order=['asphalt','gravel','leaves','earth'];
+ const mesh=ribbon(renderer,q=>{const s=surfaceAt(renderer,q.d);const w=(renderer.featureWidth?.(q.d,s.width)??s.width)*(1+(s.surface==='earth'?0:s.forest?.07:.015)*Math.sin(q.d*.13));return [-1,-.82,0,.82,1].map(side=>({off:side*w/2,lift:.062,color:s.surface==='leaves'?'#a09b8c':s.surface==='earth'?'#ffffff':'#dedbd0'}));},order.map(k=>renderer.surveyMaterials[k]),true);
+ renderer.roadMesh=mesh;
+ mesh.geometry.clearGroups();let previous=-1,start=0,count=0;
  for(let i=1;i<ps.length;i++){const kind=order.indexOf(surfaceAt(renderer,(ps[i-1].d+ps[i].d)/2).surface);if(kind!==previous&&count){mesh.geometry.addGroup(start,count,previous);start+=count;count=0;}previous=kind;count+=24;}if(count)mesh.geometry.addGroup(start,count,previous);
  // The recorded route revisits the same path with slightly different GPS/barometric heights.
  // Keep its original elevations, but hide the other pass immediately around the rider.
@@ -61,18 +67,18 @@ export function addSurveyTrees(renderer){
  const r=rng(153),ps=renderer.course.points,cells=new Map(),size=16;
  for(let i=0;i<ps.length-1;i++){const p=ps[i],key=Math.floor(p.x/size)+','+Math.floor(p.z/size);if(!cells.has(key))cells.set(key,[]);cells.get(key).push(i);}
  function nearest(x,z){let best={distance:1e6,y:0,d:0},floor=Infinity;for(let ix=-2;ix<=2;ix++)for(let iz=-2;iz<=2;iz++)for(const i of cells.get((Math.floor(x/size)+ix)+','+(Math.floor(z/size)+iz))??[]){const a=ps[i],b=ps[i+1],dx=b.x-a.x,dz=b.z-a.z,t=T.MathUtils.clamp(((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz),0,1),distance=Math.hypot(x-a.x-t*dx,z-a.z-t*dz);if(distance<4)floor=Math.min(floor,T.MathUtils.lerp(a.y,b.y,t)+Math.max(0,distance-1)*.3);if(distance<best.distance)best={distance,y:T.MathUtils.lerp(a.y,b.y,t),d:T.MathUtils.lerp(a.d,b.d,t)};}return {...best,floor};}
- function clearance(x,z){const n=nearest(x,z);return n.distance-surfaceAt(renderer,n.d).width/2;}
+ function clearance(x,z){const n=nearest(x,z),width=renderer.featureWidth?.(n.d,surfaceAt(renderer,n.d).width)??surfaceAt(renderer,n.d).width;return n.distance-width/2-(renderer.featureHeight?.(n.d)??0)*.6;}
  renderer.roadClearance=clearance;renderer.nearestRoad=nearest;
  renderer.localGround=(x,z)=>{const n=nearest(x,z),raw=renderer.height(x,z);const base=n.distance>=22?raw:T.MathUtils.lerp(n.y,raw,T.MathUtils.smoothstep(n.distance,surfaceAt(renderer,n.d).width/2+1,22));return Math.min(base,n.floor-.15);};
- renderer.world={...renderer.world,trees:renderer.world.trees.filter(p=>clearance(p[0],p[2])>1.4).map(p=>[p[0],renderer.localGround(p[0],p[2]),...p.slice(2)])};
+ renderer.world={...renderer.world,trees:renderer.world.trees.filter(p=>clearance(p[0],p[2])>1.4&&!renderer.gurtenKeepClear?.(p[0],p[2])).map(p=>[p[0],renderer.localGround(p[0],p[2]),...p.slice(2)])};
  for(let i=2;i<ps.length-2;i+=2){const q=ps[i],s=surfaceAt(renderer,q.d);if(!s.forest)continue;const b=ps[i+1],dx=b.x-q.x,dz=b.z-q.z,l=Math.hypot(dx,dz)||1;
-  for(let k=0;k<6;k++){const off=(s.width/2+2+r()*15)*(k%2?1:-1),forward=(r()-.5)*7,x=q.x-dz/l*off+dx/l*forward,z=q.z+dx/l*off+dz/l*forward;if(clearance(x,z)<1.7)continue;renderer.world.trees.push([x,renderer.localGround(x,z),z,14+r()*12,r()<.5?1:0]);}
+  for(let k=0;k<6;k++){const off=(s.width/2+2+r()*15)*(k%2?1:-1),forward=(r()-.5)*7,x=q.x-dz/l*off+dx/l*forward,z=q.z+dx/l*off+dz/l*forward;if(clearance(x,z)<1.7||renderer.gurtenKeepClear?.(x,z))continue;renderer.world.trees.push([x,renderer.localGround(x,z),z,14+r()*12,r()<.5?1:0]);}
  }
 }
 export function buildSurveyDetails(renderer){
  const r=rng(29),ps=renderer.course.points,rocks=[],roots=[],shrubs=[],saplings=[];
  for(let i=2;i<ps.length-2;i+=2){const q=ps[i],s=surfaceAt(renderer,q.d),a=ps[i-1],b=ps[i+1],dx=b.x-a.x,dz=b.z-a.z,l=Math.hypot(dx,dz)||1;
-  for(let k=0;k<(s.forest?5:1);k++){const off=(s.width/2+.6+r()*(s.forest?6:1.4))*(k%2?1:-1),x=q.x-dz/l*off,z=q.z+dx/l*off,y=renderer.localGround(x,z); if(s.forest){shrubs.push([x,y+.05,z,.35+r()*.75,r()*6]);if(k===3&&i%6===0)saplings.push([x,y,z,2+r()*2]);}else if(s.surface==='gravel')rocks.push([x,y+.06,z,.07+r()*.13]);}
+  for(let k=0;k<(s.forest?5:1);k++){const featureLift=renderer.featureHeight?.(q.d)??0;const off=((renderer.featureWidth?.(q.d,s.width)??s.width)/2+(featureLift>0?1.7+featureLift*.6:.6)+r()*(s.forest?6:1.4))*(k%2?1:-1),x=q.x-dz/l*off,z=q.z+dx/l*off,y=renderer.localGround(x,z); if(renderer.gurtenKeepClear?.(x,z))continue; if(s.forest){shrubs.push([x,y+.05,z,.35+r()*.75,r()*6]);if(k===3&&i%6===0)saplings.push([x,y,z,2+r()*2]);}else if(s.surface==='gravel')rocks.push([x,y+.06,z,.07+r()*.13]);}
   // Root placement is illustrative, not a surveyed obstacle. Restrict to observed forest sections.
   if(s.surface==='leaves'&&s.confidence==='observed'&&i%18===0)roots.push([q.x,q.y+.09,q.z,Math.atan2(dx,dz),s.width*.95]);
  }

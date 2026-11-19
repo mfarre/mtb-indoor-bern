@@ -1,4 +1,30 @@
 [
-  {"id":"al-dente","name":"Dentenberg","description":"Circuit Al Dente · boscos i turons de Berna","folder":"courses/al-dente","length":12237.26,"ascent":292,"previewDistance":4300},
-  {"id":"uetliberg","name":"Uetliberg","description":"Triemli · Uto Kulm · Ringlikon. De Zuric al bosc sobre el relleu real.","folder":"courses/uetliberg","length":25754.977207062486,"ascent":581.39,"previewDistance":11850}
+  {
+    "id": "al-dente",
+    "name": "Dentenberg",
+    "description": "Circuit Al Dente · boscos i turons de Berna",
+    "folder": "courses/al-dente",
+    "length": 12237.26,
+    "ascent": 292,
+    "previewDistance": 4300
+  },
+  {
+    "id": "uetliberg",
+    "name": "Uetliberg",
+    "description": "Triemli · Uto Kulm · Ringlikon. De Zuric al bosc sobre el relleu real.",
+    "folder": "courses/uetliberg",
+    "length": 25754.977207062486,
+    "ascent": 581.39,
+    "previewDistance": 11850
+  },
+  {
+    "id": "gurten",
+    "name": "Gurten",
+    "description": "Il Brunello · Gurten Kulm · Gurtentrail 2.0. Pujada des de Kehrsatz i baixada fins a Wabern.",
+    "folder": "courses/gurten",
+    "length": 6526.7844093083595,
+    "ascent": 289.16999999999996,
+    "previewDistance": 5069,
+    "features": "features.json"
+  }
 ]

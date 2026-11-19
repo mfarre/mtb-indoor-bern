@@ -1,10 +1,32 @@
 # MTB Indoor - Bern
 
-Simulador de MTB indoor per a Windows, amb circuits 3D de Suïssa, connexió Bluetooth al Wahoo KICKR, canvi virtual MTB i pulsòmetre. Circuits disponibles a la instal·lació local: **Dentenberg (Al Dente)**, 12,24 km, i **Uetliberg**, 25,75 km, sobre fotografia aèria i relleu reals.
+Simulador de MTB indoor per a Windows, amb circuits 3D de Suïssa, connexió Bluetooth al Wahoo KICKR, canvi virtual MTB i pulsòmetre. Circuits disponibles a la instal·lació local: **Dentenberg (Al Dente)**, 12,24 km, **Uetliberg**, 25,75 km, i **Gurten**, 6,53 km, sobre fotografia aèria i relleu reals. Uetliberg i Gurten estan inclosos al repositori públic.
 
 Projecte en desenvolupament, provat amb un KICKR CORE, un Zwift Click 2 dret i un Garmin HRM-Dual.
 
 ## Evolució del projecte
+
+### 19 de novembre de 2026 · Gurten: d’Il Brunello al Gurtentrail
+
+**Nou circuit seleccionable: Gurten**, amb sortida al costat d'Il Brunello de Kehrsatz, pujada per Zimmerwaldstrasse, Talstrasse, Gurtenstrasse i Grünenbodenweg, i baixada pel Gurtentrail fins a Wabern. Són **6,53 km i 289 m d'ascens** segons el perfil preparat. És una ruta oberta: acaba al final del trail, sense afegir una tornada inventada al restaurant.
+
+El traçat s'ha construït amb la xarxa viària d'OpenStreetMap i la geometria actual del Gurtentrail 2.0, renovat el 2025. La baixada cartografiada mesura **2,373 km**, coherent amb els **2,4 km i uns 240 m de desnivell** que publiquen els gestors. Un enllaç d'uns **15 m a peu** abans de l'entrada es documenta com a tal, sense atribuir-li permís per circular amb bici. La ruta, el terreny i l'ortofoto **SWISSIMAGE de 4352×4096 píxels** s'inclouen a la versió pública.
+
+| Pujada al Gurten | Ruta sobre la fotografia aèria |
+| --- | --- |
+| ![Pujada al Gurten amb el pendent visible al joc](docs/images/gurten-climb.png) | ![Recorregut del Gurten sobre SWISSIMAGE i relleu real](docs/images/gurten-overview.png) |
+
+Les fotografies oficials han guiat la terra compactada clara, el bosc d'estiu i els nous **40 ressalts i 14 peralts**. El rètol **El Tony Jump Line** reprodueix el disseny documentat per TRIEBHAUS; les dues banderes al salt apareixen a les fotos de la inauguració del juliol de 2025. El botó **El Tony ↗** porta directament a aquest tram en demo, sense controlar el KICKR.
+
+![Rètol i banderes El Tony al salt recreat del Gurtentrail](docs/images/gurten-el-tony.png)
+
+![Demo en moviment pel Gurtentrail recreat](docs/images/gurten-trail.gif)
+
+**Referències reals, obstacles aproximats:** el camí i la càmera comparteixen el relleu dels ressalts, però no hi ha física de vol. La posició i les dimensions de cada salt, peralt i rètol no s'han mesurat. El KICKR segueix el pendent geogràfic suavitzat, sense pulsacions de resistència pels llavis artificials dels salts. Les fotos consultades es mantenen com a referència; les textures del corriol es generen amb codi.
+
+**Verificat:** compilació personal i pública, física i demo als tres circuits, 28.040 mostres dels salts i 267.117 punts del camí sense superposicions de terreny. La vista aèria ja no té buits al marge del trail. Les captures natives de 1440×852 mostren 30 FPS i el logotip carregat; el GIF recorre el salt durant nou segons en demo. El botó El Tony s'ha comprovat a través de la interfície, sense controlar el KICKR. [Resultats de verificació](docs/verification-gurten-2026-11-19.json).
+
+[Guia, fonts i límits del Gurten](docs/GURTEN.md) · [Procedència geogràfica](src/MTBIndoorBern/Scene/courses/gurten/provenance.json) · [Referències dels elements visuals](src/MTBIndoorBern/Scene/courses/gurten/features.json).
 
 ### 19 de novembre de 2026 · Perfil MTB i calibratge guiat
 
@@ -115,7 +137,7 @@ Les captures són del mode demo. La fotografia del terreny és real; els arbres 
 ## Funcions
 
 - Circuit 3D amb fotografia aèria SWISSIMAGE, terreny, edificis, vegetació, ombres, camí texturat i manillar.
-- Pendent coherent: el camí dibuixat, la física i el control del rodillo parteixen del mateix perfil d’altitud.
+- Pendent coherent: el camí dibuixat, la física i el control del rodillo parteixen del mateix perfil geogràfic; els ressalts visuals del Gurten no modifiquen la càrrega del KICKR.
 - Potència, cadència, pulsacions, velocitat, distància, altitud i perfil de la ruta en directe.
 - Transmissió MTB configurable: presets **10–51, 10–52 i 11–46**, cassette personalitzada i plat de 20–60 dents.
 - Connexió directa al Click 2 dret: no cal BikeControl.
@@ -126,6 +148,7 @@ Les captures són del mode demo. La fotografia del terreny és real; els arbres 
 - Pesos de ciclista/bici, roda, transmissió, ajuda, pendent, circuit i resultat de calibratge recordats.
 - Primera persona, vista aèria i demo accelerable ×1 / ×2 / ×4 / ×8 sense controlar el KICKR.
 - Catàleg de circuits separat de l’app, preparat per incorporar altres rutes.
+- Gurten amb salts i peralts recreats a partir de referències oficials, rètol El Tony i accés directe al tram en demo.
 - Superfícies i ambient de tardor basats en referències de vídeo, amb perfil d'aspecte editable per circuit.
 - [Track Lab](docs/track-lab.md) per importar, alinear, revisar i anotar FIT i vídeos locals.
 
@@ -177,6 +200,7 @@ El repositori comença sense sensors vinculats. Un cop connectats, es recorden a
 | F11 | Alternar la finestra maximitzada |
 | Vista aèria | Canviar de càmera |
 | Explora en demo | Recórrer el circuit sense controlar el rodillo |
+| El Tony ↗, al Gurten | Obrir una demo abans del salt amb el rètol El Tony |
 
 ## Com funciona el canvi MTB
 
@@ -191,6 +215,8 @@ La prova guiada afina les transicions, sense alterar els watts mesurats ni certi
 `Scene/courses.json` defineix el catàleg. Cada circuit té una carpeta pròpia amb `route.json`, `world.json` i `aerial.jpg`. Al Dente s’ha preparat a partir d’un FIT: s’han interpolat les altituds absents, suavitzat el soroll i adaptat el terreny proper al mateix perfil que fa servir la simulació. El FIT original no està inclòs.
 
 **Uetliberg inclòs:** el repositori incorpora la ruta, el terreny, l’ortofoto, el perfil d’aspecte i la procedència a `Scene/courses/uetliberg/`; es pot compilar i explorar directament. Les dades derivades d’OSM conserven la llicència ODbL i les dades swisstopo, la seva atribució.
+
+**Gurten inclòs:** `Scene/courses/gurten/` conté la ruta construïda amb cartografia pública, el terreny, l'ortofoto, l'aspecte, els elements visuals i la procedència. No prové d'un FIT ni d'una gravació personal. Consulta la [guia del Gurten](docs/GURTEN.md) per distingir el traçat cartogràfic dels obstacles recreats.
 
 **Dades locals del Dentenberg:** `route.json`, `world.json`, `aerial.jpg` i la textura extreta del vídeo es mantenen a la instal·lació local. Cal aportar-los a `Scene/courses/al-dente/` per activar aquest circuit. El selector només mostra circuits amb els recursos essencials instal·lats. Els FIT, els vídeos complets, les sessions i els identificadors dels sensors no es publiquen.
 
@@ -221,8 +247,9 @@ El maquinari comprovat és **KICKR CORE**, **Zwift Click 2 dret** i **Garmin HRM
 
 ## Fonts i crèdits
 
-- Fotografia aèria i relleu: **© swisstopo**, [SWISSIMAGE](https://www.swisstopo.admin.ch/en/orthoimage-swissimage-10) i [serveis cartogràfics](https://docs.geo.admin.ch/visualize-data/xyz.html). Dentenberg local: nivell WMTS 17, 4864×3840 píxels. Uetliberg inclòs: nivell WMTS 16, 4352×5120 píxels. Els mosaics no tenen la resolució original completa de 10 cm.
+- Fotografia aèria i relleu: **© swisstopo**, [SWISSIMAGE](https://www.swisstopo.admin.ch/en/orthoimage-swissimage-10) i [serveis cartogràfics](https://docs.geo.admin.ch/visualize-data/xyz.html). Dentenberg local: nivell WMTS 17, 4864×3840 píxels. Uetliberg inclòs: nivell WMTS 16, 4352×5120 píxels. Gurten inclòs: nivell WMTS 17, 4352×4096 píxels. Els mosaics no tenen la resolució original completa de 10 cm.
 - Cartografia de boscos i edificis: **© [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)**.
+- Referències del Gurtentrail: [trailnet](https://www.trailnet.ch/de/trails/gurten-trail), [Gurtenpark](https://www.gurtenpark.ch/de-ch/freizeit/downhill-trail), [senyalització de TRIEBHAUS](https://www.triebhaus.ch/projekte/gurtentrail) i [fotografies oficials de la inauguració](https://www.trailnet.ch/de/aktuell/recap---opening-gurtentrail-2-0). Logotip [El Tony](https://www.eltonymate.com/site/templates/images/El-Tony-Mate-Logo.png) per representar el rètol real, sense implicar patrocini de l'app.
 - Three.js: llicència MIT inclosa a `src/MTBIndoorBern/Scene/vendor/LICENSE`.
 - Microsoft WebView2: dependència NuGet amb les condicions de Microsoft.
 - Referències del model: [transmissions Shimano 12 velocitats](https://productinfo.shimano.com/pdfs/product/archive/2020-2021_Compatibility_v035_en.pdf) i [comportament del control de potència Wahoo](https://support.wahoofitness.com/hc/en-us/articles/4402565516946-A-Guide-to-using-ERG-mode).

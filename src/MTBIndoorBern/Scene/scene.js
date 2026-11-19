@@ -19,6 +19,7 @@ bridge?.addEventListener('message',event=>{if(event.data?.type==='state'){const 
 $('start').onclick=()=>send('start');$('demo').onclick=()=>send('demo');$('pause').onclick=()=>send(state.mode==='paused'?'resume':'pause');$('stop').onclick=()=>send('stop');$('devices').onclick=()=>send('devices');
 $('up').onclick=()=>send('gear',{delta:1});$('down').onclick=()=>send('gear',{delta:-1});
 $('demo-speed').onclick=()=>send('demo-speed');
+$('course-highlight').onclick=()=>send('preview',{distance:engine?.gurtenFeatures?.previewDistance??info.previewDistance});
 $('course-choice').onchange=()=>send('course',{id:$('course-choice').value});
 $('view').onclick=()=>{overview=!overview;$('view').textContent=overview?'Primera persona ↙':'Vista aèria ↗';};
 window.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(e.key==='Escape'){send('pause');e.preventDefault();}if(e.key==='+'||e.key==='='){send('gear',{delta:1});e.preventDefault();}if(e.key==='-'||e.key==='b'||e.key==='B'){send('gear',{delta:-1});e.preventDefault();}});
@@ -42,7 +43,7 @@ function refreshHud(){
  demoSpeed.textContent=`⏩ Demo ×${rate}`;demoSpeed.title=`Velocitat ×${rate}. Prem per passar a ×${nextRate}`;
  demoSpeed.setAttribute('aria-label',`Velocitat de demo ×${rate}. Canvia a ×${nextRate}`);
  $('bike-summary').textContent=`${state.bikeName??'La meva MTB'} · ${format(state.weight??75)} + ${format(state.bikeKg??14)} kg · ${state.gearCount??12} marxes`;
- $('course-choice').disabled=running||state.busy;refreshDevices();updateTrail(state);updateProfileSeek($('profile'),state);if(course){drawMap();drawProfile();}
+ $('course-choice').disabled=running||state.busy;$('course-highlight').disabled=running||state.busy;refreshDevices();updateTrail(state);updateProfileSeek($('profile'),state);if(course){drawMap();drawProfile();}
 }
 function pointAt(d){
  const ps=course.points;d=THREE.MathUtils.clamp(d,0,course.length);let l=0,r=ps.length-1;while(r-l>1){const m=(l+r)>>1;if(ps[m].d<=d)l=m;else r=m;}const a=ps[l],b=ps[r],t=(d-a.d)/(b.d-a.d);return new THREE.Vector3(THREE.MathUtils.lerp(a.x,b.x,t),THREE.MathUtils.lerp(a.y,b.y,t),THREE.MathUtils.lerp(a.z,b.z,t));
@@ -73,5 +74,5 @@ try{
  $('world').setAttribute('aria-label','Circuit 3D: '+info.name);document.querySelectorAll('.profile-axis span').forEach((el,i)=>el.textContent=i===0?'0':format(course.length/1000*i/4,i===4?2:1)+' km');$('course-name').textContent=info.name;$('course-description').textContent=info.description;$('map-title').textContent=info.name.toUpperCase()+' / VOLTA 01';$('course-km').textContent=format(course.length/1000,2);$('total-km').textContent='/ '+format(course.length/1000,2)+' km';$('course-ascent').textContent=format(course.ascent);
  const xs=course.points.map(p=>p.x),zs=course.points.map(p=>p.z),alts=course.points.map(p=>p.alt);mapBounds={minX:Math.min(...xs),maxX:Math.max(...xs),minZ:Math.min(...zs),maxZ:Math.max(...zs)};profileBounds={min:Math.min(...alts)-10,max:Math.max(...alts)+10};
  for(let i=0;i<course.points.length-1;i++){const a=course.points[i],b=course.points[i+1];gradeError=Math.max(gradeError,Math.abs(a.grade-(b.y-a.y)/Math.hypot(b.x-a.x,b.z-a.z)*100));}if(gradeError>.002)throw Error('El pendent no coincideix amb la geometria del circuit.');
- engine=new ForestRenderer($('world'),course,world,info);await engine.initialize();$('loading').style.display='none';refreshHud();lastStats=performance.now();send('ready');requestAnimationFrame(animate);
+ engine=new ForestRenderer($('world'),course,world,info);await engine.initialize();$('course-highlight').hidden=!engine.gurtenFeatures?.branding;$('loading').style.display='none';refreshHud();lastStats=performance.now();send('ready');requestAnimationFrame(animate);
 }catch(e){fail(e);}

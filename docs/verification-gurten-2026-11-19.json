@@ -1,0 +1,248 @@
+{
+  "date": "2026-11-19",
+  "status": "PASS",
+  "course": "Gurten",
+  "routeLengthM": 6526.7844093083595,
+  "ascentM": 289.17,
+  "personalBuild": "PASS: Dentenberg, Uetliberg, Gurten; shared bike physics and custom gearing; torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE/FTMS; demo speed, pause/resume, seeking and finish; braking, grip and personal records.",
+  "publicBuild": "PASS: Uetliberg, Gurten; shared bike physics and custom gearing; torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE/FTMS; demo speed, pause/resume, seeking and finish; braking, grip and personal records.",
+  "publicCourses": [
+    "uetliberg",
+    "gurten"
+  ],
+  "nativeCaptures": {
+    "elTony": {
+      "branding": {
+        "bounds": {
+          "bottom": -0.4691643171897163,
+          "left": -0.49525224370486004,
+          "right": -0.34756668301988136,
+          "top": -0.049404259241715924
+        },
+        "distance": 7.9728266931607905,
+        "visible": true
+      },
+      "course": "gurten",
+      "distance": 5076,
+      "drawCalls": 91,
+      "errors": [],
+      "featureLift": 0,
+      "features": {
+        "approximatePlacement": true,
+        "berms": 14,
+        "earthTriangles": 26028,
+        "elTonyFlags": 2,
+        "elTonyLogoLoaded": true,
+        "jumps": 40
+      },
+      "frames": 461,
+      "height": 852,
+      "localGroundVertices": 91095,
+      "maxGradeErrorPercent": 4.9971333791809514e-05,
+      "mode": "paused",
+      "performance": "30 fps · primera persona",
+      "photoTexture": [
+        4352,
+        4096
+      ],
+      "pixelRatio": 0.9,
+      "renderVersion": "gurten-2026-11-19",
+      "season": "summer",
+      "surface": "earth",
+      "surveyDetails": {
+        "rocks": 2,
+        "roots": 0,
+        "saplings": 85,
+        "shrubs": 1264
+      },
+      "terrainVertices": 46830,
+      "triangles": 621523,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "width": 1440
+    },
+    "climb": {
+      "branding": {
+        "bounds": {
+          "bottom": -0.013333904323427629,
+          "left": 0.04356799058944302,
+          "right": 0.04411877775970352,
+          "top": -0.011544624230626018
+        },
+        "distance": 1607.6471674183624,
+        "visible": true
+      },
+      "course": "gurten",
+      "distance": 2150,
+      "drawCalls": 131,
+      "errors": [],
+      "featureLift": 0,
+      "features": {
+        "approximatePlacement": true,
+        "berms": 14,
+        "earthTriangles": 26028,
+        "elTonyFlags": 2,
+        "elTonyLogoLoaded": true,
+        "jumps": 40
+      },
+      "frames": 307,
+      "height": 852,
+      "localGroundVertices": 91095,
+      "maxGradeErrorPercent": 4.9971333791809514e-05,
+      "mode": "paused",
+      "performance": "30 fps · primera persona",
+      "photoTexture": [
+        4352,
+        4096
+      ],
+      "pixelRatio": 0.9,
+      "renderVersion": "gurten-2026-11-19",
+      "season": "summer",
+      "surface": "asphalt",
+      "surveyDetails": {
+        "rocks": 2,
+        "roots": 0,
+        "saplings": 85,
+        "shrubs": 1264
+      },
+      "terrainVertices": 46830,
+      "triangles": 375905,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "width": 1440
+    },
+    "overview": {
+      "branding": {
+        "bounds": {
+          "bottom": 0.012500404822887126,
+          "left": 0.03218836842629558,
+          "right": 0.03288924869806563,
+          "top": 0.02080719199230358
+        },
+        "distance": 361.9361409511592,
+        "visible": true
+      },
+      "course": "gurten",
+      "distance": 5069,
+      "drawCalls": 97,
+      "errors": [],
+      "featureLift": 0,
+      "features": {
+        "approximatePlacement": true,
+        "berms": 14,
+        "earthTriangles": 26028,
+        "elTonyFlags": 2,
+        "elTonyLogoLoaded": true,
+        "jumps": 40
+      },
+      "frames": 558,
+      "height": 852,
+      "localGroundVertices": 91095,
+      "maxGradeErrorPercent": 4.9971333791809514e-05,
+      "mode": "paused",
+      "performance": "30 fps · foto aèria real",
+      "photoTexture": [
+        4352,
+        4096
+      ],
+      "pixelRatio": 0.9,
+      "renderVersion": "gurten-2026-11-19",
+      "season": "summer",
+      "surface": "earth",
+      "surveyDetails": {
+        "rocks": 2,
+        "roots": 0,
+        "saplings": 85,
+        "shrubs": 1264
+      },
+      "terrainVertices": 46830,
+      "triangles": 311685,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "width": 1440
+    }
+  },
+  "previewButton": "PASS: real preview button + WebView bridge entered demo at5069m without trainer control.",
+  "featureTests": {
+    "status": "PASS",
+    "samples": 28040,
+    "jumps": 40,
+    "berms": 14,
+    "minimumCrossingGapM": 11.1,
+    "minimumJumpGapM": 4.49,
+    "checks": [
+      "bounded continuous surface",
+      "road/deck agreement",
+      "smooth joins",
+      "crossings clear",
+      "DEM unchanged"
+    ]
+  },
+  "groundGeometry": {
+    "method": "Actual generated terrain and fine-ground geometry: every fine cell intersecting a removed coarse square exists; road centre and both edges sampled every 0.5m exclude retained coarse terrain",
+    "results": [
+      {
+        "course": "al-dente",
+        "status": "PASS",
+        "coarseSpacingM": 8,
+        "removedCells": 7228,
+        "uncoveredFineCellIntersections": 0,
+        "roadSurfaceSamples": 73425,
+        "coarseOverRoad": 0
+      },
+      {
+        "course": "uetliberg",
+        "status": "PASS",
+        "coarseSpacingM": 16,
+        "removedCells": 2331,
+        "uncoveredFineCellIntersections": 0,
+        "roadSurfaceSamples": 154530,
+        "coarseOverRoad": 0
+      },
+      {
+        "course": "gurten",
+        "status": "PASS",
+        "coarseSpacingM": 16,
+        "removedCells": 748,
+        "uncoveredFineCellIntersections": 0,
+        "roadSurfaceSamples": 39162,
+        "coarseOverRoad": 0
+      }
+    ]
+  },
+  "gif": {
+    "frames": 72,
+    "durationMs": 9010,
+    "size": [
+      720,
+      426
+    ],
+    "mode": "Native demo; captured at10fps, encoded at8fps with centisecond delays; no trainer control"
+  },
+  "manualVisualChecks": [
+    "El Tony logo and both flags visible",
+    "road and camera stay above the ramp",
+    "mound ends taper into trail",
+    "aerial terrain holes removed"
+  ],
+  "limitations": [
+    "Feature positions and dimensions are visual estimates, not a survey.",
+    "Ground rollover only; no airborne physics.",
+    "Gurten tested in demo; no physical KICKR ride performed for this course."
+  ],
+  "assets": {
+    "gurten-el-tony.png": {
+      "sha256": "85dbc3c03ff84e5eac17eba47feb8ea74016bb5f7999b81cd0512a4c7b5f8fa0",
+      "bytes": 1400933
+    },
+    "gurten-climb.png": {
+      "sha256": "3d5bff762fcb4203b6920ff7bef8ff1bf685e15abb998a15546a644ed217f951",
+      "bytes": 620800
+    },
+    "gurten-overview.png": {
+      "sha256": "f52c056391a0fdb87f501bf4bab21b63206cb1741864fba4d0f2d2baff2e4a77",
+      "bytes": 1713919
+    },
+    "gurten-trail.gif": {
+      "sha256": "3305216639ca81e06f2cab5bb1d7b540a3ac76d29aed6c833e824b1089e7a109",
+      "bytes": 10200655
+    }
+  }
+}

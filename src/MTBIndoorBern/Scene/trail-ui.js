@@ -29,7 +29,7 @@ export function updateTrail(s){
  $('ride-focus').classList.toggle('climbing',up);
  const c=s.corner;
  if(c){$('corner-arrow').textContent=c.direction>0?'↱':'↰';$('corner-title').textContent=c.distance<1?'DINS DEL REVOLT':`REVOLT A ${number(c.distance)} m`;
-  $('corner-speed').textContent=number(c.limit);$('corner-surface').textContent=({leaves:'Fulles · corriol',asphalt:'Asfalt',gravel:'Grava'})[c.surface]??'Camí';
+  $('corner-speed').textContent=number(c.limit);$('corner-surface').textContent=({leaves:'Fulles · corriol',asphalt:'Asfalt',gravel:'Grava',earth:'Terra compactada'})[c.surface]??'Camí';
   $('corner-card').classList.toggle('urgent',!!c.urgent);$('corner-instruction').textContent=c.urgent?'FRENA ABANS D’ENTRAR':'VELOCITAT OBJECTIU DEL JOC';}
  const r=s.descent;
  if(r){$('descent-name').textContent=r.name;$('descent-time').textContent=r.status==='waiting'?`${number(r.remaining)} m`:clock(r.seconds);

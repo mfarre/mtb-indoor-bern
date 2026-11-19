@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "season": "summer",
+  "source": "Selected OpenStreetMap ways and forest footprints; SWISSIMAGE aerial context; official 2025 trail photographs",
+  "notes": "Compacted earth on the mapped downhill. Gurtenstrasse is asphalt (explicit where tagged, inferred on untagged connected residential sections). The 15.2m entrance footway is represented as gravel/pebbles. Widths and green summer vegetation are visual estimates, not measured surveys. Forest boundaries are sampled at 5m; no user video survey was supplied.",
+  "segments": [
+    {
+      "from": 0,
+      "to": 1685,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 1685,
+      "to": 1840,
+      "surface": "asphalt",
+      "width": 3.0,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 1840,
+      "to": 2980,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 2980,
+      "to": 3180,
+      "surface": "asphalt",
+      "width": 3.0,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 3180,
+      "to": 4138.560263396274,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4138.560263396274,
+      "to": 4153.732136428436,
+      "surface": "gravel",
+      "width": 1.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4153.732136428436,
+      "to": 4255,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4255,
+      "to": 4295,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4295,
+      "to": 4300,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4300,
+      "to": 4360,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4360,
+      "to": 4395,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4395,
+      "to": 5470,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 5470,
+      "to": 5490,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 5490,
+      "to": 5520,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 5520,
+      "to": 5550,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 5550,
+      "to": 6526.7844093083595,
+      "surface": "earth",
+      "width": 2.6,
+      "forest": true,
+      "confidence": "map-inferred"
+    }
+  ]
+}

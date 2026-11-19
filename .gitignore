@@ -36,3 +36,8 @@ records.json.tmp
 !src/MTBIndoorBern/Scene/courses/uetliberg/route.json
 !src/MTBIndoorBern/Scene/courses/uetliberg/world.json
 !src/MTBIndoorBern/Scene/courses/uetliberg/aerial.jpg
+
+# Public mapped Gurten course and open geodata
+!src/MTBIndoorBern/Scene/courses/gurten/route.json
+!src/MTBIndoorBern/Scene/courses/gurten/world.json
+!src/MTBIndoorBern/Scene/courses/gurten/aerial.jpg

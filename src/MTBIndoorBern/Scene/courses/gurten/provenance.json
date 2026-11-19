@@ -1,0 +1,79 @@
+{
+  "name": "Gurten · Il Brunello → Gurtentrail",
+  "prepared": "2026-11-19",
+  "inputSha256": "1ef34cb6e8f3f1b0d79f91ee886751d92f2ac7aa57a43101b69ce2aca6901b8b",
+  "routeSource": "New route assembled from OpenStreetMap road connectivity and downhill way 94360847. This is not a recorded GPX or a user-supplied track.",
+  "mapSource": "© OpenStreetMap contributors — ODbL",
+  "mapRetrieved": "2026-11-19",
+  "imagerySource": "SWISSIMAGE © swisstopo",
+  "imageryZoom": 17,
+  "terrainSource": "Terrain © swisstopo, quantized mesh 20250101",
+  "profileSource": "swisstopo terrain sampled on the mapped route, smoothed over 40m. The same profile drives the road, elevation HUD and trainer. Terrain resolution does not capture individual constructed jump lips.",
+  "start": {
+    "name": "Il Brunello, Bernstrasse 1, 3122 Kehrsatz",
+    "officialAddressLocation": {
+      "lat": 46.90968322753906,
+      "lon": 7.470588684082031
+    },
+    "routeStartLocation": {
+      "lat": 46.9096838,
+      "lon": 7.4708419
+    },
+    "addressOffsetM": 19.256745046020676,
+    "note": "Start is on the adjoining mapped road, approximately 19m from the official address point."
+  },
+  "ascent": {
+    "roads": [
+      "Zimmerwaldstrasse",
+      "Talstrasse",
+      "Gurtenstrasse",
+      "Grünenbodenweg"
+    ],
+    "destination": "Entrance to Gurtentrail next to Gurten Kulm, not the pedestrian summit park",
+    "method": "Connected OSM road graph; rejects bicycle=no/private/dismount and general private/no access without an explicit bicycle exception; excludes downhill ways and informal paths, and honours one-way restrictions. Private motor-vehicle restrictions do not prohibit bicycles."
+  },
+  "walkingAccess": {
+    "from": 4138.560263396274,
+    "to": 4153.732136428436,
+    "lengthM": 15.171873032161784,
+    "osmWayId": 598407326,
+    "label": "Accés al trail · tram a peu",
+    "reason": "Short footway connection from Grünenbodenweg to the mapped trail gate has no explicit bicycle permission. Represented as walking access, not asserted rideable."
+  },
+  "downhill": {
+    "osmWayId": 94360847,
+    "osmVersion": 25,
+    "osmUpdated": "2026-11-15T18:35:27Z",
+    "start": 4153.732136428436,
+    "end": 6526.7844093083595,
+    "lengthM": 2373.0522728799233,
+    "direction": "Mapped one-way downhill towards Wabern",
+    "tags": {
+      "bicycle": "designated",
+      "foot": "no",
+      "oneway": "yes",
+      "surface": "compacted",
+      "mtb:scale": "2"
+    },
+    "comparison": "Current OSM geometry is 2.373km; Trailnet and Gurtenpark describe the 2025 rebuilt trail as 2.4km with about 240m descent. The official schematic map confirms upper switchbacks, intermediate road crossings and the Wabern finish. It is not used as a georeferenced survey."
+  },
+  "limitations": [
+    "Indoor course reconstruction, not turn-by-turn outdoor navigation or a guarantee of route safety, access or current opening status.",
+    "Open route: starts at Il Brunello in Kehrsatz and ends at the trail finish in Wabern; no invented return connector.",
+    "Forest outlines, roads and building footprints come from OpenStreetMap; tree placement, surface microtexture, widths and jump shapes are procedural approximations.",
+    "Named jump coordinates and El Tony feature coordinates have not been surveyed. Feature placement and dimensions are representative, with photographic branding evidence documented separately in features.json.",
+    "The terrain mesh gives approximately 840m at the downhill gate and 593m at the mapped end, versus rounded official 840m and 600m. Local profile details are limited by terrain resolution and smoothing."
+  ],
+  "urls": [
+    "https://ilbrunello.ch/",
+    "https://www.trailnet.ch/de/trails/gurten-trail",
+    "https://www.gurtenpark.ch/de-ch/freizeit/downhill-trail",
+    "https://schweizmobil.ch/de/mountainbikeland/route-10714",
+    "https://www.openstreetmap.org/way/94360847",
+    "https://www.openstreetmap.org/copyright",
+    "https://map.geo.admin.ch/",
+    "https://docs.geo.admin.ch/visualize-data/xyz.html",
+    "https://docs.geo.admin.ch/visualize-data/terrain-service.html",
+    "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices"
+  ]
+}
