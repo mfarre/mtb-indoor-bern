@@ -6,6 +6,30 @@ Projecte en desenvolupament, provat amb un KICKR CORE, un Zwift Click 2 dret i u
 
 ## Evolució del projecte
 
+### 19 de novembre de 2026 · Frens i repte de baixada al Dentenberg
+
+**Ara frenar té conseqüències en el temps de baixada.** Mantén l'**A del Click dret**, **Espai** o el botó en pantalla per reduir la velocitat virtual. La pulsació i l'alliberament de l'A s'han validat amb el comandament real. `+` i `B` conserven el canvi MTB.
+
+Els revolts mostren direcció, distància i velocitat objectiu del joc segons la geometria, la superfície i l'amplada estimada. Un excés de velocitat provoca derrapada; si es manté, una sortida de traçada atura la bicicleta virtual **3 segons** mentre el cronòmetre continua. La frenada anticipada evita aquesta penalització. No augmenta la càrrega física del KICKR.
+
+**Frenada al corriol:** vuit segons del mode pràctica, capturats amb la física real del joc i un control de fre automàtic per fer la demostració reproduïble. El KICKR està inactiu.
+
+![Dentenberg: avís de revolt, fre actiu i entrada controlada al corriol](docs/images/dentenberg-braking.gif)
+
+**Dades més visibles:** pendent en gran quan puges; velocitat, pendent, frenada i adherència quan baixes.
+
+| Pendent de pujada | Sortida de traçada per excés de velocitat |
+| --- | --- |
+| ![Pujada amb un pendent del 12,2% destacat](docs/images/dentenberg-climb.png) | ![Recuperació de tres segons després d'entrar massa ràpid al revolt](docs/images/dentenberg-runout.png) |
+
+El botó **Practica la baixada · Dentenberg** permet començar directament abans del tram, sense sensors. El repte cronometrat ocupa els **km 4,480–6,980 d'Al Dente**, amb sortida, meta i rècord personal local. La pràctica incorpora impuls automàtic als replans; les marques només es desen en sessions reals que completen el tram sense pauses. La visita en demo ×1–×8 continua disponible.
+
+En la prova automàtica del descens amb aproximació, no frenar produeix **4 sortides i 384,3 s**; anticipar els revolts acaba amb **0 sortides i 365,1 s**. S'han comprovat també la frenada amb pendent del −20%, la roda lliure amb 0 W, la persistència dels rècords i l'exclusió de pauses i demos. Les captures de pujada i baixada mantenen **30 FPS a 1440×852** amb resolució adaptativa.
+
+S'ha eliminat una superposició del terreny en els revolts on el track torna a passar pel mateix camí. Es conserven les altituds originals i la coherència entre el pendent dibuixat i la física.
+
+[Guia de frens, pràctica i rècords](docs/downhill.md) · [Eines de captura reproduïble](tools/downhill/README.md) · [Resultats de verificació](docs/verification-downhill-2026-11-19.json).
+
 ### 15 de novembre de 2026 · Al Dente de tardor i Track Lab
 
 La gravació d'una sortida real ha servit per revisar l'aspecte del circuit: asfalt, grava i corriol estret amb fulles, arbres de tardor, sotabosc i marges. La instal·lació local utilitza una mostra del terra extreta del vídeo; aquest recurs es manté privat i el motor disposa d'una textura alternativa generada amb codi. La vegetació es recrea amb geometria i textures; no és una reconstrucció fotogramètrica. Les captures següents mostren la instal·lació local.
@@ -61,6 +85,8 @@ Les captures són del mode demo. La fotografia del terreny és real; els arbres 
 - Potència, cadència, pulsacions, velocitat, distància, altitud i perfil de la ruta en directe.
 - Transmissió MTB **1×12, cassette 10–51**, amb plat de 30, 32 o 34 dents.
 - Connexió directa al Click 2 dret: no cal BikeControl.
+- Fre virtual amb A / Espai, avisos de revolt, adherència i sortides de traçada.
+- Pràctica del Dentenberg, cronòmetre de baixada i rècords personals persistents.
 - Dispositius recordats, indicadors d’estat a la pantalla principal i cerca automàtica cada 5 segons.
 - Pes, dificultat del pendent, plat i circuit desats automàticament.
 - Primera persona, vista aèria i demo accelerable ×1 / ×2 / ×4 / ×8 sense controlar el KICKR.
@@ -107,6 +133,8 @@ El repositori comença sense sensors vinculats. Un cop connectats, es recorden a
 | --- | --- |
 | Click dret `+` / tecla `+` | Pujar marxa |
 | Click dret `B` / tecla `B` o `−` | Baixar marxa |
+| Click dret `A` / tecla `A` o Espai / botó Fre | Mantenir per frenar; alliberar per rodar |
+| Practica la baixada | Saltar a l’aproximació del Dentenberg sense KICKR ni rècord |
 | Escape / Pausa | Pausar i alliberar la càrrega |
 | Atura / reinicia | Tornar al principi |
 | F11 | Alternar la finestra maximitzada |

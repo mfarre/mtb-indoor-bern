@@ -27,3 +27,7 @@ src/MTBIndoorBern/Scene/courses/*/route.json
 src/MTBIndoorBern/Scene/courses/*/world.json
 src/MTBIndoorBern/Scene/courses/*/aerial.jpg
 src/MTBIndoorBern/Scene/courses/*/textures/forest-floor.jpg
+
+# Rècords personals locals
+records.json
+records.json.tmp
