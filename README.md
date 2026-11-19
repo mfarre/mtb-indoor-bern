@@ -1,10 +1,28 @@
 # MTB Indoor - Bern
 
-Simulador de MTB indoor per a Windows, amb circuits 3D de Berna, connexió Bluetooth al Wahoo KICKR, canvi virtual MTB i pulsòmetre. **Al Dente** és el primer circuit preparat: 12,24 km sobre fotografia aèria i relleu reals.
+Simulador de MTB indoor per a Windows, amb circuits 3D de Suïssa, connexió Bluetooth al Wahoo KICKR, canvi virtual MTB i pulsòmetre. Circuits disponibles a la instal·lació local: **Dentenberg (Al Dente)**, 12,24 km, i **Uetliberg**, 25,75 km, sobre fotografia aèria i relleu reals.
 
 Projecte en desenvolupament, provat amb un KICKR CORE, un Zwift Click 2 dret i un Garmin HRM-Dual.
 
 ## Evolució del projecte
+
+### 19 de novembre de 2026 · Nou track Uetliberg i exploració del perfil
+
+**Ja es pot triar entre Uetliberg i Dentenberg a l'inici.** El nou recorregut del GPX passa per Zuric, Triemli, Uto Kulm i Ringlikon: **25,75 km i 581 m d'ascens** després de suavitzar el perfil. La selecció del circuit es recorda en tornar a obrir l'app. Dentenberg conserva el circuit Al Dente, els ajustos i els rècords anteriors.
+
+L'Uetliberg incorpora una ortofoto **SWISSIMAGE © swisstopo de 4352×5120 píxels**, relleu real i edificis/superfícies estimats amb OpenStreetMap. La vegetació és recreada. El GPX és una ruta planificada, sense vídeo de reconeixement; el mapa guia l'aspecte dels camins. El perfil suavitzat comparteix exactament les elevacions amb el camí 3D i la física. El GPX original suma uns 614 m d'ascens abans del suavitzat.
+
+| Demo pausada al bosc | Fotografia aèria d'Uto Kulm |
+| --- | --- |
+| ![Uetliberg: demo pausada, perfil seleccionable i botó Reprèn demo](docs/images/uetliberg-demo.png) | ![Ortofoto SWISSIMAGE i relleu d'Uto Kulm](docs/images/uetliberg-aerial.png) |
+
+**Explora en demo → Pausa → Reprèn demo** continua des del mateix punt i conserva el multiplicador ×1–×8. Clica qualsevol punt del perfil per saltar-hi: si estaves pausat, continues pausat; si avançaves, continues avançant. Amb el perfil enfocat, les fletxes mouen 100 m, Majúscules + fletxa mouen 1 km i Inici/Fi van als extrems. Es pot tornar enrere després d'arribar al final. Els salts són exclusius de la demo i no generen rècords ni activen el KICKR.
+
+El nou circuit inclou també **Practica la baixada · Uetliberg · Ringlikon**, amb sector entre els km **11,355 i 14,565**, els mateixos frens i les regles de traçada del Dentenberg.
+
+**Verificat:** compilació local i pública, proves de física i demo als dos tracks, 140 punts de l'Uetliberg sense terreny damunt del ciclista i error de pendent inferior a 0,00005 punts percentuals. Les captures comprovades mantenen **30 FPS a 1440×852**, amb resolució adaptativa. La còpia pública funciona amb l'Uetliberg inclòs, sense necessitar els recursos privats del Dentenberg.
+
+[Eines reutilitzables d'importació GPX](tools/course-import/README.md) · [Procedència de les dades](src/MTBIndoorBern/Scene/courses/uetliberg/provenance.json) · [Verificació d'aquesta entrega](docs/verification-uetliberg-2026-11-19.json).
 
 ### 19 de novembre de 2026 · Frens i repte de baixada al Dentenberg
 
@@ -134,8 +152,10 @@ El repositori comença sense sensors vinculats. Un cop connectats, es recorden a
 | Click dret `+` / tecla `+` | Pujar marxa |
 | Click dret `B` / tecla `B` o `−` | Baixar marxa |
 | Click dret `A` / tecla `A` o Espai / botó Fre | Mantenir per frenar; alliberar per rodar |
-| Practica la baixada | Saltar a l’aproximació del Dentenberg sense KICKR ni rècord |
+| Practica la baixada | Saltar a l’aproximació del sector del circuit triat sense KICKR ni rècord |
 | Escape / Pausa | Pausar i alliberar la càrrega |
+| Reprèn demo | Continuar la demo pausada des del mateix punt |
+| Clic al perfil / fletxes | Saltar a una posició en demo, també en pausa |
 | Atura / reinicia | Tornar al principi |
 | F11 | Alternar la finestra maximitzada |
 | Vista aèria | Canviar de càmera |
@@ -157,9 +177,11 @@ El percentatge de pendent seleccionat modifica l’esforç al KICKR. La geometri
 
 `Scene/courses.json` defineix el catàleg. Cada circuit té una carpeta pròpia amb `route.json`, `world.json` i `aerial.jpg`. Al Dente s’ha preparat a partir d’un FIT: s’han interpolat les altituds absents, suavitzat el soroll i adaptat el terreny proper al mateix perfil que fa servir la simulació. El FIT original no està inclòs.
 
-**Dades locals:** el repositori públic actual conté el codi, el perfil d'aspecte, textures i captures. Els fitxers de geometria i cartografia del circuit (`route.json`, `world.json`, `aerial.jpg`) es mantenen a la instal·lació local; cal aportar-los a `Scene/courses/al-dente/` per executar aquesta ruta. Els FIT, els vídeos complets i les sessions de treball tampoc es publiquen.
+**Uetliberg inclòs:** el repositori incorpora la ruta, el terreny, l’ortofoto, el perfil d’aspecte i la procedència a `Scene/courses/uetliberg/`; es pot compilar i explorar directament. Les dades derivades d’OSM conserven la llicència ODbL i les dades swisstopo, la seva atribució.
 
-La portada mostra un tram de bosc; la ruta comença al km 0. Track Lab importa FIT i vídeo per analitzar-los, però la creació automàtica d'un circuit jugable des d'un FIT/GPX encara no està disponible.
+**Dades locals del Dentenberg:** `route.json`, `world.json`, `aerial.jpg` i la textura extreta del vídeo es mantenen a la instal·lació local. Cal aportar-los a `Scene/courses/al-dente/` per activar aquest circuit. El selector només mostra circuits amb els recursos essencials instal·lats. Els FIT, els vídeos complets, les sessions i els identificadors dels sensors no es publiquen.
+
+La portada mostra un tram de bosc; la ruta comença al km 0. Track Lab importa FIT i vídeo per analitzar-los. Les [eines d'importació GPX](tools/course-import/README.md) preparen circuits suïssos des de la línia d'ordres; afegir-los al catàleg i revisar-ne l'aspecte continua sent un pas manual.
 
 ## Estructura
 
@@ -180,13 +202,13 @@ build.ps1              Compilació i proves bàsiques
 
 ## Verificació i límits actuals
 
-Les proves comproven paquets BLE/FTMS, les 2.448 pendents del traçat, arrencada en pujada, sentit de les marxes, reducció a baixa cadència, límit de càrrega, pausa, persistència i identitat dels sensors. Una prova real pedalant ha verificat la reducció de càrrega en passar de marxa 3 a marxa 1 i el retorn al pla, amb confirmació de totes les ordres del KICKR.
+Les proves comproven paquets BLE/FTMS, totes les pendents dels circuits instal·lats, arrencada en pujada, sentit de les marxes, reducció a baixa cadència, límit de càrrega, pausa, persistència i identitat dels sensors. Una prova real pedalant ha verificat la reducció de càrrega en passar de marxa 3 a marxa 1 i el retorn al pla, amb confirmació de totes les ordres del KICKR.
 
 El maquinari comprovat és **KICKR CORE**, **Zwift Click 2 dret** i **Garmin HRM-Dual**. El Click esquerre i altres rodillos encara no s’han validat. El projecte no és una reconstrucció fotogramètrica completa ni una integració oficial de Wahoo, Zwift o Garmin.
 
 ## Fonts i crèdits
 
-- Fotografia aèria i relleu: **© swisstopo**, [SWISSIMAGE](https://www.swisstopo.admin.ch/en/orthoimage-swissimage-10) i [serveis cartogràfics](https://docs.geo.admin.ch/visualize-data/xyz.html). Mosaic inclòs de nivell WMTS 17, de 4864×3840 píxels; no és la resolució original completa de 10 cm.
+- Fotografia aèria i relleu: **© swisstopo**, [SWISSIMAGE](https://www.swisstopo.admin.ch/en/orthoimage-swissimage-10) i [serveis cartogràfics](https://docs.geo.admin.ch/visualize-data/xyz.html). Dentenberg local: nivell WMTS 17, 4864×3840 píxels. Uetliberg inclòs: nivell WMTS 16, 4352×5120 píxels. Els mosaics no tenen la resolució original completa de 10 cm.
 - Cartografia de boscos i edificis: **© [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)**.
 - Three.js: llicència MIT inclosa a `src/MTBIndoorBern/Scene/vendor/LICENSE`.
 - Microsoft WebView2: dependència NuGet amb les condicions de Microsoft.

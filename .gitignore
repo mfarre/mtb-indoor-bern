@@ -28,6 +28,11 @@ src/MTBIndoorBern/Scene/courses/*/world.json
 src/MTBIndoorBern/Scene/courses/*/aerial.jpg
 src/MTBIndoorBern/Scene/courses/*/textures/forest-floor.jpg
 
-# Rècords personals locals
+# RÃ¨cords personals locals
 records.json
 records.json.tmp
+
+# Public planned Uetliberg course and open geodata
+!src/MTBIndoorBern/Scene/courses/uetliberg/route.json
+!src/MTBIndoorBern/Scene/courses/uetliberg/world.json
+!src/MTBIndoorBern/Scene/courses/uetliberg/aerial.jpg
