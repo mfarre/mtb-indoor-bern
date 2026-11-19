@@ -120,6 +120,7 @@ internal static class Packets
         if (!mask.HasValue) throw new InvalidDataException();
         byte up = (mask.Value & 0x1000) == 0 ? (byte)1 : (byte)0;
         byte down = (mask.Value & (rightOnly ? 0x20u : 0x100u)) == 0 ? (byte)1 : (byte)0;
-        return [(1, up), (2, down)];
+        byte brake = rightOnly && (mask.Value & 0x10u) == 0 ? (byte)1 : (byte)0;
+        return [(1, up), (2, down), (3, brake)];
     }
 }

@@ -7,6 +7,12 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        if(args.Length >= 2 && args[0] == "--test-trail")
+        {
+            try { File.WriteAllText(args[1], JsonSerializer.Serialize(TrailTests.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])), new JsonSerializerOptions { WriteIndented = true })); }
+            catch(Exception e) { File.WriteAllText(args[1], e.ToString()); Environment.ExitCode = 1; }
+            return;
+        }
         if(args.Length>=2&&args[0]=="--probe-mtb")
         {Task.Run(()=>Diagnostics.EquipmentAsync(args[1])).GetAwaiter().GetResult();return;}
         if(args.Length>=2&&args[0]=="--probe-mtb-gears")
@@ -23,7 +29,7 @@ internal static class Program
         }
         if (args.Length >= 2 && args[0] == "--self-test")
         {
-            try { Packets.Verify(); RideSession.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])); PreferencesStore.Verify(); File.WriteAllText(args[1], "PASS: BLE and FTMS packets; all 2448 visual slopes match physics; hill restart; MTB 1x12 load and low-cadence release; 600 W cap; demo 1x/2x/4x/8x, pause/resume and finish; pause/reset; settings persistence and device identity."); }
+            try { Packets.Verify(); RideSession.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])); PreferencesStore.Verify(); TrailTests.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])); File.WriteAllText(args[1], "PASS: BLE and FTMS packets; all 2448 visual slopes match physics; hill restart; MTB 1x12 load and low-cadence release; 600 W cap; demo 1x/2x/4x/8x, pause/resume and finish; pause/reset; settings persistence and device identity; Click A press/release; downhill braking, grip and run-outs; descent timing and persistent personal records."); }
             catch (Exception e) { File.WriteAllText(args[1], e.ToString()); Environment.ExitCode = 1; }
             return;
         }
@@ -38,7 +44,8 @@ internal static class Program
                     var controller = devices.FirstOrDefault(d => d.ZwiftType == 10) ?? devices.First(d => d.Matches(SensorRole.Controller));
                     events.Enqueue(new { controller });
                     using var connection = new SensorConnection(SensorRole.Controller);
-                    connection.Changed += () => events.Enqueue(new { time = DateTime.UtcNow, connection.Status, connection.Model, connection.Firmware, connection.LastPacket });
+                    connection.Changed += () => { events.Enqueue(new { time = DateTime.UtcNow, connection.Status, connection.Model, connection.Firmware, connection.LastPacket, connection.BrakePressed }); File.WriteAllText(args[1], JsonSerializer.Serialize(events, new JsonSerializerOptions { WriteIndented = true })); };
+                    connection.ControllerPacket += packet => events.Enqueue(new { time = DateTime.UtcNow, packet });
                     connection.Shift += direction => events.Enqueue(new { time = DateTime.UtcNow, shift = direction });
                     await connection.ConnectAsync(controller, CancellationToken.None);
                     await Task.Delay(TimeSpan.FromSeconds(35));
@@ -85,7 +92,7 @@ internal static class Program
             return;
         }
         ApplicationConfiguration.Initialize();
-        using var instance = new Mutex(true, "Local\\AlDente.MtbIndoor", out bool firstInstance);
+        using var instance = new Mutex(true, "Local\\MTBIndoorBern.App", out bool firstInstance);
         if (!firstInstance) { MessageBox.Show("MTB Indoor - Bern ja està obert. Fes servir la finestra existent per evitar dues connexions al KICKR.", "MTB Indoor - Bern"); return; }
         try { Application.Run(new MainForm(args.Length >= 2 && args[0] is "--render-smoke" or "--render-welcome" ? args[1] : null, args.Length == 0 || args[0] != "--render-welcome")); }
         catch (Exception e) { MessageBox.Show("No s’ha pogut iniciar MTB Indoor - Bern. Mantén la carpeta Scene al costat de l’executable.\n\n" + e.Message, "MTB Indoor - Bern"); }

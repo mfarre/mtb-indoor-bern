@@ -88,21 +88,39 @@ internal sealed class RideSession
     public bool Busy { get; private set; }
     public bool IsDemo { get; private set; }
     public int DemoSpeed { get; private set; } = 1;
+    public bool Practice { get; private set; }
+    public TrailPlan Trail { get; }
+    public TrailHandling Handling { get; } = new();
+    public DescentTimer Descent { get; }
+    private bool controllerBrake, screenBrake;
+    private DateTime screenBrakeUntil;
+    public bool BrakePressed => controllerBrake || (screenBrake && DateTime.UtcNow < screenBrakeUntil);
+    public void SetControllerBrake(bool pressed) => controllerBrake = pressed;
+    public void SetScreenBrake(bool pressed) { screenBrake = pressed; screenBrakeUntil = DateTime.UtcNow.AddSeconds(.75); }
 
-    public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null)
+    public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null, string? routeFile=null, PersonalRecords? records=null)
     { this.course = course; this.trainer = trainer; this.heart = heart; this.log = log;this.preferences=preferences;
+      Trail = new(course, routeFile); Descent = new(Trail, records ?? new PersonalRecords(null));
       if(preferences is not null){RiderKg=preferences.Data.RiderKg;Difficulty=preferences.Data.Difficulty;Chainring=preferences.Data.Chainring;} }
 
     public void Shift(int delta) { Gear = Math.Clamp(Gear + Math.Sign(delta), 1, 12); }
     public void CycleDemoSpeed()
     {
-        if (!IsDemo || Busy || Mode is not ("demo" or "paused")) return;
+        if (!IsDemo || Practice || Busy || Mode is not ("demo" or "paused")) return;
         DemoSpeed = DemoSpeed == 8 ? 1 : DemoSpeed * 2;
     }
     public void JumpDemo(double distance)
     {
         if (Mode != "demo") return;
         Distance = Math.Clamp(distance, 0, course.Length - 10); Velocity = 0; Elapsed = 0; Climbed = 0;
+        Handling.Reset(); Descent.Reset();
+    }
+    public async Task StartPracticeAsync()
+    {
+        if (Trail.Stage is null || Busy || Running) return;
+        await ResetAsync(); await StartAsync(true);
+        Practice = true; JumpDemo(Math.Max(0, Trail.Stage.Start - 55)); Velocity = 5;
+        Message = "PRÀCTICA · A / Espai: mantén per frenar · sense KICKR ni rècord";
     }
     public void Configure(double weight, double difficulty,int chainring=32)
     {
@@ -124,6 +142,7 @@ internal sealed class RideSession
                 throw new InvalidOperationException("Esperant el KICKR amb potència i cadència. Pedala uns segons i torna a iniciar.");
             if (Distance >= course.Length || IsDemo != demo) ResetProgress();
             IsDemo = demo;
+            if (!demo) Practice = false;
             if (!demo)
             {
                 activeControl = trainer.Control;
@@ -132,7 +151,7 @@ internal sealed class RideSession
             }
             Mode = demo ? "demo" : "ride";
             Message = demo ? "DEMO · recorregut automàtic, sense controlar el KICKR" : "MTB 1×12 · + puja marxa · B baixa marxa";
-            pedalled = demo; lastControl = DateTime.MinValue; lastConfirmation = DateTime.UtcNow;
+            pedalled = demo || pedalled; lastControl = DateTime.MinValue; lastConfirmation = DateTime.UtcNow;
             log(demo ? "Demo 3D iniciada. KICKR sense control." : "Ruta iniciada. Control del KICKR confirmat.");
         }
         catch (Exception e)
@@ -148,6 +167,7 @@ internal sealed class RideSession
         try
         {
             Mode = Distance >= course.Length ? "finished" : "paused"; Velocity = 0;
+            Descent.Invalidate(); screenBrake = controllerBrake = false; Handling.Release();
             Message = reason ?? "Ruta en pausa · resistència alliberada";
             string? failure = await ReleaseControlAsync();
             if (failure is not null) Message += " · " + failure;
@@ -161,7 +181,7 @@ internal sealed class RideSession
         await PauseAsync("Ruta aturada");
         ResetProgress(); Mode = "ready";
     }
-    private void ResetProgress() { Distance = 0; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; }
+    private void ResetProgress() { Distance = 0; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); Descent.Reset(); screenBrake = controllerBrake = false; }
     private async Task<string?> ReleaseControlAsync()
     {
         rideToken?.Cancel();
@@ -177,15 +197,22 @@ internal sealed class RideSession
         dt = Math.Clamp(dt, 0, .25);
         if (Live && (!Fresh || activeControl != trainer.Control || activeControl?.IsControlling != true))
         { _ = PauseAsync("Ruta pausada: s’ha perdut el senyal o el control del KICKR"); return; }
-        var before = course.At(Distance);
-        int watts = IsDemo ? 170 : Math.Max(0, trainer.Power ?? 0);
-        if (watts > 10) pedalled = true;
-        if (pedalled)
+        // Small fixed upper step keeps braking and corner penalties stable at 10 Hz or after a delayed frame.
+        for (double remaining = dt; remaining > .000001;)
         {
-            Velocity = IsDemo ? 6.2 * DemoSpeed : RidePhysics.Speed(Velocity, watts, before.Grade, RiderKg, dt);
-            Distance = Math.Min(course.Length, Distance + Velocity * dt);
-            Elapsed += dt;
-            Climbed += Math.Max(0, course.At(Distance).Alt - before.Alt);
+            double step = Math.Min(.025, remaining); remaining -= step;
+            var before = course.At(Distance); double oldDistance = Distance;
+            int watts = Practice ? (before.Grade > -1.3 ? 160 : 0) : IsDemo ? 170 : Math.Max(0, trainer.Power ?? 0);
+            if (watts > 10 || before.Grade < -1.1) pedalled = true;
+            if (pedalled)
+            {
+                Velocity = IsDemo && !Practice ? (BrakePressed ? Math.Max(0, Velocity - 5.5 * step) : 6.2 * DemoSpeed)
+                    : Handling.Step(Velocity, watts, before.Grade, RiderKg, BrakePressed, Trail.At(Distance), Distance, step);
+                Distance = Math.Min(course.Length, Distance + Velocity * step);
+                Elapsed += step;
+                Climbed += Math.Max(0, course.At(Distance).Alt - before.Alt);
+            }
+            if (!IsDemo || Practice) Descent.Tick(oldDistance, Distance, step, Live, Handling.OffTracks);
         }
         if (Distance >= course.Length) { _ = PauseAsync("Volta completada. Bona ruta!"); return; }
         if (Live && !controlBusy && (DateTime.UtcNow - lastControl).TotalSeconds >= 1)
@@ -220,12 +247,20 @@ internal sealed class RideSession
         return new { type = "state", mode = Mode, message = Message, distance = Distance, speed = Velocity * 3.6, elapsed = Elapsed,
             climbed = Climbed, grade = p.Grade, altitude = p.Alt, gear = Gear, weight = RiderKg, difficulty = Difficulty, busy = Busy,
             devices,chainring=Chainring,sprocket=RidePhysics.Sprockets[Gear-1],development=RidePhysics.Development(Gear,Chainring),gearCount=12,settingsWarning=preferences?.Warning,
-            watts = IsDemo && Running ? 170 : Fresh ? trainer.Power : null,
-            cadence = IsDemo && Running ? 82 : Fresh ? trainer.Cadence : null,
+            watts = Practice ? (Running && p.Grade > -1.3 ? 160 : 0) : IsDemo && Running ? 170 : Fresh ? trainer.Power : null,
+            cadence = Practice ? 0 : IsDemo && Running ? 82 : Fresh ? trainer.Cadence : null,
             heart = hrFresh ? heart.HeartRate : null, trainer = trainer.Connected, hr = hrFresh,
             control = activeControl?.IsControlling == true, targetPower = activeControl?.AppliedPower,
             controlStatus = trainer.Control?.Status ?? trainer.ControlInfo,
-            length = course.Length, demo = IsDemo, demoSpeed = DemoSpeed };
+            length = course.Length, demo = IsDemo, demoSpeed = DemoSpeed, practice = Practice,
+            brake = BrakePressed, brakePressure = Handling.Brake, slip = Handling.Slip, recovery = Handling.Recovery, skidSide = Handling.Side,
+            corner = CornerSnapshot(), descent = Descent.Snapshot(Distance, Handling.OffTracks) };
+    }
+    private object? CornerSnapshot()
+    {
+        var c = Trail.Next(Distance); if (c is null) return null;
+        return new { distance = Math.Max(0, c.Start - Distance), limit = c.Limit * 3.6, direction = c.Direction, surface = c.Surface,
+            urgent = Velocity > c.Limit * 1.04 && c.Start - Distance < Math.Max(25, (Velocity * Velocity - c.Limit * c.Limit) / 7 + Velocity * 1.4) };
     }
 
     public static void Verify(string routeFile)

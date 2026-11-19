@@ -86,6 +86,8 @@ internal sealed class SensorConnection : IDisposable
     private byte? zwiftType;
     public event Action? Changed;
     public event Action<int>? Shift;
+    public event Action<string>? ControllerPacket;
+    public bool BrakePressed { get; private set; }
     public SensorRole Role { get; }
     public string Status { get; private set; } = "Sense connexió";
     public string DeviceName { get; private set; } = "";
@@ -298,10 +300,12 @@ internal sealed class SensorConnection : IDisposable
                 if (sender.Uuid != BleIds.Buttons && (bytes.Length == 0 || (bytes[0] != 0x37 && bytes[0] != 0x23))) return;
                 var states = sender.Uuid == BleIds.Buttons ? Packets.ReadButtons(bytes)
                     : bytes[0] == 0x37 ? Packets.ReadZwiftClick(bytes) : Packets.ReadZwiftClick2(bytes, zwiftType == 10);
+                ControllerPacket?.Invoke(Convert.ToHexString(bytes));
                 foreach (var (button, state) in states)
                 {
                     buttonStates.TryGetValue(button, out var previous);
                     buttonStates[button] = state;
+                    if (button == 3) BrakePressed = state != 0;
                     if (state != 0 && previous == 0 && (button == 1 || button == 2)) Shift?.Invoke(button == 1 ? 1 : -1);
                 }
             }
@@ -339,7 +343,7 @@ internal sealed class SensorConnection : IDisposable
     private void ClearData()
     {
         Power = null; Cadence = null; HeartRate = null; LastPacket = null;
-        crankRevolutions = null; crankTime = null; buttonStates.Clear();
+        crankRevolutions = null; crankTime = null; buttonStates.Clear(); BrakePressed = false;
     }
 
     private void DisconnectCore()

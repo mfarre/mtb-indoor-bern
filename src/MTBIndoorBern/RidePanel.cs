@@ -17,6 +17,7 @@ internal sealed class RidePanel : Panel
     private double lastTick;
     private DateTime heartbeat = DateTime.UtcNow;
     private bool ready, initialized, captured;
+    private bool controllerWasConnected;
     private readonly Equipment equipment;
     private readonly PreferencesStore preferences;
     private readonly CourseInfo[] courses;
@@ -35,6 +36,10 @@ internal sealed class RidePanel : Panel
         clock.Tick += (_, _) =>
         {
             var now = time.Elapsed.TotalSeconds;
+            var controller = equipment.Connections[SensorRole.Controller];
+            if (controllerWasConnected && !controller.Connected && Ride.Live) _ = Ride.PauseAsync("Click desconnectat · ruta pausada per recuperar els frens");
+            controllerWasConnected = controller.Connected;
+            Ride.SetControllerBrake(controller.Connected && controller.BrakePressed);
             Ride.Tick(now - lastTick); lastTick = now;
             if (ready && Ride.Running && (DateTime.UtcNow - heartbeat).TotalSeconds > 8)
                 _ = Ride.PauseAsync("Vista 3D interrompuda · ruta pausada");
@@ -44,7 +49,7 @@ internal sealed class RidePanel : Panel
         clock.Start();
     }
 
-    private RideSession NewRide()=>new(Course.Load(CourseCatalog.RouteFile(selectedCourse)),equipment.Connections[SensorRole.Trainer],equipment.Connections[SensorRole.HeartRate],log,preferences);
+    private RideSession NewRide()=>new(Course.Load(CourseCatalog.RouteFile(selectedCourse)),equipment.Connections[SensorRole.Trainer],equipment.Connections[SensorRole.HeartRate],log,preferences,CourseCatalog.RouteFile(selectedCourse),new PersonalRecords(Path.Combine(AppContext.BaseDirectory,"records.json")));
     private string CourseUrl=>"https://mtbindoor.local/index.html?course="+Uri.EscapeDataString(selectedCourse.Id);
 
     public async Task InitializeAsync()
@@ -66,6 +71,8 @@ internal sealed class RidePanel : Panel
             core.PermissionRequested += (_, e) => e.State = CoreWebView2PermissionState.Deny;
             core.ProcessFailed += async (_, _) => { ready = false; await Ride.PauseAsync("El motor 3D s’ha interromput. Reinicia MTB Indoor - Bern."); };
             core.WebMessageReceived += OnMessage;
+            // The same virtual origin serves new local assets after an application update.
+            await core.Profile.ClearBrowsingDataAsync(CoreWebView2BrowsingDataKinds.DiskCache);
             core.Navigate(CourseUrl);
         }
         catch (Exception e)
@@ -86,11 +93,13 @@ internal sealed class RidePanel : Panel
             var action = message.GetProperty("action").GetString();
             switch (action)
             {
-                case "ready": ready = true; heartbeat = DateTime.UtcNow; if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
+                case "ready": ready = true; heartbeat = DateTime.UtcNow; web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
                 case "heartbeat": heartbeat = DateTime.UtcNow; break;
                 case "start": await Ride.StartAsync(false); break;
                 case "demo": await Ride.StartAsync(true); break;
                 case "demo-speed": Ride.CycleDemoSpeed(); break;
+                case "practice": await Ride.StartPracticeAsync(); break;
+                case "brake": Ride.SetScreenBrake(message.GetProperty("pressed").GetBoolean()); break;
                 case "pause": await Ride.PauseAsync(); break;
                 case "stop": await Ride.ResetAsync(); break;
                 case "devices": await Ride.PauseAsync("Ruta en pausa per configurar dispositius"); devices(); break;
