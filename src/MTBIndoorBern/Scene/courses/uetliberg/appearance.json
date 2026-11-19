@@ -1,0 +1,496 @@
+{
+  "version": 1,
+  "season": "late-autumn",
+  "source": "OpenStreetMap geometry and surface tags; SWISSIMAGE aerial context",
+  "notes": "Surface and width are map estimates. Vegetation is recreated; no video survey was supplied for this course.",
+  "segments": [
+    {
+      "from": 0,
+      "to": 50,
+      "surface": "asphalt",
+      "width": 1.5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 50,
+      "to": 150,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 150,
+      "to": 950,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 950,
+      "to": 1150,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 1150,
+      "to": 4100,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4100,
+      "to": 4350,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 4350,
+      "to": 5150,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 5150,
+      "to": 5250,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 5250,
+      "to": 6950,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 6950,
+      "to": 7000,
+      "surface": "asphalt",
+      "width": 2.5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 7000,
+      "to": 7250,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 7250,
+      "to": 7300,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 7300,
+      "to": 7450,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 7450,
+      "to": 7700,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 7700,
+      "to": 8400,
+      "surface": "gravel",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 8400,
+      "to": 8450,
+      "surface": "gravel",
+      "width": 1.8,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 8450,
+      "to": 9400,
+      "surface": "gravel",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 9400,
+      "to": 9750,
+      "surface": "gravel",
+      "width": 3.2,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 9750,
+      "to": 10700,
+      "surface": "gravel",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 10700,
+      "to": 10850,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 10850,
+      "to": 11200,
+      "surface": "gravel",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 11200,
+      "to": 11500,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 11500,
+      "to": 11850,
+      "surface": "gravel",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 11850,
+      "to": 12000,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 12000,
+      "to": 12150,
+      "surface": "gravel",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 12150,
+      "to": 12600,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 12600,
+      "to": 12650,
+      "surface": "gravel",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 12650,
+      "to": 13600,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 13600,
+      "to": 15000,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 15000,
+      "to": 15050,
+      "surface": "asphalt",
+      "width": 1.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 15050,
+      "to": 15500,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 15500,
+      "to": 15600,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 15600,
+      "to": 15950,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 15950,
+      "to": 16000,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 16000,
+      "to": 16300,
+      "surface": "asphalt",
+      "width": 2,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 16300,
+      "to": 16450,
+      "surface": "asphalt",
+      "width": 3.5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 16450,
+      "to": 17600,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 17600,
+      "to": 17700,
+      "surface": "asphalt",
+      "width": 3,
+      "forest": true,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 17700,
+      "to": 18600,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 18600,
+      "to": 18950,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 18950,
+      "to": 19100,
+      "surface": "asphalt",
+      "width": 4.5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19100,
+      "to": 19250,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19250,
+      "to": 19400,
+      "surface": "asphalt",
+      "width": 4.5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19400,
+      "to": 19500,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19500,
+      "to": 19650,
+      "surface": "asphalt",
+      "width": 4.5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19650,
+      "to": 19700,
+      "surface": "asphalt",
+      "width": 1.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19700,
+      "to": 19900,
+      "surface": "asphalt",
+      "width": 1.2,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19900,
+      "to": 19950,
+      "surface": "asphalt",
+      "width": 1.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 19950,
+      "to": 20400,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 20400,
+      "to": 20550,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 20550,
+      "to": 21300,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 21300,
+      "to": 21600,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 21600,
+      "to": 22250,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 22250,
+      "to": 22300,
+      "surface": "asphalt",
+      "width": 1.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 22300,
+      "to": 22800,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 22800,
+      "to": 22850,
+      "surface": "asphalt",
+      "width": 1.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 22850,
+      "to": 24650,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 24650,
+      "to": 24850,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 24850,
+      "to": 25650,
+      "surface": "asphalt",
+      "width": 3.8,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 25650,
+      "to": 25750,
+      "surface": "asphalt",
+      "width": 5,
+      "forest": false,
+      "confidence": "map-inferred"
+    },
+    {
+      "from": 25750,
+      "to": 25754.977207062486,
+      "surface": "asphalt",
+      "width": 1.5,
+      "forest": false,
+      "confidence": "map-inferred"
+    }
+  ]
+}

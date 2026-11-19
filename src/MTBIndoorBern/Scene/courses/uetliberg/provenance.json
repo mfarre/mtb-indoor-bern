@@ -1,0 +1,16 @@
+{
+  "name": "Uetliberg",
+  "inputSha256": "e1301dbad742a56101835e9e45a701295d46dd0ccda5247128d0b9999abb7ee8",
+  "prepared": "2026-11-19",
+  "routeSource": "User-supplied planned GPX (BRouter / OpenStreetMap)",
+  "imagerySource": "SWISSIMAGE © swisstopo",
+  "imageryZoom": 16,
+  "terrainSource": "Terrain © swisstopo, quantized mesh 20250101",
+  "mapSource": "© OpenStreetMap contributors — ODbL",
+  "urls": [
+    "https://docs.geo.admin.ch/visualize-data/xyz.html",
+    "https://docs.geo.admin.ch/visualize-data/terrain-service.html",
+    "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices",
+    "https://www.openstreetmap.org/copyright"
+  ]
+}
