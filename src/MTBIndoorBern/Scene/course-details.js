@@ -7,7 +7,7 @@ export function surfaceAt(renderer,d){const segs=renderer.survey?.segments;retur
 export async function loadSurvey(renderer){
  const response=await fetch(`${renderer.info.folder}/appearance.json`);if(response.status===404)return;if(!response.ok)throw Error('No es pot llegir l’aspecte del circuit');
  renderer.survey=await response.json();let source;
- try{source=await new T.TextureLoader().loadAsync(`${renderer.info.folder}/${renderer.survey.texture}`);renderer.groundSource='video';}
+ try{if(!renderer.survey.texture)throw Error('Use generated ground');source=await new T.TextureLoader().loadAsync(`${renderer.info.folder}/${renderer.survey.texture}`);renderer.groundSource='video';}
  catch{source=genericLeafFloor();renderer.groundSource='procedural';}
  if(renderer.survey.foliageTexture){renderer.beech=await new T.TextureLoader().loadAsync(`${renderer.info.folder}/${renderer.survey.foliageTexture}`);renderer.beech.colorSpace=T.SRGBColorSpace;renderer.beech.anisotropy=4;}
  // Mirror the extracted ground patch at the borders, preserving its real leaf detail.
@@ -55,7 +55,7 @@ function buildSurveyGround(renderer){
  for(const cell of cells){const [ix,iz]=cell.split(',').map(Number),x=(ix+.5)*spacing,z=(iz+.5)*spacing,n=renderer.nearestRoad(x,z);if(n.distance>28)continue;const s=surfaceAt(renderer,n.d),forest=s.forest&&n.distance<17,kind=forest?1:0,a=vertex(ix,iz,forest),b=vertex(ix+1,iz,forest),c=vertex(ix,iz+1,forest),d=vertex(ix+1,iz+1,forest);indices[kind].push(a,c,b,b,c,d);}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('color',new T.Float32BufferAttribute(color,3));g.setIndex([...indices[0],...indices[1]]);g.addGroup(0,indices[0].length,0);g.addGroup(indices[0].length,indices[1].length,1);g.computeVertexNormals();
  const material=new T.MeshStandardMaterial({map:renderer.aerial,roughness:1,vertexColors:true});const mesh=new T.Mesh(g,[material,renderer.surveyMaterials.floor]);mesh.receiveShadow=true;renderer.scene.add(mesh);
- renderer.localGroundVertices=p.length/3;
+ renderer.localGroundVertices=p.length/3;renderer.localGroundMesh=mesh;renderer.localGroundAerialMaterial=material;renderer.localGroundForestUv=g.getAttribute("uv");const photoUv=[];for(let i=0;i<p.length;i+=3)photoUv.push(...renderer.uv(p[i],p[i+2]));renderer.localGroundPhotoUv=new T.Float32BufferAttribute(photoUv,2);
 }
 export function addSurveyTrees(renderer){
  const r=rng(153),ps=renderer.course.points,cells=new Map(),size=16;
