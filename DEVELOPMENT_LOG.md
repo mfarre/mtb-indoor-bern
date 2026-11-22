@@ -4,6 +4,20 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; the screenshots are historical captures and retain the app's Catalan interface. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 22 November 2026 · Maneta v01: from mechanical design to realistic render
+
+The [Bluetooth brakes guide](docs/bluetooth-brakes.md) now shows the **actual Maneta v01 design beneath the earlier concept study**. The supplied ZIP contains mirrored STL parts, the OpenSCAD assembly, a two-page PDF and assembly notes. The right-hand meshes were assembled at their original scale and orientation in Blender; ImageGen then added realistic PETG, rubber and metal surfaces using that render as its geometry reference.
+
+![Maneta v01 render based on the supplied mechanical design](docs/images/bluetooth-brake-v01-realistic.png)
+
+The exposed return spring, rubber stop, sensor cover and two-piece clamp follow the design package. The six printed parts retain their source geometry in the [direct CAD reference](docs/images/bluetooth-brake-v01-cad.png). Colours, spring-coil details, fasteners, wire routing and the handlebar/grip are visualization choices. This image documents a proposed prototype, not a completed physical build.
+
+The hardware list now records the proposed **two AS5600 sensors, TCA9548A multiplexer and external LilyGO T-Beam Supreme**, with supplier and technical links. Each sensor measures lever angle. Custom BLE firmware, proportional simulator input and physical validation remain pending; existing Click A-button braking is unchanged.
+
+The [render provenance](docs/brake-v01-render.md) records the source hashes and generation prompt. A [reusable Blender renderer](tools/brake-render/README.md) reproduces the CAD reference from the supplied package. Visual review checked the main shapes, spring, rubber stop, cover hole, clamp and four sensor wires against the source render.
+
+**Verified:** 19 Markdown pages and 209 local file/heading links; published image hashes; concept-before-render order in both pages; and the documented Blender command producing both reference views and its scene file. This milestone changes documentation and adds an offline rendering tool; simulator behavior is unchanged.
+
 ## 22 November 2026 · English documentation and three project sections
 
 The repository now has a visual landing page and separate guides for the **[simulator](docs/simulator.md)**, **[data acquisition](docs/data-acquisition.md)** and **[Bluetooth brakes](docs/bluetooth-brakes.md)**. The full milestone history has moved from the README into this development log. User guides, tool READMEs and third-party notices are now in English; historical screenshots and recorded UI strings retain their original language.

@@ -1,0 +1,108 @@
+{
+  "created": "2026-11-22",
+  "archive": "Maneta-MTB-v01.zip",
+  "archive_sha256": "5e63dc93afddf633b9277a3e9b5ed62c21faf550c1b60a05819cefd13b896ba8",
+  "source_files": [
+    {
+      "path": "maneta.scad",
+      "bytes": 5375,
+      "sha256": "4a5da6d909b7b62eacfe256c08ac4111b224319a303e06b3c66f7d32f3d6dfec"
+    },
+    {
+      "path": "MUNTATGE.md",
+      "bytes": 8211,
+      "sha256": "2dcc9370a35d081125a7789b40af7dc7ac62154f8f3513291b67584fc1836e00"
+    },
+    {
+      "path": "planol.pdf",
+      "bytes": 110317,
+      "sha256": "a2fa2e71a36f88473c7463865528d97e1a00582fb698ccb6690f381ec20f37b0"
+    },
+    {
+      "path": "STL/dreta/base.stl",
+      "bytes": 186384,
+      "sha256": "839bb2f31463146d76b6e370953651d5644da0058aa9266b536dd1f4ea5405de",
+      "triangles": 3726
+    },
+    {
+      "path": "STL/dreta/guia.stl",
+      "bytes": 58684,
+      "sha256": "5dafac1bc97fe84dff171c87c1179efccf11e9683fd4c6d7c6e4800ecaa6ba86",
+      "triangles": 1172
+    },
+    {
+      "path": "STL/dreta/mordassa.stl",
+      "bytes": 37284,
+      "sha256": "34757e43a07f7573348cb414b5dd0b633220f2361de280b0fc0ce134c4917e17",
+      "triangles": 744
+    },
+    {
+      "path": "STL/dreta/palanca.stl",
+      "bytes": 97684,
+      "sha256": "b158e601ec104d01e2df9f0481a35fd914aec5585826376db5ef5d531b45f18c",
+      "triangles": 1952
+    },
+    {
+      "path": "STL/dreta/tapa.stl",
+      "bytes": 87684,
+      "sha256": "5d993dbe10dadbd733e9ee3ddd851cd3a9db2bb827bef3a6b6b970d4b7aeb88f",
+      "triangles": 1752
+    },
+    {
+      "path": "STL/esquerra/base.stl",
+      "bytes": 186384,
+      "sha256": "8829563dc42ae9583d38d06a129fb88261de61fcce254972f99a8f5587c2ee7e",
+      "triangles": 3726
+    },
+    {
+      "path": "STL/esquerra/guia.stl",
+      "bytes": 58684,
+      "sha256": "08b01462d9780166771b58cad49fe81cfd3a4ece2adcf5e9956256c2d16c14be",
+      "triangles": 1172
+    },
+    {
+      "path": "STL/esquerra/mordassa.stl",
+      "bytes": 37284,
+      "sha256": "3914fe15ecbb7a14c3a3d581035715916144c1f926cc26ffa1ee4b0321e359a0",
+      "triangles": 744
+    },
+    {
+      "path": "STL/esquerra/palanca.stl",
+      "bytes": 97684,
+      "sha256": "259cb8d2fd6c4dbb865e18daf35e80e15f34a4963bcfd129edf63aa063e4a02b",
+      "triangles": 1952
+    },
+    {
+      "path": "STL/esquerra/tapa.stl",
+      "bytes": 87684,
+      "sha256": "6f3421499c6e9d397d55cf1cc1f32c05974325c70fe85dd427b5ffde5ea622fc",
+      "triangles": 1752
+    }
+  ],
+  "assets": [
+    {
+      "path": "docs/images/bluetooth-brake-v01-realistic.png",
+      "dimensions": [
+        1568,
+        1003
+      ],
+      "sha256": "d47a8c4f6a392df7e84c86c03dcd5df9afe844170c25971c76eb1edf9e97e7d5",
+      "bytes": 2085236
+    },
+    {
+      "path": "docs/images/bluetooth-brake-v01-cad.png",
+      "dimensions": [
+        1800,
+        1152
+      ],
+      "sha256": "d88a8d62bad7893d9ebfeda419f37614db080aeeb8f32d52545d1240a50449cb",
+      "bytes": 2284579
+    }
+  ],
+  "reference_renderer": "Blender 4.5.16 LTS / Cycles / 48 samples",
+  "final_treatment": "built-in ImageGen, source CAD render as local image reference",
+  "assembly_side": "right",
+  "lever_angle_degrees": 8,
+  "source_units": "mm",
+  "physical_validation": false
+}

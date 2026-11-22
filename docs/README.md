@@ -25,6 +25,8 @@
 - [Bike profile and calibration UI checks](../tools/calibration-ui/README.md)
 - [Rendering assets and provenance](render-assets.md)
 - [Bluetooth brake concept render provenance](brake-concept-render.md)
+- [Maneta v01 render from the actual CAD design](brake-v01-render.md)
+- [Reusable brake CAD reference renderer](../tools/brake-render/README.md)
 - [Third-party notices](../THIRD_PARTY_NOTICES.md)
 
 ## Historical verification reports

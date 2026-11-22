@@ -45,7 +45,13 @@ Select a course and choose **Explore in demo** (`Explora en demo`). Pause, click
 | [![Track Lab aligns the ride video and FIT route](docs/images/track-lab.png)](docs/data-acquisition.md) | [![Concept render of an unbuilt Bluetooth brake-lever accessory](docs/images/bluetooth-brake-concept.png)](docs/bluetooth-brakes.md) |
 | [Camera/FIT alignment, annotations and hardware links](docs/data-acquisition.md) | [Existing Click support, design discussion and hardware references](docs/bluetooth-brakes.md) |
 
-The brake image is an AI-generated concept, not a photograph or a validated hardware design. Documentation is in English; current application controls and historical screenshots retain the Catalan UI.
+The brake image above is an AI-generated concept, not a photograph or a validated hardware design.
+
+[![Maneta v01 realistic render based on the supplied STL design](docs/images/bluetooth-brake-v01-realistic.png)](docs/bluetooth-brakes.md#maneta-v01-render-from-the-actual-design)
+
+**Maneta v01: the actual mechanical design.** A render assembled from the supplied STL files and PDF drawings, with ImageGen material and lighting treatment. [Design, hardware and CAD reference](docs/brake-v01-render.md). Physical testing and custom BLE integration are still pending.
+
+Documentation is in English; current application controls and historical screenshots retain the Catalan UI.
 
 ## Follow development
 
