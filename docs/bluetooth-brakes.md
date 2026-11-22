@@ -14,6 +14,8 @@ This section brings together the working Bluetooth brake input and the early des
 
 *Based on the supplied STL files, OpenSCAD assembly and PDF drawings. The meshes were assembled in Blender before ImageGen added realistic materials and lighting. Colours, fastener details and cable routing are illustrative; this is not a photograph of a built prototype. [CAD reference, source hashes and prompt](brake-v01-render.md).*
 
+Viewed from the rider's side: the trigger points **outward toward the right grip and bar end**, with the pivot inboard, as on a conventional bicycle brake lever.
+
 ## Working today
 
 - Hold **A** on the right Click 2 to brake; release it to coast. Keyboard **A / Space** and the on-screen brake are also supported.

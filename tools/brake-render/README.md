@@ -17,6 +17,8 @@ Use Blender 4.5 LTS with Cycles. Extract the owner-supplied `Maneta-MTB-v01.zip`
 
 Outputs are `maneta-v01-cad-assembly.png`, `maneta-v01-cad-open.png` and an editable `maneta-v01-assembly.blend`. Source coordinates are millimetres; the numerical scene coordinates preserve that scale. The displayed lever angle is 8 degrees within its nominal 22-degree travel.
 
-The six printed parts use the original mesh geometry without subdivision, bevels or remeshing. Duplicate STL vertices are merged for correct normals. Materials and studio lighting are visualization choices. Hardware, spring coils, sensor-board details, wires, tube and grip are illustrative additions based on the assembly notes, not newly supplied manufacturing models.
+The camera looks from the rider's side. The right grip and visible bar end are on the right, with a contextual stem on the left: the trigger points outward toward the grip, and the pivot stays inboard. This orientation comes from the camera and handlebar context; the source parts and spring/stop arrangement are preserved.
+
+The six printed parts use the original mesh geometry without subdivision, bevels or remeshing. Duplicate STL vertices are merged for correct normals. Materials and studio lighting are visualization choices. Hardware, spring coils, sensor-board details, wires, tube, grip and stem are illustrative additions based on the assembly notes and mounting context, not newly supplied manufacturing models.
 
 The script is an offline rendering tool. It does not generate print files, validate mechanical fit or supply brake firmware. It does not control the trainer or Bluetooth devices.

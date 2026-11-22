@@ -10,7 +10,7 @@ The [Bluetooth brakes guide](docs/bluetooth-brakes.md) now shows the **actual Ma
 
 ![Maneta v01 render based on the supplied mechanical design](docs/images/bluetooth-brake-v01-realistic.png)
 
-The exposed return spring, rubber stop, sensor cover and two-piece clamp follow the design package. The six printed parts retain their source geometry in the [direct CAD reference](docs/images/bluetooth-brake-v01-cad.png). Colours, spring-coil details, fasteners, wire routing and the handlebar/grip are visualization choices. This image documents a proposed prototype, not a completed physical build.
+The exposed return spring, rubber stop, sensor cover and two-piece clamp follow the design package. The six printed parts retain their source geometry in the [direct CAD reference](docs/images/bluetooth-brake-v01-cad.png). The rider-side view shows the trigger pointing outward toward the right grip/bar end, with the pivot inboard and a contextual stem on the left. Colours, spring-coil details, fasteners, wire routing and the handlebar/grip/stem are visualization choices. This image documents a proposed prototype, not a completed physical build.
 
 The hardware list now records the proposed **two AS5600 sensors, TCA9548A multiplexer and external LilyGO T-Beam Supreme**, with supplier and technical links. Each sensor measures lever angle. Custom BLE firmware, proportional simulator input and physical validation remain pending; existing Click A-button braking is unchanged.
 

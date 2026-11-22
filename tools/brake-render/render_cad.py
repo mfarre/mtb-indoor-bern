@@ -146,9 +146,16 @@ for center,sgn,endpt in [(a,1,pts[0]),(b,-1,pts[-1])]:
     path('Extension spring eye',eye,.34,steel)
     path('Spring connecting hook',[eye[20 if sgn==1 else 60],endpt],.34,steel)
 
-cyl('22.2 mm handlebar context',(25,-45,-15.5),11.1,200,bar_mat,'X',96)
+cyl('22.2 mm handlebar context',(-40,-45,-15.5),11.1,340,bar_mat,'X',96)
 cyl('Rubber grip context',(77.5,-45,-15.5),14.4,100,gripmat,'X',96)
 for x in [29,126]:cyl('Grip lock ring',(x,-45,-15.5),14.6,3.5,blacksteel,'X',96)
+cyl('Visible outboard bar-end plug',(130,-45,-15.5),14.1,3.5,gripmat,'X',96)
+# Contextual stem at the inboard end makes right-hand orientation unambiguous.
+# These objects are not part of the supplied brake CAD or its bill of materials.
+cyl('Contextual stem bar clamp',(-94,-45,-15.5),16.8,24,blacksteel,'X',64)
+box('Contextual stem body',(-94,-74,-17),(24,52,24),blacksteel)
+for x in [-102,-86]:
+    for y in [-50,-40]:screw_head('Contextual stem bolt',x,y,-.2,2.6)
 for i in range(38):
     x=33+i*2.4
     points=[(x,-45+14.48*math.cos(t*math.tau/96),-15.5+14.48*math.sin(t*math.tau/96)) for t in range(97)]
@@ -178,10 +185,12 @@ scene.render.resolution_x=1800;scene.render.resolution_y=1152;scene.render.resol
 scene.render.image_settings.file_format='PNG'
 scene.view_settings.view_transform='AgX'
 camdata=bpy.data.cameras.new('Camera');cam=bpy.data.objects.new('Camera',camdata);bpy.context.collection.objects.link(cam)
-scene.camera=cam;camdata.type='ORTHO';camdata.ortho_scale=192
+scene.camera=cam;camdata.type='ORTHO';camdata.ortho_scale=255
 def camera(loc,target):
     cam.location=loc;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler()
-camera((125,150,180),(21,-20,-2))
+# Rider at negative Y; the right-hand outer end is positive X / screen right.
+# The trigger points toward the grip/bar end, with its pivot inboard.
+camera((15,-190,280),(15,-20,-8))
 scene.render.filepath=str(OUT/'maneta-v01-cad-assembly.png')
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'maneta-v01-assembly.blend'))
 bpy.ops.render.render(write_still=True)
@@ -190,7 +199,7 @@ cover.hide_render=True
 pcb.hide_render=True
 for o in bpy.data.objects:
     if o.name.startswith(('AS5600 downward','Chip contact','M3 cover','Four-wire')):o.hide_render=True
-camera((70,100,260),(20,-18,-2));camdata.ortho_scale=160
+camera((15,-150,300),(15,-20,-8));camdata.ortho_scale=235
 scene.render.filepath=str(OUT/'maneta-v01-cad-open.png')
 bpy.ops.render.render(write_still=True)
 print('Saved exact STL reference renders',flush=True)

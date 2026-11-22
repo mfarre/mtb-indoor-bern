@@ -86,8 +86,8 @@
         1568,
         1003
       ],
-      "sha256": "d47a8c4f6a392df7e84c86c03dcd5df9afe844170c25971c76eb1edf9e97e7d5",
-      "bytes": 2085236
+      "sha256": "e022603f8d417f33a72e39232741615189dae7d31283bda0fc15550741ff0e23",
+      "bytes": 1914142
     },
     {
       "path": "docs/images/bluetooth-brake-v01-cad.png",
@@ -95,14 +95,27 @@
         1800,
         1152
       ],
-      "sha256": "d88a8d62bad7893d9ebfeda419f37614db080aeeb8f32d52545d1240a50449cb",
-      "bytes": 2284579
+      "sha256": "154436d510808b4fc4738558aa492ead6a0043d2fb6c654b5fd8b385b1625a6a",
+      "bytes": 2205647
     }
   ],
-  "reference_renderer": "Blender 4.5.16 LTS / Cycles / 48 samples",
+  "reference_renderer": "Blender 4.5.16 LTS / Cycles / 24 samples",
   "final_treatment": "built-in ImageGen, source CAD render as local image reference",
   "assembly_side": "right",
   "lever_angle_degrees": 8,
   "source_units": "mm",
-  "physical_validation": false
+  "physical_validation": false,
+  "view_revision": 2,
+  "mounting_view": "rider side: right grip and outboard end on screen right, pivot and stem inboard on screen left",
+  "camera_location": [
+    15,
+    -190,
+    280
+  ],
+  "camera_target": [
+    15,
+    -20,
+    -8
+  ],
+  "camera_orthographic_scale": 255
 }
