@@ -1,38 +1,40 @@
 # Track Lab
 
-Visor local de vídeo i FIT per estudiar un recorregut abans de recrear-lo en 3D. És una eina independent del simulador: no connecta ni controla sensors.
+[Data acquisition](data-acquisition.md) · [Project overview](../README.md)
 
-## Ús
+A local video and FIT viewer for studying a route before recreating it in 3D. Track Lab is separate from the simulator: it does not connect to or control sensors. The interface currently uses Catalan labels; the instructions below retain those labels where needed to find a control.
 
-1. **Importa FIT i vídeos**: tria un FIT o un ZIP amb un únic FIT i la carpeta dels vídeos. Indica si els nous vídeos necessiten un gir de 180°.
-2. La importació copia tots els originals a una sessió nova i verifica cada còpia amb SHA-256. Extreu el FIT i crea vídeos de previsualització i un fotograma cada minut. També admet clips curts.
-3. Tria una miniatura o mou la barra del vídeo. El mapa mostra el punt GPS pròxim a l'hora del vídeo, tenint en compte l'ajust del rellotge.
-4. Ajusta **Hora FIT = hora càmera + segons**. Busca una aturada o un punt recognoscible. No s'interpolen posicions a través de pauses llargues del FIT.
-5. Prem **Marca**, indica el final del tram, la superfície, l'amplada estimada i les observacions. **Desa observació** escriu `annotations.json` a la sessió.
-6. **Extreu fotograma** desa un JPEG corregit a `details/`. S'utilitza el MP4 original de màxima resolució quan hi ha un LRF equivalent.
-7. **Exporta JSON** permet reutilitzar les anotacions en preparar l'aspecte d'un circuit. Aquesta exportació no modifica automàticament el joc.
+## Using the viewer
 
-La rotació del vídeo es fa al visor, sense alterar els originals; els JPEG extrets ja contenen els píxels girats. Els MP4 de `preview/` són fitxers de treball que el visor orienta en reproduir-los. Els LRF H.264 es remultiplexen sense recodificació. Si cal, altres còdecs es converteixen a H.264 de 720p.
+1. Select **Importa FIT i vídeos** (import FIT and videos): choose a FIT file, or a ZIP containing a single FIT file, and the video folder. Specify whether the new videos need a 180° rotation.
+2. The importer copies all originals into a new session and verifies each copy with SHA-256. It extracts the FIT file and creates preview videos and one thumbnail per minute. Short clips are supported too.
+3. Select a thumbnail or move the video timeline. The map shows the GPS point nearest the video time, including the clock offset.
+4. Adjust **Hora FIT = hora càmera + segons** (FIT time = camera time + seconds). Find a stop or a recognisable location. Positions are not interpolated across long gaps in the FIT recording.
+5. Select **Marca** (mark), then enter the segment end, surface, estimated width and observations. **Desa observació** (save observation) writes `annotations.json` into the session.
+6. **Extreu fotograma** (extract frame) saves a correctly oriented JPEG in `details/`. When a matching LRF exists, extraction uses the full-resolution original MP4.
+7. **Exporta JSON** (export JSON) makes the annotations available when preparing a course's appearance. Exporting does not automatically modify the game.
 
-## Circuit de referència i límits
+Video rotation happens in the viewer without changing the originals; extracted JPEGs contain the rotated pixels. MP4 files in `preview/` are working files whose orientation is applied during playback. H.264 LRF files are remuxed without re-encoding. Other codecs are converted to 720p H.264 when necessary.
 
-`config.json` pot apuntar a un `route.json` del simulador. El descodificador compara posició, direcció i continuïtat amb el traçat. El visor només associa un punt al circuit si l'error espacial és de 12 m o menys; la resta es mostra com a variant. Les distàncies anotades corresponen al circuit de referència. Sense circuit de referència, es fan servir les distàncies del FIT.
+## Reference course and limitations
 
-La proximitat GPS no valida el rellotge. Per a la sessió del 14 de novembre s'ha estimat **−226 s, amb una incertesa aproximada de 10 s**, a partir de l'aturada llarga. El tram central segueix una variant diferent del circuit anterior. Les amplades i les superfícies són estimacions visuals, no un aixecament topogràfic.
+`config.json` can point to a simulator `route.json`. The decoder compares position, direction and continuity against that route. The viewer associates a point with the course only when its spatial error is 12 m or less; other points are shown as a variant. Annotation distances refer to the reference course. Without a reference course, FIT distances are used instead.
 
-Cal que el vídeo contingui `creation_time` amb data i hora. La importació d'aquesta versió està orientada a FIT i vídeos DJI LRF/MP4; no importa GPX ni genera automàticament un circuit 3D.
+GPS proximity does not validate clock synchronisation. For the 14 November 2026 session, the long stop supported an estimated offset of **−226 seconds, with approximately 10 seconds of uncertainty**. The central section follows a different variant from the earlier course. Widths and surfaces are visual estimates, not a topographic survey.
 
-## Compilació
+Videos must contain a `creation_time` date and time. This version's importer is designed for FIT files and DJI LRF/MP4 recordings. It does not import GPX files or automatically generate a 3D course. The [separate GPX tools](../tools/course-import/README.md) prepare map-based courses.
 
-Requisits: .NET 10 SDK, WebView2 Runtime, Python 3 amb Pillow, Node.js, FFmpeg i FFprobe a la mateixa carpeta, i Garmin FIT SDK per a JavaScript. El visor no necessita cap servidor extern.
+## Build
+
+Requirements: .NET 10 SDK, WebView2 Runtime, Python 3 with Pillow, Node.js, FFmpeg and FFprobe in the same directory, and the Garmin FIT SDK for JavaScript. The viewer does not require an external server.
 
 ```powershell
 python -m pip install Pillow
 npm install --prefix artifacts/track-lab-deps --ignore-scripts @garmin/fitsdk@21.221.0
-.\tools\track-lab\build.ps1 -FitSdkPath .\artifacts\track-lab-deps\node_modules\@garmin\fitsdk -FfmpegPath C:\eines\ffmpeg\bin\ffmpeg.exe
+.\tools\track-lab\build.ps1 -FitSdkPath .\artifacts\track-lab-deps\node_modules\@garmin\fitsdk -FfmpegPath C:\Tools\ffmpeg\bin\ffmpeg.exe
 .\artifacts\track-lab\TrackLab.exe
 ```
 
-FFmpeg es pot obtenir des dels enllaços de Windows de [la pàgina oficial](https://ffmpeg.org/download.html). El constructor admet `-PythonPath`, `-NodePath`, `-DotnetPath`, `-SessionsRoot`, `-DefaultSession` i `-Course`. Les rutes queden a `config.json`; cal adaptar-les al PC. Una sessió inicial buida mostra els botons d'obertura i importació.
+FFmpeg is available through the Windows links on its [official download page](https://ffmpeg.org/download.html). The build script accepts `-PythonPath`, `-NodePath`, `-DotnetPath`, `-SessionsRoot`, `-DefaultSession` and `-Course`. These paths are written into `config.json` and must match the local PC. An empty initial session displays the open and import buttons.
 
-El codi i les captures d'exemple formen part del repositori. Els vídeos complets, les sessions de treball, les vinculacions Bluetooth i els FIT originals es mantenen locals.
+The source and example screenshots are included in this repository. Full videos, working sessions, Bluetooth pairings and original FIT files remain local. See the [hardware and acquisition workflow](data-acquisition.md) for device references and planned support for additional sensor streams.

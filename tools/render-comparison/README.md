@@ -1,21 +1,23 @@
-# Comparacions animades del motor 3D
+# Animated renderer comparisons
 
-`RenderCapture` carrega el `ForestRenderer` de qualsevol còpia local de `Scene`. Captura fotogrames a posicions exactes, sense sensors ni connexions Bluetooth. Les dues seqüències tenen la mateixa càmera, recorregut, resolució i velocitat. No es duplica una imatge estàtica: cada fotograma es torna a renderitzar amb el motor corresponent.
+[Simulator](../../docs/simulator.md) · [Development log](../../DEVELOPMENT_LOG.md)
 
-Requisits: Windows, .NET 10 SDK, WebView2, Python amb Pillow i FFmpeg. Cal disposar dels dos directoris `Scene` complets, amb les dades locals del circuit. Els originals es conserven; es crea una còpia de treball `_scene` dins de cada carpeta de sortida.
+`RenderCapture` loads the `ForestRenderer` from any local copy of `Scene`. It captures frames at exact positions without sensors or Bluetooth connections. Both sequences use the same camera, route, resolution and speed. Each frame is rendered by its corresponding engine; this is not an animated duplicate of a still image.
 
-Des de l'arrel del repositori:
+Requirements: Windows, .NET 10 SDK, WebView2, Python with Pillow and FFmpeg. Both complete `Scene` directories must be available, including local course data. Originals are preserved; a working `_scene` copy is created inside each output folder.
+
+From the repository root:
 
 ```powershell
 dotnet publish tools/render-comparison/RenderCapture.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/render-capture
 ```
 
-Crea dos fitxers JSON amb aquest esquema, canviant `SceneFolder` i `OutputFolder` per a cada versió. Fes servir rutes absolutes. La sortida ha de ser fora de `SceneFolder`.
+Create two JSON files with the following schema, changing `SceneFolder` and `OutputFolder` for each version. Use absolute paths. The output must be outside `SceneFolder`.
 
 ```json
 {
-  "SceneFolder": "C:/MTB/versio-anterior/Scene",
-  "OutputFolder": "C:/MTB/captures/abans",
+  "SceneFolder": "C:/MTB/previous-version/Scene",
+  "OutputFolder": "C:/MTB/captures/before",
   "StartMeters": 4300,
   "SpeedMps": 6.2,
   "Seconds": 10,
@@ -24,14 +26,14 @@ Crea dos fitxers JSON amb aquest esquema, canviant `SceneFolder` i `OutputFolder
 }
 ```
 
-Executa les captures successivament, esperant que cada finestra acabi i es tanqui:
+Run the captures one after another, waiting for each window to finish and close:
 
 ```powershell
-Start-Process -Wait artifacts/render-capture/RenderCapture.exe -ArgumentList 'C:/MTB/abans.json'
-Start-Process -Wait artifacts/render-capture/RenderCapture.exe -ArgumentList 'C:/MTB/despres.json'
-python tools/render-comparison/compose.py C:/MTB/captures/abans C:/MTB/captures/despres docs/images/al-dente-before-after.gif --ffmpeg C:/Tools/ffmpeg/bin/ffmpeg.exe
+Start-Process -Wait artifacts/render-capture/RenderCapture.exe -ArgumentList 'C:/MTB/before.json'
+Start-Process -Wait artifacts/render-capture/RenderCapture.exe -ArgumentList 'C:/MTB/after.json'
+python tools/render-comparison/compose.py C:/MTB/captures/before C:/MTB/captures/after docs/images/al-dente-before-after.gif --ffmpeg C:/Tools/ffmpeg/bin/ffmpeg.exe
 ```
 
-Sense arguments, l'executable llegeix `capture.json` al costat seu. Cada captura genera PNGs numerats i `capture-report.json`; qualsevol error genera `error.txt`. Si es repeteix una captura, convé triar una carpeta nova per evitar barrejar resultats. El compositor comprova que ambdues seqüències tinguin tots els fotogrames i els mateixos paràmetres, i genera un GIF en bucle i una imatge PNG intermèdia.
+Without arguments, the executable reads `capture.json` beside itself. Each capture generates numbered PNGs and `capture-report.json`; failures produce `error.txt`. Use a new folder when repeating a capture to avoid mixing results. The compositor checks that both sequences contain every frame and have matching parameters, then creates a looping GIF and an intermediate PNG.
 
-El GIF del README compara la còpia del motor anterior al canvi de tardor amb la instal·lació local nova. El tram és un corriol observat entre els km 4,30 i 4,35. La captura utilitza 960×540 per versió a 12 fps; el compositor limita el GIF als primers 8 segons, a 10 fps i 800 píxels d'amplada total, amb una paleta de 128 colors per limitar el pes. Les dades del circuit, les còpies `_scene` i els informes amb rutes locals no es publiquen.
+The historical GIF in the development log compares the engine before the autumn update with the updated local installation. The section is an observed forest singletrack between km 4.30 and 4.35. Capture uses 960×540 per version at 12 fps; the compositor limits the GIF to the first eight seconds, 10 fps and 800 pixels of total width, with a 128-colour palette to limit file size. Course data, `_scene` copies and reports containing local paths are not published. Existing image captions and the compositor's overlay labels remain in Catalan.

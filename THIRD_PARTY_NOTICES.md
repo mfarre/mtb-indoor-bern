@@ -1,33 +1,38 @@
-# Recursos de tercers
+# Third-party resources
 
-Els recursos inclosos conserven les seves llicències i atribucions originals.
+[Project overview](README.md) · [Development log](DEVELOPMENT_LOG.md)
 
-| Recurs | Procedència | Condicions |
+Included resources retain their original licences and attribution. The Dentenberg map and photographic ground assets listed below remain local rather than being distributed in this repository.
+
+| Resource | Source | Terms |
 | --- | --- | --- |
-| `Scene/vendor/three.module.js`, `three.core.js` | Three.js 0.187.0 | MIT; text complet a `Scene/vendor/LICENSE` |
-| `Scene/courses/al-dente/aerial.jpg` | SWISSIMAGE, © swisstopo; mosaic del servei WMTS `ch.swisstopo.swissimage`, nivell 17 | Condicions d’Open Government Data de swisstopo, amb atribució |
-| `Scene/courses/uetliberg/aerial.jpg` | SWISSIMAGE, © swisstopo; mosaic WMTS de nivell 16 | Condicions d’Open Government Data de swisstopo, amb atribució |
-| `Scene/courses/gurten/aerial.jpg` | SWISSIMAGE, © swisstopo; mosaic WMTS de nivell 17 | Condicions d’Open Government Data de swisstopo, amb atribució |
-| `Scene/courses/gurten/textures/el-tony-logo.png` | [Logotip oficial El Tony Mate](https://www.eltonymate.com/site/templates/images/El-Tony-Mate-Logo.png) | Marca i disseny d’El Tony Mate; no es relicencien amb el codi. Ús per representar la senyalització del trail, sense afiliació ni patrocini de l’app |
-| Relleu a `world.json` | Dades d’elevació de swisstopo | Condicions d’Open Government Data de swisstopo, amb atribució |
-| Boscos, edificis i cartografia derivada a `world.json` | © OpenStreetMap contributors | Open Database License (ODbL) 1.0 per a les dades derivades d’OpenStreetMap |
-| WebView2 | Microsoft.Web.WebView2 1.0.4314.35 | Condicions de Microsoft; es restaura des de NuGet |
+| `Scene/vendor/three.module.js`, `three.core.js` | Three.js 0.187.0 | MIT; full text in `Scene/vendor/LICENSE` |
+| `Scene/courses/al-dente/aerial.jpg` | SWISSIMAGE, © swisstopo; mosaic from the `ch.swisstopo.swissimage` WMTS service, level 17 | swisstopo Open Government Data terms, with attribution; local asset |
+| `Scene/courses/uetliberg/aerial.jpg` | SWISSIMAGE, © swisstopo; level 16 WMTS mosaic | swisstopo Open Government Data terms, with attribution |
+| `Scene/courses/gurten/aerial.jpg` | SWISSIMAGE, © swisstopo; level 17 WMTS mosaic | swisstopo Open Government Data terms, with attribution |
+| `Scene/courses/gurten/textures/el-tony-logo.png` | [Official El Tony Mate logo](https://www.eltonymate.com/site/templates/images/El-Tony-Mate-Logo.png) | El Tony Mate trademark and design; not relicensed with the code. Used to depict the trail's signage, without affiliation or app sponsorship |
+| Terrain in `world.json` | swisstopo elevation data | swisstopo Open Government Data terms, with attribution |
+| Forests, buildings and derived mapping in `world.json` | © OpenStreetMap contributors | Open Database License (ODbL) 1.0 for data derived from OpenStreetMap |
+| WebView2 | Microsoft.Web.WebView2 1.0.4314.35 | Microsoft terms; restored from NuGet |
 
-Referències:
+References:
 
-- [swisstopo: dades gratuïtes i condicions d’ús](https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices)
-- [OpenStreetMap: copyright i llicència](https://www.openstreetmap.org/copyright)
+- [swisstopo: free geodata and terms of use](https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices)
+- [OpenStreetMap: copyright and licence](https://www.openstreetmap.org/copyright)
 - [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/)
 - [Three.js](https://github.com/mrdoob/three.js)
-- [WebView2 a NuGet](https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.4314.35)
+- [WebView2 on NuGet](https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.4314.35)
 
-La publicació d’aquest repositori no concedeix drets addicionals sobre marques de tercers.
+Publishing this repository grants no additional rights to third-party trademarks.
 
-El circuit Gurten es deriva de cartografia pública d’OpenStreetMap i de swisstopo. Les fotografies de trailnet i TRIEBHAUS s’han consultat per al disseny dels obstacles i la senyalització; no s’inclouen al repositori. Vegeu les [fonts del Gurten](docs/GURTEN.md).
-## Track Lab i nous recursos visuals
+The Gurten course is derived from public OpenStreetMap and swisstopo mapping. Photographs by trailnet and TRIEBHAUS informed the obstacle and signage design; those photographs are not included in the repository. See the [Gurten sources](docs/GURTEN.md).
 
-Track Lab utilitza FFmpeg/FFprobe com a eines externes i el Garmin FIT SDK per a JavaScript. No s'inclouen els binaris de FFmpeg ni el SDK al repositori; cal obtenir-los separadament i conservar les seves llicències. La instal·lació local de treball utilitza FFmpeg 9.0.2 i Garmin FIT SDK 21.221.0. Python/Pillow s'utilitza per preparar els fulls de contacte.
+## Track Lab and additional visual resources
 
-La textura fotogràfica de fulles del terra es manté a la instal·lació local i no es publica. El motor públic inclou una alternativa generada amb codi. La textura RGBA de branquillons de faig s'ha generat amb l'eina integrada ImageGen. Vegeu [textures i procedència](docs/render-assets.md) per a les rutes i el prompt. Les captures de Track Lab mostren un fragment de bosc; els vídeos originals complets es mantenen locals.
+Track Lab uses FFmpeg/FFprobe as external tools and the Garmin FIT SDK for JavaScript. Neither FFmpeg binaries nor the SDK are included in the repository; obtain them separately and retain their licences. The local working installation uses FFmpeg 9.0.2 and Garmin FIT SDK 21.221.0. Python/Pillow is used to prepare contact sheets.
 
-La carpeta pública `Scene/courses/uetliberg/` inclou les dades del nou circuit i un `provenance.json` amb fonts, data i empremta del GPX. El GPX planificat i la cartografia derivada d’OpenStreetMap es distribueixen sota ODbL. Els recursos cartogràfics del Dentenberg de la taula anterior continuen sent locals.
+The photographic leaf-litter texture remains in the local installation and is not published. The public renderer includes a code-generated alternative. The RGBA beech-twig texture was generated with the integrated ImageGen tool. See [textures and provenance](docs/render-assets.md) for paths and the prompt. Track Lab screenshots show a woodland excerpt; the complete original videos remain local.
+
+The public `Scene/courses/uetliberg/` folder includes the course data and a `provenance.json` file containing sources, date and a GPX hash. The planned GPX and mapping derived from OpenStreetMap are distributed under ODbL. The Dentenberg mapping assets in the table above remain local.
+
+The [Bluetooth brake concept image](docs/images/bluetooth-brake-concept.png) was generated with the built-in ImageGen tool. It is an illustrative design study, not a manufacturer photograph, a tested device or a reproduction of a selected bill of materials. Its [generation prompt and provenance](docs/brake-concept-render.md) are included.

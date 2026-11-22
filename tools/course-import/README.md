@@ -1,19 +1,21 @@
-# Preparar un circuit GPX de Suïssa
+# Prepare a Swiss GPX course
 
-Eines utilitzades per afegir **Uetliberg · Triemli · Uto Kulm · Ringlikon**. Cal Python 3 amb Pillow, Node.js i connexió a Internet per a la primera descàrrega. El joc resultant carrega tots els recursos localment.
+[Data acquisition](../../docs/data-acquisition.md) · [Simulator](../../docs/simulator.md)
+
+These tools were used to add **Uetliberg · Triemli · Uto Kulm · Ringlikon**. They require Python 3 with Pillow, Node.js and an internet connection for the initial download. The resulting game loads all assets locally.
 
 ```powershell
 python -m pip install Pillow
-python tools/course-import/fetch_gpx.py ruta.gpx --work artifacts/import/uetliberg --output src/MTBIndoorBern/Scene/courses/uetliberg --name Uetliberg
+python tools/course-import/fetch_gpx.py route.gpx --work artifacts/import/uetliberg --output src/MTBIndoorBern/Scene/courses/uetliberg --name Uetliberg
 node tools/course-import/build_course.mjs artifacts/import/uetliberg
 node tools/course-import/verify-profile.mjs
 node tools/downhill/verify-ground.mjs uetliberg
 ```
 
-Utilitza una carpeta de treball nova per a cada GPX. L'importador admet un segment continu, amb elevacions i sense salts de més de 500 m. Està configurat per a Suïssa. Descarrega SWISSIMAGE a zoom 16, terreny quantized mesh i un extracte OpenStreetMap, amb memòria cau i quatre descàrregues simultànies. Per a l'Uetliberg són 410 tessel·les i una ortofoto de 4352×5120 píxels. Les rutes molt extenses requereixen reduir la resolució o dividir l'àrea abans d'importar.
+Use a new working directory for each GPX. The importer accepts one continuous segment with elevations and no gaps greater than 500 m. It is configured for Switzerland. It downloads SWISSIMAGE at zoom 16, quantized-mesh terrain and an OpenStreetMap extract, with caching and four concurrent downloads. Uetliberg required 410 tiles and a 4352×5120-pixel orthophoto. Very long routes require a lower resolution or a smaller area before import.
 
-El constructor remostra cada 5 m, suavitza l'altitud en una finestra d'uns 40 m i fa servir **la mateixa elevació per al camí, el perfil i la física**. Adapta el terreny proper, estima amplades/superfícies amb OSM i afegeix edificis i vegetació recreada. Escriu `route.json`, `world.json`, `appearance.json` i `provenance.json`. Si troba el waypoint Ringlikon després del cim, prepara també el sector de baixada Uetliberg–Ringlikon; altres sectors es defineixen manualment a `handling.json`.
+The builder resamples every 5 m, smooths altitude over an approximately 40 m window and uses **the same elevation for the road, profile and physics**. It adapts nearby terrain, estimates widths and surfaces from OSM, and adds buildings and recreated vegetation. It writes `route.json`, `world.json`, `appearance.json` and `provenance.json`. If it finds the Ringlikon waypoint after the summit, it also prepares the Uetliberg–Ringlikon downhill sector; other sectors are defined manually in `handling.json`.
 
-Afegeix després una entrada a `Scene/courses.json`, amb la carpeta, longitud, ascens i distància de portada de `report.json`. Revisa `elevation-validation.json`, compila amb `build.ps1 -SelfTest` i comprova en demo les cruïlles, els pendents i les superfícies. Les estimacions del mapa no equivalen a una inspecció de camp. Track Lab permet complementar-les amb vídeo.
+Then add an entry to `Scene/courses.json` with the folder, length, ascent and preview distance from `report.json`. Review `elevation-validation.json`, build with `build.ps1 -SelfTest`, and inspect intersections, grades and surfaces in demo mode. Map estimates are not a field survey. [Track Lab](../../docs/track-lab.md) can complement them with video observations.
 
-**Fonts i atribució:** [SWISSIMAGE / swisstopo](https://docs.geo.admin.ch/visualize-data/xyz.html), [terreny swisstopo](https://docs.geo.admin.ch/visualize-data/terrain-service.html), [condicions de les dades obertes](https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices), [OpenStreetMap, ODbL](https://www.openstreetmap.org/copyright). Conserva l'atribució al joc i en qualsevol redistribució. La geometria de mapa derivada d'OSM es distribueix sota ODbL; la llicència del codi no substitueix les de les dades.
+**Sources and attribution:** [SWISSIMAGE / swisstopo](https://docs.geo.admin.ch/visualize-data/xyz.html), [swisstopo terrain](https://docs.geo.admin.ch/visualize-data/terrain-service.html), [open-data terms](https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices), and [OpenStreetMap, ODbL](https://www.openstreetmap.org/copyright). Retain attribution in the game and any redistribution. Map geometry derived from OSM is distributed under ODbL; the code's licence does not replace the data licences.

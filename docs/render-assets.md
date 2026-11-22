@@ -1,11 +1,13 @@
-# Textures de tardor
+# Autumn textures
 
-La instal·lació local té `src/MTBIndoorBern/Scene/courses/al-dente/textures/forest-floor.jpg`, una mostra extreta de la gravació pròpia després de girar-la 180°. Aquest recurs es manté privat i està exclòs del repositori públic. El motor corregeix les bandes de llum del retall i el repeteix sobre el sòl. Si el fitxer no hi és, genera una textura de terra i fulles amb codi, sense utilitzar píxels del vídeo. L'origen del recurs local i el retall consten a `appearance.json`.
+[Project overview](../README.md) · [Simulator](simulator.md) · [Data acquisition](data-acquisition.md) · [Development log](../DEVELOPMENT_LOG.md)
 
-`src/MTBIndoorBern/Scene/courses/al-dente/textures/beech-branch.png` és una textura RGBA generada amb l'eina integrada ImageGen per als arbres i arbustos recreats. No és una fotografia ni una mesura de la vegetació exacta del recorregut. El canal alfa es conserva. El perfil d'altitud i la posició del camí no depenen d'aquesta textura.
+The local installation contains `src/MTBIndoorBern/Scene/courses/al-dente/textures/forest-floor.jpg`, a sample extracted from the owner's recording after rotating it 180°. This asset remains private and is excluded from the public repository. The renderer corrects broad lighting bands in the crop and tiles it across the ground. If the file is absent, it generates an earth-and-leaf texture in code without using video pixels. The local asset's origin and crop are recorded in `appearance.json`.
 
-Prompt utilitzat:
+`src/MTBIndoorBern/Scene/courses/al-dente/textures/beech-branch.png` is an RGBA texture generated with the integrated ImageGen tool for the recreated trees and shrubs. It is neither a photograph nor a measurement of the route's exact vegetation. The alpha channel is preserved. The elevation profile and trail position do not depend on this texture.
+
+Prompt used:
 
 > Use case: photorealistic-natural. Asset type: transparent alpha foliage card texture for a real-time mountain biking game set in Bern woodland in late autumn. Generate ONE botanically plausible natural irregular spray of thin beech twigs with many small crisp individual ochre, muted golden yellow, tan and brown beech leaves, a few desaturated olive leaves, loosely branching in all directions from a fine central woody branch. Front orthographic view; flat soft overcast illumination, no baked directional cast shadow; realistic leaf veins, fine serrated edges and variation, photographic natural detail. An irregular airy silhouette, visible transparent gaps between groups and individual leaves; no circular blob outline. The spray occupies 85% of a square image with generous transparent margins. No trunk, no full tree, no scenery, no ground, no objects, no text or labels. Truly transparent background, preserve alpha. Avoid luminous saturation, illustration, cartoon, repeated identical leaves.
 
-La resta de textures vegetals i d'asfalt/grava es generen amb codi. Les amplades estimades, la temporada i els trams es poden ajustar a `appearance.json`; els obstacles puntuals del tram que no coincideix amb el circuit no s'han traslladat com si fossin ubicacions mesurades.
+The remaining vegetation, asphalt and gravel textures are generated in code. Estimated widths, season and sections can be adjusted in `appearance.json`. Individual obstacles seen on a section that does not match the course have not been transferred as though their positions were surveyed.

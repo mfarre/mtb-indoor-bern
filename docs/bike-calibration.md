@@ -1,59 +1,61 @@
-# Bicicleta i calibratge
+# Bicycle setup and calibration
 
-Obre **Bicicleta i calibratge** a la barra superior o a la portada. Obrir aquesta pantalla pausa la ruta i allibera la càrrega. El perfil funciona encara que no facis la prova guiada.
+[Project overview](../README.md) · [Simulator](simulator.md) · [Development log](../DEVELOPMENT_LOG.md)
 
-## Configura la bicicleta
+Open **Bicycle setup and calibration** (`Bicicleta i calibratge`) from the top bar or welcome screen. Opening this screen pauses the ride and releases trainer load. The profile works even if you skip the guided test. The app labels and existing screenshots remain in Catalan.
 
-- **Pes del ciclista i de la bicicleta:** la suma entra al càlcul de gravetat i rodament. Es conserven el pes i el percentatge de pendent que ja tenies desats.
-- **Perímetre de la roda:** metres recorreguts per una volta completa de roda, introduïts en mil·límetres. El valor inicial és 2300 mm; es pot substituir pel perímetre mesurat.
-- **Plat i cassette virtuals:** plat de 20–60 dents; presets MTB 10–51, 10–52 o 11–46, o una llista personalitzada de 4–24 pinyons. Escriu els pinyons del més gran al més petit: el primer és la marxa 1, la més curta. La pantalla mostra els metres per volta de pedals als dos extrems.
-- **Pendent al KICKR:** 100% aplica el pendent complet al càlcul de càrrega. Els percentatges inferiors en redueixen l'efecte sobre el rodillo; el relleu i la velocitat del joc sempre utilitzen el pendent real.
-- **Ajuda a cadència baixa:** activada, la càrrega es redueix progressivament entre 45 i 30 rpm i l'objectiu arriba a 0 W a 30 rpm. Desactivada, aquests llindars són 25 i 12 rpm; es conserva l'alliberament a cadència molt baixa.
-- **Marxa física:** nota opcional per recordar la posició real de la cadena durant la prova. El canvi del Click modifica la transmissió virtual, no mou la cadena física.
+## Configure your bicycle
 
-Prem **Desa el perfil**. Els ajustos s'apliquen al joc i es recorden en reobrir l'app. Els canvis de pesos, roda, transmissió, assistència, pendent o nota de marxa física fan que el resultat de calibratge anterior deixi d'aplicar-se; canviar només el nom o el circuit no l'invalida.
+- **Rider and bicycle weight:** their combined mass enters the gravity and rolling-resistance calculations. Previously saved rider weight and trainer gradient percentage are preserved.
+- **Wheel circumference:** distance travelled in one full wheel revolution, entered in millimetres. The initial value is 2300 mm; replace it with your measured circumference if available.
+- **Virtual chainring and cassette:** a 20–60-tooth chainring; MTB presets of 10–51, 10–52 or 11–46, or a custom list of 4–24 sprockets. Enter sprockets from largest to smallest: the first is gear 1, the easiest gear. The screen shows metres travelled per crank revolution at both ends of the range.
+- **KICKR gradient percentage:** 100% applies the full gradient to the load calculation. Lower percentages reduce its effect on the trainer; terrain and game speed always use the actual route gradient.
+- **Low-cadence assistance:** when enabled, load decreases progressively between 45 and 30 rpm, reaching a 0 W target at 30 rpm. When disabled, these thresholds become 25 and 12 rpm; load release at very low cadence remains active.
+- **Physical gear:** an optional note recording the real chain position during the test. Shifting with the Click changes the virtual transmission; it does not move the physical chain.
 
-![Perfil de bicicleta](images/bike-profile.png)
+Press **Save profile** (`Desa el perfil`). The settings apply to the game and persist when the app reopens. Changing weights, wheel circumference, gearing, assistance, gradient percentage or the physical-gear note makes the previous calibration result inapplicable. Changing only the profile name or course does not invalidate it.
 
-## Prova guiada de resposta
+![Bicycle profile settings](images/bike-profile.png)
 
-1. Connecta el KICKR, escalfa uns minuts i tria una marxa física còmoda. Mantén-la durant tota la prova.
-2. Obre **Prova guiada**, marca **Soc a la bici i estic a punt per pedalar** i prem **Comença la prova**.
-3. Pedala entre **65 i 75 rpm**. No s'envien ordres de càrrega fins a haver observat almenys cinc segons estables i cinc mostres noves.
-4. Segueix les instruccions: **70 → 110 → 70 W** a uns 70 rpm, transició a **80–90 rpm**, i **110 → 70 W** a uns 85 rpm. La seqüència dura aproximadament dos minuts, més l'espera inicial.
-5. Si totes les etapes tenen dades suficients i estables, i el KICKR confirma l'alliberament final, el resultat es desa automàticament. La pantalla passa a **Calibratge vigent** amb el mateix perfil i rodillo connectat.
+## Guided response test
 
-La prova mesura el temps d'estabilització i el seguiment dels objectius de 70–110 W. Ajusta la velocitat d'augment del parell entre **3 i 6 Nm/s**, amb ordres com a mínim separades un segon. Sense resultat vàlid, el joc utilitza **5 Nm/s**. Les reduccions de càrrega no esperen aquesta rampa.
+1. Connect the KICKR, warm up for a few minutes and choose a comfortable physical gear. Keep that gear throughout the test.
+2. Open **Guided test** (`Prova guiada`), tick **I am on the bicycle and ready to pedal** (`Soc a la bici i estic a punt per pedalar`) and press **Start test** (`Comença la prova`).
+3. Pedal at **65–75 rpm**. No load commands are sent until at least five stable seconds and five fresh samples have been observed.
+4. Follow the instructions: **70 → 110 → 70 W** at approximately 70 rpm, transition to **80–90 rpm**, then **110 → 70 W** at approximately 85 rpm. The sequence takes about two minutes, plus the initial wait.
+5. If every stage has enough stable data and the KICKR confirms the final load release, the result is saved automatically. The screen shows **Current calibration** (`Calibratge vigent`) when the same profile and trainer are connected.
 
-**Atura i allibera la càrrega**, Esc, tancar la pantalla o perdre el focus cancel·len la prova. També s'atura si falta telemetria recent, es desconnecta el rodillo o la cadència cau massa. Una prova cancel·lada o amb seguiment deficient no crea un resultat nou. Si existia un resultat anterior vàlid, es conserva. El botó d'esborrar permet tornar explícitament a la resposta estàndard.
+The test measures settling time and tracking of the 70–110 W targets. It adjusts the torque increase rate between **3 and 6 Nm/s**, with commands at least one second apart. Without a valid result, the game uses **5 Nm/s**. Load reductions do not wait for this ramp.
 
-![Prova guiada pendent, sense connexió al rodillo](images/calibration-guide.png)
+**Stop and release load** (`Atura i allibera la càrrega`), Esc, closing the screen or losing focus cancels the test. It also stops if fresh telemetry is missing, the trainer disconnects or cadence drops too low. A cancelled test or poor target tracking does not create a new result. Any previously valid result is retained. The delete button explicitly restores the standard response.
 
-## Què calcula el joc
+![Guided test awaiting a trainer connection](images/calibration-guide.png)
 
-El desenvolupament és `perímetre × dents del plat / dents del pinyó`. Per calcular la càrrega de la marxa es combina amb la cadència. La força resistent suma gravetat, rodament i aire:
+## What the game calculates
+
+Rollout is `wheel circumference × chainring teeth / sprocket teeth`. The load calculation combines rollout with cadence. Resistance includes gravity, rolling resistance and aerodynamic drag:
 
 ```text
-θ = atan(pendent / 100)
-F = massa_total × g × (sin θ + Crr × cos θ) + ½ × ρ × CdA × velocitat²
-parell als pedals = max(0, F) × desenvolupament / (2π × eficiència)
-potència objectiu = parell × velocitat angular dels pedals
+θ = atan(gradient / 100)
+F = total_mass × g × (sin θ + Crr × cos θ) + ½ × ρ × CdA × speed²
+crank torque = max(0, F) × rollout / (2π × efficiency)
+target power = torque × crank angular velocity
 ```
 
-La velocitat de l'avatar evoluciona amb la **potència mesurada** i la força resistent del mateix model, incloent-hi la massa de la bici i la superfície. La gravetat permet baixar amb 0 W; no es força la velocitat del joc a ser igual a la cadència multiplicada pel desenvolupament.
+Avatar speed evolves from **measured power** and the resistive force from the same model, including bicycle mass and surface type. Gravity allows descending at 0 W; game speed is not forced to equal cadence multiplied by rollout.
 
-Els coeficients són supòsits del simulador: eficiència 0,96; densitat de l'aire 1,225 kg/m³; CdA 0,51 m²; Crr 0,005 a l'asfalt, 0,009 a la grava i 0,012 a terra/fulles. No són mesures de cada tram. Es mantenen els límits del joc: 600 W de càrrega objectiu i 45 km/h de velocitat virtual.
+The coefficients are simulator assumptions: efficiency 0.96; air density 1.225 kg/m³; CdA 0.51 m²; Crr 0.005 on asphalt, 0.009 on gravel and 0.012 on earth/leaves. They are not measurements of individual route sections. The game retains its limits of 600 W target load and 45 km/h virtual speed.
 
-**Límit del calibratge:** el KICKR proporciona tant la càrrega com els watts observats. Sense un potenciòmetre de referència independent, aquesta prova no certifica l'exactitud absoluta de la potència ni aplica un multiplicador als watts. Tampoc substitueix el procediment del fabricant. La resistència continua sent una aproximació amb ordres FTMS de potència dinàmica: no reprodueix exactament la inèrcia d'una roda real ni fa servir el protocol propietari de canvi virtual de Zwift.
+**Calibration limitation:** the KICKR supplies both the load and the observed power. Without an independent reference power meter, this test cannot certify absolute power accuracy and does not apply a multiplier to measured watts. It does not replace the manufacturer's procedure. Resistance remains an approximation using dynamic FTMS target-power commands: it does not reproduce real-wheel inertia exactly or use Zwift's proprietary virtual-shifting protocol.
 
-El canvi del model de rodament inicia una nova versió dels rècords de baixada. Els registres antics es conserven al fitxer local, però no es comparen amb marques fetes amb aquesta física.
+The rolling-resistance model change starts a new version of downhill records. Old records remain in the local file but are not compared with times set using this physics model.
 
-## Dades i verificació
+## Data and verification
 
-El perfil i el resultat es desen exclusivament a `settings.json`, exclòs del repositori. El resultat queda associat a una signatura del perfil i a una identitat derivada del rodillo. No s'envia telemetria a GitHub.
+The profile and result are saved only in `settings.json`, which is excluded from the repository. The result is associated with a profile signature and an identity derived from the trainer. No telemetry is sent to GitHub.
 
-`--self-test <fitxer>` executa proves de física, migració de perfils, marxes personalitzades i calibratge amb un rodillo simulat. Inclou resposta ràpida/lenta, cancel·lació durant una ordre pendent, mostres duplicades o antigues, cadència incorrecta, desconnexió, ordres rebutjades i fallada d'alliberament. Aquestes proves no envien ordres al KICKR real.
+`--self-test <file>` runs physics, profile-migration, custom-gearing and calibration tests with a simulated trainer. Cases include fast/slow response, cancellation during a pending command, duplicate or stale samples, incorrect cadence, disconnection, rejected commands and failure to release load. These tests do not send commands to a real KICKR.
 
-Les captures d'aquesta entrega mostren el perfil i la prova pendent. La validació física del nou assistent correspon a la primera prova guiada que faci l'usuari.
+The screenshots from this milestone show the profile and the test awaiting a connection. Physical validation of the new assistant remains the user's first guided test.
 
-Referències: [modes de control de Wahoo](https://support.wahoofitness.com/hc/en-us/articles/28408412793490-Trainer-control-modes-for-KICKR-CORE-SNAP-or-BIKE-in-the-Wahoo-app), [comportament del mode ERG](https://support.wahoofitness.com/hc/en-us/articles/4402565516946-A-Guide-to-using-ERG-mode) i [model de potència de ciclisme de Martin et al.](https://pubmed.ncbi.nlm.nih.gov/28121252/).
+References: [Wahoo trainer control modes](https://support.wahoofitness.com/hc/en-us/articles/28408412793490-Trainer-control-modes-for-KICKR-CORE-SNAP-or-BIKE-in-the-Wahoo-app), [ERG mode behaviour](https://support.wahoofitness.com/hc/en-us/articles/4402565516946-A-Guide-to-using-ERG-mode) and [Martin et al.'s cycling power model](https://pubmed.ncbi.nlm.nih.gov/28121252/).

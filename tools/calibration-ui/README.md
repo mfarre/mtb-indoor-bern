@@ -1,24 +1,26 @@
-# Proves de la pantalla de bicicleta i calibratge
+# Bike profile and calibration UI checks
 
-Banc de proves del DOM que importa directament `src/MTBIndoorBern/Scene/bike-settings.js` i els estils de l’aplicació. No és una còpia de la pantalla ni necessita dependències de JavaScript.
+[Simulator](../../docs/simulator.md) · [Calibration guide](../../docs/bike-calibration.md)
 
-Des de l’arrel del repositori:
+This DOM test harness imports `src/MTBIndoorBern/Scene/bike-settings.js` and the application's styles directly. It does not duplicate the screen and requires no JavaScript dependencies.
+
+From the repository root:
 
 ```sh
 python -m http.server 8766 --bind 127.0.0.1
 ```
 
-Obre [el banc de proves](http://127.0.0.1:8766/tools/calibration-ui/). Les comprovacions s’executen automàticament i escriuen el resultat a la pàgina i a la consola. El botó **Executa les comprovacions** permet repetir-les. `window.bikeUiHarness.getSummary()` retorna el recompte i `window.bikeUiHarness.results` conté els detalls.
+Open the [test harness](http://127.0.0.1:8766/tools/calibration-ui/). Checks run automatically and write their results to the page and console. **Executa les comprovacions** (run checks) repeats them. `window.bikeUiHarness.getSummary()` returns the counts, while `window.bikeUiHarness.results` contains the details.
 
-Per inspeccionar l’aspecte després de les proves:
+To inspect the appearance after the checks:
 
-- [Perfil de la bici](http://127.0.0.1:8766/tools/calibration-ui/?preview=profile).
-- [Prova guiada](http://127.0.0.1:8766/tools/calibration-ui/?preview=guide).
+- [Bike profile](http://127.0.0.1:8766/tools/calibration-ui/?preview=profile).
+- [Guided calibration](http://127.0.0.1:8766/tools/calibration-ui/?preview=guide).
 
-Comprova almenys les mides de finestra de 1440 × 852 i 1100 × 772. La comprovació de dimensions usa la mida actual del navegador; no substitueix una inspecció visual.
+Check at least the 1440 × 852 and 1100 × 772 viewport sizes. The dimension check uses the browser's current viewport and does not replace visual inspection.
 
-## Què es comprova
+## Coverage
 
-La càrrega inicial, la previsualització de marxes, la validació de dades, la conversió de mm a metres, la conservació dels esborranys davant les actualitzacions periòdiques, la confirmació de desament, els errors persistents, les dificultats existents com 60% i 0%, l’inici explícit de la prova, la cancel·lació, els estats de calibratge, la navegació amb teclat, el focus i el tancament del diàleg.
+The checks cover initial loading, gear previews, input validation, millimetre-to-metre conversion, draft preservation during periodic updates, save confirmation, persistent errors, existing difficulty settings such as 60% and 0%, explicit test start, cancellation, calibration states, keyboard navigation, focus and dialog dismissal.
 
-El pont és simulat i no importa el joc, el pont nadiu ni el codi Bluetooth. **No envia cap ordre a un rodillo i no modifica la configuració de l’aplicació.** Els watts i els resultats de calibratge dels casos de prova són dades sintètiques; no demostren la resposta física del KICKR. La previsualització manual sempre comença amb el rodillo desconnectat.
+The bridge is simulated. It does not import the game, native bridge or Bluetooth code. **It sends no trainer commands and does not change the application's settings.** Power readings and calibration results in the test cases are synthetic; they do not demonstrate physical KICKR response. Manual previews always start with the trainer disconnected.

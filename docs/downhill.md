@@ -1,33 +1,35 @@
-# Frens i baixada del Dentenberg
+# Braking and the Dentenberg descent
 
-Mantén **A del Zwift Click 2 dret** per frenar; deixa'l anar per tornar a rodar. També pots mantenir **Espai**, la tecla **A** o el botó de fre en pantalla. `+` puja marxa i `B` baixa marxa, com abans. La lectura de pulsació i alliberament de l'A s'ha comprovat amb el comandament real.
+[Project overview](../README.md) · [Simulator](simulator.md) · [Bluetooth brake project](bluetooth-brakes.md) · [Development log](../DEVELOPMENT_LOG.md)
 
-El fre redueix la velocitat de la bicicleta virtual. **No aplica un fre físic ni augmenta la càrrega del KICKR.** En baixada, la gravetat fa avançar la bicicleta encara que la potència sigui zero. Els petits replans i contrapendents de la ruta poden requerir pedalar en una sessió real.
+Hold **A on the right Zwift Click 2** to brake; release it to coast again. You can also hold **Space**, the **A** key or the on-screen brake button. `+` shifts up and `B` shifts down, as before. Detection of A being pressed and released has been checked with the real controller.
 
-## Què guanyes frenant
+The brake reduces virtual bicycle speed. **It does not apply a physical brake or increase KICKR load.** On descents, gravity moves the bicycle even at zero power. Small flat sections and rises may require pedalling during a real ride.
 
-El cartell central mostra el sentit del proper revolt, els metres fins a l'entrada i la velocitat objectiu del joc. El càlcul utilitza la curvatura del traçat, la superfície i l'amplada estimada. També hi ha senyals dins l'escena. Aquests valors són una calibració de jugabilitat, no un mesurament de l'adherència real ni una recomanació per circular a l'exterior.
+## Why braking helps
 
-Entrar una mica massa ràpid provoca una derrapada, una desviació visible i pèrdua de velocitat. Si mantens un excés important, surts de la traçada: la bicicleta virtual s'atura durant **3 segons**, el cronòmetre continua i després recuperes el control. No hi ha sortides aleatòries. La frenada anticipada permet conservar velocitat a la sortida del revolt i evitar aquesta penalització.
+The central sign shows the direction of the next corner, distance to its entry and the game's target speed. The calculation uses route curvature, surface type and estimated width. Signs also appear within the scene. These values tune gameplay; they are not measurements of real grip or outdoor riding recommendations.
 
-A les pujades es destaca el **pendent en percentatge**; a les baixades, la **velocitat**, el pendent i si estàs frenant o rodant. L'indicador d'adherència avisa de la derrapada abans de perdre el control.
+Entering slightly too fast causes a skid, visible lateral movement and loss of speed. Sustained excessive speed takes you off the riding line: the virtual bicycle stops for **3 seconds**, the timer continues and control then returns. Runouts are not random. Braking early lets you retain exit speed and avoid this penalty.
 
-## Pràctica i rècords
+Climbs emphasise **gradient percentage**; descents show **speed**, gradient and whether you are braking or coasting. The grip indicator warns of a skid before control is lost.
 
-**Practica la baixada · Dentenberg**, a la portada, et situa 55 m abans de la sortida del tram. No necessita sensors i no controla el KICKR. Té la mateixa frenada i adherència que una sessió real; aporta un impuls automàtic als replans i contrapendents per poder completar-la amb les mans als controls. La demo de visita continua disponible amb velocitats ×1, ×2, ×4 i ×8; aquesta visita automàtica no puntua ni aplica sortides de pista.
+## Practice and personal records
 
-El tram cronometrat **Dentenberg · baixada del bosc** correspon als **km 4,480–6,980 del circuit Al Dente existent**. No és un segon track importat. `handling.json` defineix els límits del tram i permet preparar-ne un per a altres circuits.
+**Practise the descent · Dentenberg** (`Practica la baixada · Dentenberg`) on the welcome screen places you 55 m before the sector starts. It needs no sensors and does not control the KICKR. It uses the same braking and grip as a real ride, with automatic propulsion on flat sections and rises so you can complete it using only the controls. The sightseeing demo remains available at ×1, ×2, ×4 and ×8; this automatic tour neither scores a time nor applies runouts.
 
-En una sessió real, el temps comença en creuar la sortida i acaba a la meta. Inclou aturades i recuperacions. La millor marca es desa a `records.json`, al costat de l'executable, i reapareix en tornar a obrir l'app. Pausar durant el tram invalida la marca; la pràctica i la demo tampoc poden establir rècords. Un canvi en el traçat o en el model d'adherència separa les marques anteriors.
+The timed **Dentenberg · forest descent** sector covers **km 4.480–6.980 of the existing Al Dente course**. It is not a second imported track. `handling.json` defines the sector boundaries and can define sectors for other courses.
 
-Si es perd un Click que estava connectat durant una sessió real, la ruta es pausa per recuperar els controls. El fre de teclat o pantalla s'allibera en perdre el focus; la comunicació té caducitat per evitar que quedi premut si s'interromp la vista.
+During a real ride, timing starts when you cross the start line and ends at the finish. It includes stops and recoveries. Your best time is saved to `records.json` beside the executable and reappears when the app reopens. Pausing within the sector invalidates the time; practice and demo sessions cannot set records either. Changes to the route or grip model separate older records from new ones.
 
-## Verificació
+If a previously connected Click disconnects during a real ride, the route pauses so the controls can be recovered. Keyboard and on-screen braking release when focus is lost; input messages expire to prevent a stuck brake if the view is interrupted.
 
-Les proves integrades comproven la descodificació d'A, alliberament, A+B, frenada en pendent del −20%, arrencada per gravetat amb 0 W, estabilitat temporal, conseqüències de passar els revolts massa ràpid, cronòmetre, pausa i persistència de les marques. Executa `build.ps1 -SelfTest` per repetir-les amb les dades locals del circuit.
+## Verification
 
-La prova automàtica del descens amb la seva aproximació dura **384,3 s amb 4 sortides** sense frenar, davant de **365,1 s i cap sortida** amb frenada anticipada. És una comparació de la simulació amb impuls de pràctica, no una prova feta pedalant ni un rècord personal.
+The built-in tests cover A decoding, release, A+B, braking on a −20% slope, gravity starts at 0 W, time-step stability, excessive corner-entry speed, timing, pausing and record persistence. Run `build.ps1 -SelfTest` to repeat them with the local course data.
 
-S'ha corregit també la geometria del terra als revolts on la ruta passa dues vegades pel mateix camí amb petites diferències d'altitud GPS/baromètrica. Una malla contínua evita franges de terreny superposades, i la superfície del pas distant s'oculta immediatament al voltant del ciclista. Les altituds de la ruta i la física es conserven.
+The automated descent test, including its approach, takes **384.3 s with 4 runouts** without braking, compared with **365.1 s and no runouts** with anticipatory braking. This compares simulations using practice propulsion; it is neither a pedalling test nor a personal record.
 
-Protocol del Click 2: els paquets `0x23` tenen una màscara de botons de lògica invertida; A correspon a `0x10`. Referència de la comunitat: [documentació del protocol a zwiftplay](https://github.com/ajchellew/zwiftplay/issues/5).
+Ground geometry was also corrected at corners where the route revisits the same path with small GPS/barometric elevation differences. A continuous mesh prevents overlapping terrain strips, and the surface of the distant pass is hidden immediately around the rider. Route elevations and physics are preserved.
+
+Click 2 protocol: `0x23` packets contain an active-low button mask; A corresponds to `0x10`. Community reference: [zwiftplay protocol discussion](https://github.com/ajchellew/zwiftplay/issues/5).
