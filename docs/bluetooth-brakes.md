@@ -10,9 +10,9 @@ This section brings together the working Bluetooth brake input and the early des
 
 ### Maneta v01: render from the actual design
 
-![Realistic rendering of the Maneta v01 printed brake lever, with exposed return spring, rubber stop and sensor cover](images/bluetooth-brake-v01-realistic.png)
+![Animated Maneta v01 brake lever pulling and returning, with its exposed spring following the anchors](images/bluetooth-brake-v01-motion.gif)
 
-*Based on the supplied STL files, OpenSCAD assembly and PDF drawings. The meshes were assembled in Blender before ImageGen added realistic materials and lighting. Colours, fastener details and cable routing are illustrative; this is not a photograph of a built prototype. [CAD reference, source hashes and prompt](brake-v01-render.md).*
+*Pull-and-release animation rendered directly in Blender from the supplied STL assembly. The lever rotates around its pivot and the spring follows its anchors. Materials, fastener details and cable routing are illustrative; this is not footage of a built prototype or a mechanical validation. [Animation details, original realistic still and CAD reference](brake-v01-render.md).*
 
 Viewed from the rider's side: the trigger points **outward toward the right grip and bar end**, with the pivot inboard, as on a conventional bicycle brake lever.
 

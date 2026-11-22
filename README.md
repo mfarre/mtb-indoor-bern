@@ -6,7 +6,7 @@ A Windows MTB simulator with real elevation data, aerial imagery, direct Bluetoo
 
 [Simulator](docs/simulator.md) · [Data acquisition](docs/data-acquisition.md) · [Bluetooth brakes](docs/bluetooth-brakes.md) · [Development log](DEVELOPMENT_LOG.md) · [Documentation index](docs/README.md)
 
-![Gurtentrail in the simulator, with the El Tony jump and signage](docs/images/gurten-el-tony.png)
+![Animated ride through the Gurtentrail, featuring the El Tony jump and signage](docs/images/gurten-trail.gif)
 
 *Gurten: Il Brunello → Gurten → Gurtentrail. Real map and elevation data, recreated vegetation and approximate jump geometry.*
 
@@ -47,9 +47,9 @@ Select a course and choose **Explore in demo**. Pause, click the elevation profi
 
 The brake image above is an AI-generated concept, not a photograph or a validated hardware design.
 
-[![Maneta v01 realistic render based on the supplied STL design](docs/images/bluetooth-brake-v01-realistic.png)](docs/bluetooth-brakes.md#maneta-v01-render-from-the-actual-design)
+[![Maneta v01 brake lever pulling and returning, rendered from the supplied STL design](docs/images/bluetooth-brake-v01-motion.gif)](docs/bluetooth-brakes.md#maneta-v01-render-from-the-actual-design)
 
-**Maneta v01: the actual mechanical design.** A render assembled from the supplied STL files and PDF drawings, with ImageGen material and lighting treatment. [Design, hardware and CAD reference](docs/brake-v01-render.md). Physical testing and custom BLE integration are still pending.
+**Maneta v01: the actual mechanical design in motion.** A looping Blender render of the lever pulling and returning, based on the supplied STL files and assembly drawings. [Animation, original still and CAD reference](docs/brake-v01-render.md). Physical testing and custom BLE integration are still pending.
 
 The simulator, Track Lab, documentation and current screenshots are in English.
 

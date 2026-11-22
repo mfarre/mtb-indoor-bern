@@ -1,0 +1,32 @@
+{
+  "source_scene": "maneta-v01-assembly.blend",
+  "source_geometry": "Unmodified supplied STL meshes from render_cad.py",
+  "orientation": "Right lever outward toward grip and bar end; stem inboard on left",
+  "travel_degrees": [
+    0,
+    22
+  ],
+  "spring_anchor_spacing_mm": [
+    21.0,
+    30.041432300840352
+  ],
+  "fps": 20,
+  "frames": 63,
+  "duration_seconds": 3.15,
+  "size": [
+    800,
+    512
+  ],
+  "limitation": "Kinematic illustration; spring force, bumper compression and physical fit are not simulated or validated.",
+  "date": "2026-11-22",
+  "asset": "docs/images/bluetooth-brake-v01-motion.gif",
+  "sha256": "a72dbf2767cc46a662d321fa01c41a818ed16121da35d11622dcbdb92099cf34",
+  "bytes": 1160645,
+  "renderer": "Blender 4.5 LTS / Cycles",
+  "samples_per_pose": 32,
+  "seed": 19,
+  "source_archive_sha256": "5e63dc93afddf633b9277a3e9b5ed62c21faf550c1b60a05819cefd13b896ba8",
+  "animation_script": "tools/brake-render/animate_cad.py",
+  "reproduction_guide": "tools/brake-render/README.md",
+  "still_image_preserved": "docs/images/bluetooth-brake-v01-realistic.png"
+}

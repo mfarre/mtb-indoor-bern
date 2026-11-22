@@ -4,6 +4,16 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 22 November 2026 · Gurten in motion and animated brake design
+
+The repository landing page now opens with the existing **Gurtentrail riding GIF**, featuring the El Tony jump and signage, instead of a still screenshot.
+
+The [Bluetooth brake guide](docs/bluetooth-brakes.md) and landing page also show a new **Maneta v01 pull-and-release animation** beneath the earlier concept image. It is rendered directly from the editable STL assembly in Blender: the orange lever rotates around its pivot and the return spring follows its anchors. The rider-side view keeps the trigger pointing outward toward the right grip. The original realistic still and CAD reference remain linked in the [render provenance](docs/brake-v01-render.md).
+
+This is an illustration of the proposed mechanism, not footage of a built brake or a force simulation. The [animation tool and reproduction commands](tools/brake-render/README.md) are included. No simulator behavior, hardware connection or saved setting changed in this milestone.
+
+**Verified:** the 800×512 GIF has 63 frames over 3.15 seconds, with matching first and last resting poses. Visual review checked the resting, intermediate and full-pull positions, including the spring and attached fasteners. All 224 local documentation links resolve.
+
 ## 22 November 2026 · English apps and refreshed screenshots
 
 **The simulator and Track Lab now use English throughout their interfaces.** Course selection, ride data, gearing, device pairing, brake and corner warnings, bike setup, guided calibration, video alignment, observations and import/export messages have been translated. Number and date formatting uses English conventions. The guides now use the actual English control names.

@@ -2,16 +2,25 @@
 
 [Bluetooth brakes](bluetooth-brakes.md) · [Development log](../DEVELOPMENT_LOG.md) · [Documentation index](README.md)
 
-The realistic view beneath the earlier conceptual image is based on the owner's **Maneta-MTB-v01.zip** design package, supplied on 22 November 2026. Both pages of `planol.pdf`, `MUNTATGE.md`, the OpenSCAD assembly and the STL meshes were inspected before rendering.
+The Maneta v01 views are based on the owner's **Maneta-MTB-v01.zip** design package, supplied on 22 November 2026. Both pages of `planol.pdf`, `MUNTATGE.md`, the OpenSCAD assembly and the STL meshes were inspected before rendering.
 
 ## Published images
 
+- [Animated Maneta v01 pull and release](images/bluetooth-brake-v01-motion.gif): direct Blender animation of the supplied STL assembly, with the spring following its anchors.
 - [Realistic Maneta v01 render](images/bluetooth-brake-v01-realistic.png): built-in ImageGen surface and lighting treatment using the direct CAD render as its image reference.
 - [Direct CAD reference](images/bluetooth-brake-v01-cad.png): Blender Cycles rendering of the supplied meshes, before the ImageGen treatment.
 
 ![Direct rendering of the supplied right-hand STL assembly](images/bluetooth-brake-v01-cad.png)
 
-The original conceptual illustration remains above the realistic version in the brake guide and on the repository landing page. It records the earlier design exploration; it is not the geometry reference for this rendering.
+The original conceptual illustration remains above the animated assembly in the brake guide and on the repository landing page. It records the earlier design exploration; it is not the geometry reference for this rendering. The realistic still remains available above.
+
+## Pull-and-release animation
+
+The GIF is rendered from the editable 3D assembly, with a fixed rider-side camera. The lever rotates around its original pivot, its moving spring anchor follows the rotation, and the illustrated spring stretches between its anchors. The grip, cover, clamp and handlebar stay fixed. The trigger continues to point outward toward the right grip.
+
+The **800×512 loop lasts 3.15 seconds at 20 fps**, covering the nominal **0–22°** lever travel with short pauses at each end. Twenty-four distinct poses form the 63-frame sequence. It uses Blender 4.5 LTS, Cycles with 32 samples and fixed sampling noise, and a shared GIF palette. [Animation parameters and asset hash](brake-v01-animation.json).
+
+The loop illustrates the design's nominal travel; it does not model measured force, spring stiffness, stop deformation or sensor output. It uses native Blender materials and lighting rather than animated pixels from the ImageGen still. [Reproducible animation tool](../tools/brake-render/README.md).
 
 ## Source and assembly
 
