@@ -1,0 +1,410 @@
+{
+  "date": "2026-11-22",
+  "course": "Eiger Bike Challenge 20 km",
+  "official_download": "https://www.eigerbike.ch/wp-content/uploads/gpx/ebc20km.gpx",
+  "length_m": 19477.99243759055,
+  "ascent_m": 873.8800000000001,
+  "sectors": [
+    {
+      "id": "climb",
+      "name": "Grindelwald climb",
+      "start": 0,
+      "end": 8250
+    },
+    {
+      "id": "descent",
+      "name": "Upper traverse & descent",
+      "start": 8250,
+      "end": 13030
+    },
+    {
+      "id": "finish",
+      "name": "Mühlebach & finish",
+      "start": 13030,
+      "end": 19477.99243759055
+    }
+  ],
+  "geography_checks": {
+    "corner_vertices_retained": 6,
+    "opposite_grade_signs": 0,
+    "maximum_graphical_grade_error_percentage_points": 4.996100571119655e-05,
+    "raw_gpx_vs_terrain_rmse_m": 1.6546948304687723
+  },
+  "public_build_and_self_tests": "PASS: Uetliberg, Gurten, Eiger",
+  "personal_build_and_self_tests": "PASS: Dentenberg, Uetliberg, Gurten, Eiger",
+  "native_ui_checks": [
+    {
+      "name": "select-climb",
+      "passed": true
+    },
+    {
+      "name": "zero-counters-climb",
+      "passed": true
+    },
+    {
+      "name": "demo-start-climb",
+      "passed": true
+    },
+    {
+      "name": "no-trainer-climb",
+      "passed": true
+    },
+    {
+      "name": "reject-running-change-climb",
+      "passed": true
+    },
+    {
+      "name": "pause-climb",
+      "passed": true
+    },
+    {
+      "name": "resume-climb",
+      "passed": true
+    },
+    {
+      "name": "reset-climb",
+      "passed": true
+    },
+    {
+      "name": "select-descent",
+      "passed": true
+    },
+    {
+      "name": "zero-counters-descent",
+      "passed": true
+    },
+    {
+      "name": "demo-start-descent",
+      "passed": true
+    },
+    {
+      "name": "no-trainer-descent",
+      "passed": true
+    },
+    {
+      "name": "reject-running-change-descent",
+      "passed": true
+    },
+    {
+      "name": "pause-descent",
+      "passed": true
+    },
+    {
+      "name": "resume-descent",
+      "passed": true
+    },
+    {
+      "name": "reset-descent",
+      "passed": true
+    },
+    {
+      "name": "select-finish",
+      "passed": true
+    },
+    {
+      "name": "zero-counters-finish",
+      "passed": true
+    },
+    {
+      "name": "demo-start-finish",
+      "passed": true
+    },
+    {
+      "name": "no-trainer-finish",
+      "passed": true
+    },
+    {
+      "name": "reject-running-change-finish",
+      "passed": true
+    },
+    {
+      "name": "pause-finish",
+      "passed": true
+    },
+    {
+      "name": "resume-finish",
+      "passed": true
+    },
+    {
+      "name": "reset-finish",
+      "passed": true
+    },
+    {
+      "name": "paused-profile-click-seek",
+      "passed": true
+    },
+    {
+      "name": "paused-profile-keyboard-seek",
+      "passed": true
+    },
+    {
+      "name": "demo-speed",
+      "passed": true
+    },
+    {
+      "name": "resume-after-seek",
+      "passed": true
+    }
+  ],
+  "partial_descent_timer_regressions": "PASS: exact start, inside, at end and beyond; real handling stage loaded, partial runs cannot write records",
+  "captures": [
+    {
+      "capture": "eiger-welcome",
+      "viewport": [
+        1440,
+        852
+      ],
+      "fps_label": "30 fps · first-person view",
+      "runtime_errors": [],
+      "horizontal_overflow": [],
+      "scene": {
+        "drawCalls": 151,
+        "triangles": 1545466,
+        "renderVersion": "eiger-summer-2026-11-22",
+        "season": "summer",
+        "race": {
+          "aidStations": 2,
+          "arches": 3,
+          "flags": 16,
+          "mountainSource": "swisstopo far terrain",
+          "placement": "Illustrative race-day scenery along the official GPX",
+          "routePennants": 46,
+          "season": "summer",
+          "spectators": 148,
+          "staticBatches": 41,
+          "wildflowers": 816
+        }
+      }
+    },
+    {
+      "capture": "eiger-select-descent",
+      "viewport": [
+        1440,
+        852
+      ],
+      "fps_label": "30 fps · first-person view",
+      "runtime_errors": [],
+      "horizontal_overflow": [],
+      "scene": {
+        "drawCalls": 89,
+        "triangles": 1459998,
+        "renderVersion": "eiger-summer-2026-11-22",
+        "season": "summer",
+        "race": {
+          "aidStations": 2,
+          "arches": 3,
+          "flags": 16,
+          "mountainSource": "swisstopo far terrain",
+          "placement": "Illustrative race-day scenery along the official GPX",
+          "routePennants": 46,
+          "season": "summer",
+          "spectators": 148,
+          "staticBatches": 41,
+          "wildflowers": 816
+        }
+      }
+    },
+    {
+      "capture": "eiger-panorama",
+      "viewport": [
+        1440,
+        852
+      ],
+      "fps_label": "30 fps · first-person view",
+      "runtime_errors": [],
+      "horizontal_overflow": [],
+      "scene": {
+        "drawCalls": 187,
+        "triangles": 1567646,
+        "renderVersion": "eiger-summer-2026-11-22",
+        "season": "summer",
+        "race": {
+          "aidStations": 2,
+          "arches": 3,
+          "flags": 16,
+          "mountainSource": "swisstopo far terrain",
+          "placement": "Illustrative race-day scenery along the official GPX",
+          "routePennants": 46,
+          "season": "summer",
+          "spectators": 148,
+          "staticBatches": 41,
+          "wildflowers": 816
+        }
+      }
+    },
+    {
+      "capture": "eiger-start",
+      "viewport": [
+        1440,
+        852
+      ],
+      "fps_label": "30 fps · first-person view",
+      "runtime_errors": [],
+      "horizontal_overflow": [],
+      "scene": {
+        "drawCalls": 151,
+        "triangles": 1545466,
+        "renderVersion": "eiger-summer-2026-11-22",
+        "season": "summer",
+        "race": {
+          "aidStations": 2,
+          "arches": 3,
+          "flags": 16,
+          "mountainSource": "swisstopo far terrain",
+          "placement": "Illustrative race-day scenery along the official GPX",
+          "routePennants": 46,
+          "season": "summer",
+          "spectators": 148,
+          "staticBatches": 41,
+          "wildflowers": 816
+        }
+      }
+    },
+    {
+      "capture": "eiger-aid-station",
+      "viewport": [
+        1440,
+        852
+      ],
+      "fps_label": "30 fps · first-person view",
+      "runtime_errors": [],
+      "horizontal_overflow": [],
+      "scene": {
+        "drawCalls": 236,
+        "triangles": 1589660,
+        "renderVersion": "eiger-summer-2026-11-22",
+        "season": "summer",
+        "race": {
+          "aidStations": 2,
+          "arches": 3,
+          "flags": 16,
+          "mountainSource": "swisstopo far terrain",
+          "placement": "Illustrative race-day scenery along the official GPX",
+          "routePennants": 46,
+          "season": "summer",
+          "spectators": 148,
+          "staticBatches": 41,
+          "wildflowers": 816
+        }
+      }
+    },
+    {
+      "capture": "eiger-aerial",
+      "viewport": [
+        1440,
+        852
+      ],
+      "fps_label": "30 fps · real aerial imagery",
+      "runtime_errors": [],
+      "horizontal_overflow": [],
+      "scene": {
+        "drawCalls": 46,
+        "triangles": 1343160,
+        "renderVersion": "eiger-summer-2026-11-22",
+        "season": "summer",
+        "race": {
+          "aidStations": 2,
+          "arches": 3,
+          "flags": 16,
+          "mountainSource": "swisstopo far terrain",
+          "placement": "Illustrative race-day scenery along the official GPX",
+          "routePennants": 46,
+          "season": "summer",
+          "spectators": 148,
+          "staticBatches": 41,
+          "wildflowers": 816
+        }
+      }
+    },
+    {
+      "capture": "eiger-welcome-compact",
+      "viewport": [
+        1100,
+        772
+      ],
+      "fps_label": "30 fps · first-person view",
+      "runtime_errors": [],
+      "horizontal_overflow": [],
+      "scene": {
+        "drawCalls": 86,
+        "triangles": 1452420,
+        "renderVersion": "eiger-summer-2026-11-22",
+        "season": "summer",
+        "race": {
+          "aidStations": 2,
+          "arches": 3,
+          "flags": 16,
+          "mountainSource": "swisstopo far terrain",
+          "placement": "Illustrative race-day scenery along the official GPX",
+          "routePennants": 46,
+          "season": "summer",
+          "spectators": 148,
+          "staticBatches": 41,
+          "wildflowers": 816
+        }
+      }
+    }
+  ],
+  "assets": [
+    {
+      "file": "docs/images/eiger-welcome.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "bytes": 909286,
+      "sha256": "6ede9bd61c6fac0ecc763a4884657d24cfe39e2f03790a8bbd47756666c8eb40"
+    },
+    {
+      "file": "docs/images/eiger-sectors.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "bytes": 942649,
+      "sha256": "b8fc730dc9462d62f75f8fac92c38e47624ecef1a1c433293d4af64d1434974d"
+    },
+    {
+      "file": "docs/images/eiger-panorama.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "bytes": 860026,
+      "sha256": "d875da6fe1af6be470c21520d6bce672b918c3f813f7f79e9a6b0f7767a575cd"
+    },
+    {
+      "file": "docs/images/eiger-race-start.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "bytes": 822294,
+      "sha256": "27db89db50585c3d5bec0c6f852fa1968fe40ed768bf3200c3eb4f15976e786a"
+    },
+    {
+      "file": "docs/images/eiger-aid-station.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "bytes": 839187,
+      "sha256": "f820352e3da427818b5cdc9f5e4e4a562338e64efdb21d463e377dc3c9a54fef"
+    },
+    {
+      "file": "docs/images/eiger-aerial.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "bytes": 1386181,
+      "sha256": "7fc2235ce66e0148e65e3f6eae51d9065f3ce539f02e401850d5f3265fa53695"
+    },
+    {
+      "file": "docs/images/eiger-summer-race.gif",
+      "width": 1000,
+      "height": 592,
+      "frames": 90,
+      "bytes": 17721932,
+      "sha256": "4b28ca38e94df6e0e9e0485e6236cf06e408dd433f56e427ea93f158be516747",
+      "duration_ms": 9000
+    }
+  ],
+  "local_installation": "Updated simulator; protected settings, records and existing local course assets preserved",
+  "physical_hardware_test": false,
+  "capture_method": "Actual isolated WinForms/WebView2 application; disconnected devices and demo only; GIF contains three demo excerpts at x4."
+}

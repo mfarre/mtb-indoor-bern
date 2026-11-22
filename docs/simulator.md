@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Development log](../DEVELOPMENT_LOG.md) · [Data acquisition](data-acquisition.md) · [Bluetooth brakes](bluetooth-brakes.md)
 
-**MTB Indoor - Bern** is a Windows simulator with Swiss 3D courses, Bluetooth connectivity to a Wahoo KICKR, virtual MTB gearing and heart-rate data. It has been tested with a **KICKR CORE, right Zwift Click 2 and Garmin HRM-Dual**. Uetliberg and Gurten are included in the public repository; the local installation also has Dentenberg (Al Dente).
+**MTB Indoor - Bern** is a Windows simulator with Swiss 3D courses, Bluetooth connectivity to a Wahoo KICKR, virtual MTB gearing and heart-rate data. It has been tested with a **KICKR CORE, right Zwift Click 2 and Garmin HRM-Dual**. Uetliberg, Gurten and Eiger Bike Challenge 20 km are included in the public repository; the local installation also has Dentenberg (Al Dente).
 
 ![El Tony jump scenery on the Gurten course](images/gurten-el-tony.png)
 
@@ -19,6 +19,7 @@ The simulator interface and documentation are in English. The screenshots show t
 - Remembered devices, connection indicators on the main screen and automatic searches every five seconds.
 - A saved bike profile and optional guided KICKR response test. Rider/bike weights, wheel, drivetrain, assistance, gradient scaling, course and calibration result are remembered.
 - First-person and aerial views; demo speeds of ×1, ×2, ×4 and ×8 without controlling the trainer.
+- Three selectable starting sectors on Eiger Bike Challenge 20 km, with summer Alpine scenery and race furniture.
 - A separate course catalog, editable appearance profiles and support for additional routes. Gurten adds approximate jumps and berms based on official references, El Tony signage and a direct demo preview.
 - Video-informed autumn surfaces and vegetation for Al Dente. [Track Lab](track-lab.md) imports, aligns, reviews and annotates local FIT/video sessions; see the separate [data acquisition section](data-acquisition.md).
 
@@ -29,14 +30,17 @@ The simulator interface and documentation are in English. The screenshots show t
 | Dentenberg / Al Dente | 12.24 km | Local assets, prepared from a recorded FIT and video references |
 | Uetliberg | 25.75 km | Included; planned GPX through Zurich, Triemli, Uto Kulm and Ringlikon |
 | Gurten | 6.53 km | Included; mapped climb from Il Brunello in Kehrsatz and Gurtentrail descent to Wabern |
+| Eiger Bike Challenge 20 km | 19.48 km | Included; organisers' published GPX around Grindelwald, with three training starts |
 
-[`Scene/courses.json`](../src/MTBIndoorBern/Scene/courses.json) defines the catalog. Each course has a folder with `route.json`, `world.json` and `aerial.jpg`. The selector only shows courses with these essential assets installed. The welcome screen previews a section of the course; a ride starts at km 0.
+[`Scene/courses.json`](../src/MTBIndoorBern/Scene/courses.json) defines the catalog. Each course has a folder with `route.json`, `world.json` and `aerial.jpg`. The selector only shows courses with these essential assets installed. A whole-course ride starts at km 0. On courses with starting sectors, the **Start from** selector previews the selected entry point before **Start ride** or **Explore in demo**.
 
 **Uetliberg:** [`Scene/courses/uetliberg/`](../src/MTBIndoorBern/Scene/courses/uetliberg/) includes the route, terrain, orthophoto, appearance profile and provenance. It can be built and explored directly. OpenStreetMap-derived data retains its ODbL license and swisstopo data retains its attribution.
 
 **Gurten:** [`Scene/courses/gurten/`](../src/MTBIndoorBern/Scene/courses/gurten/) includes the route assembled from public map data, terrain, orthophoto, appearance, visual features and provenance. It is not based on a personal FIT or recording. The [Gurten guide](GURTEN.md) distinguishes the mapped route from the approximate obstacles. The route ends in Wabern; it does not loop back to the restaurant. A short walking connector at the trail entrance is documented explicitly. Jump shapes affect the rendered road and camera, with no airborne physics.
 
 **Dentenberg:** `route.json`, `world.json`, `aerial.jpg` and the video-derived ground texture remain in the local installation. Supply those assets in `Scene/courses/al-dente/` to enable the course. Missing elevations were interpolated, noise was smoothed and nearby terrain was adapted to the same elevation profile used by the simulation. The original FIT is not included. Personal FIT files, complete videos, sessions and sensor identifiers are not published.
+
+**Eiger Bike Challenge 20 km:** [`Scene/courses/eiger-20/`](../src/MTBIndoorBern/Scene/courses/eiger-20/) includes the official downloadable route, SWISSIMAGE orthophoto, near and distant Alpine terrain, mapped buildings and summer appearance. Choose the full route or any of three sectors and ride through to the finish. The [Eiger guide](EIGER.md) explains sources, splits and race scenery.
 
 [GPX import tools](../tools/course-import/README.md) prepare Swiss courses from the command line. Adding a course to the catalog and reviewing its appearance remain manual steps.
 
@@ -88,7 +92,8 @@ The public repository starts with no paired sensors. Once connected, devices are
 | Escape / Pause | Pause and release trainer control |
 | Resume demo | Continue a paused demo from the same position |
 | Click the elevation profile / arrow keys | Seek to a position in demo mode, including while paused |
-| Stop / restart | Return to the start |
+| Stop / restart | Return to the selected starting point |
+| Start from, on Eiger | Choose the whole route or one of three sectors before riding/demo |
 | F11 | Toggle the maximized window |
 | Aerial view | Change camera |
 | Explore in demo | Travel through the course without controlling the trainer |

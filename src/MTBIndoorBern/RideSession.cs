@@ -51,6 +51,7 @@ internal sealed class RideSession
     private readonly SensorConnection trainer, heart;
     private readonly Action<string> log;
     private readonly Course course;
+    private readonly CourseSector[] sectors;
     private readonly PreferencesStore? preferences;
     private readonly SemaphoreSlim operations = new(1, 1);
     private CancellationTokenSource? rideToken;
@@ -69,6 +70,9 @@ internal sealed class RideSession
     public double Velocity { get; private set; }
     public double Elapsed { get; private set; }
     public double Climbed { get; private set; }
+    public string StartSector { get; private set; } = "";
+    public double StartDistance { get; private set; }
+    public bool CanSelectStart => !Busy && activeControl is null && Mode is "ready" or "finished";
     public int Gear { get; private set; } = 8;
     public int Chainring { get; private set; } = 32;
     public double RiderKg { get; private set; } = 75;
@@ -88,10 +92,22 @@ internal sealed class RideSession
     public void SetControllerBrake(bool pressed) => controllerBrake = pressed;
     public void SetScreenBrake(bool pressed) { screenBrake = pressed; screenBrakeUntil = DateTime.UtcNow.AddSeconds(.75); }
 
-    public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null, string? routeFile=null, PersonalRecords? records=null)
+    public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null, string? routeFile=null, PersonalRecords? records=null,CourseSector[]? sectors=null)
     { this.course = course; this.trainer = trainer; this.heart = heart; this.log = log;this.preferences=preferences;
+      CourseCatalog.ValidateSectors(sectors,course.Length);this.sectors=sectors?.ToArray()??[];
       Trail = new(course, routeFile); Descent = new(Trail, records ?? new PersonalRecords(null));
       ReloadProfile(); }
+
+    public bool SelectStart(string? sectorId)
+    {
+        if(!CanSelectStart)return false;
+        var sector=sectors.FirstOrDefault(s=>s.Id==sectorId);
+        if(!string.IsNullOrEmpty(sectorId)&&sector is null)return false;
+        StartSector=sector?.Id??"";StartDistance=sector?.Start??0;
+        ResetProgress();Mode="ready";
+        Message=sector is null?"Whole course selected · start at km 0":$"Start at {sector.Name} · km {StartDistance/1000:0.00} to the finish";
+        return true;
+    }
 
     public void Shift(int delta) { Gear = Math.Clamp(Gear + Math.Sign(delta), 1, GearCount); }
     public void CycleDemoSpeed()
@@ -110,7 +126,7 @@ internal sealed class RideSession
         if (!CanSeek || !double.IsFinite(distance)) return;
         bool wasFinished = Mode == "finished";
         Distance = Math.Clamp(distance, 0, course.Length); Velocity = 0;
-        Handling.Reset(); Descent.Reset(); screenBrake = controllerBrake = false;
+        Handling.Reset(); Descent.ResetAt(Distance); screenBrake = controllerBrake = false;
         if (Distance >= course.Length) { Mode = "finished"; Message = "Demo finished · click the profile to return to another point"; }
         else if (wasFinished) { Mode = "paused"; Message = "Demo paused · select Resume to continue from here"; }
         else Message = Mode == "paused" ? "Demo paused · position changed using the profile" : Practice ? "PRACTICE · new position · no record" : "DEMO · position changed using the profile";
@@ -189,7 +205,7 @@ internal sealed class RideSession
         await PauseAsync("Ride stopped");
         ResetProgress(); Mode = "ready";
     }
-    private void ResetProgress() { Distance = 0; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); Descent.Reset(); screenBrake = controllerBrake = false; }
+    private void ResetProgress() { Distance = StartDistance; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); if(StartDistance>0)Descent.ResetAt(StartDistance);else Descent.Reset(); screenBrake = controllerBrake = false; }
     private async Task<string?> ReleaseControlAsync()
     {
         rideToken?.Cancel();
@@ -220,7 +236,7 @@ internal sealed class RideSession
                 Elapsed += step;
                 Climbed += Math.Max(0, course.At(Distance).Alt - before.Alt);
             }
-            if (!IsDemo || Practice) Descent.Tick(oldDistance, Distance, step, Live, Handling.OffTracks);
+            if (!IsDemo || Practice) Descent.Tick(oldDistance, Distance, step, Live && StartDistance==0, Handling.OffTracks);
         }
         if (Distance >= course.Length) { _ = PauseAsync("Course complete. Enjoy the ride!"); return; }
         if (Live && !controlBusy && (DateTime.UtcNow - lastControl).TotalSeconds >= (ValidCalibration?.UpdateIntervalSeconds ?? 1))
@@ -261,8 +277,16 @@ internal sealed class RideSession
             control = activeControl?.IsControlling == true, targetPower = activeControl?.AppliedPower,
             controlStatus = trainer.Control?.Status ?? trainer.ControlInfo,
             length = course.Length, demo = IsDemo, demoSpeed = DemoSpeed, practice = Practice, canSeek = CanSeek,
+            startSector=StartSector,startDistance=StartDistance,canSelectStart=CanSelectStart,riddenDistance=Math.Max(0,Distance-StartDistance),sector=SectorSnapshot(),
             brake = BrakePressed, brakePressure = Handling.Brake, slip = Handling.Slip, recovery = Handling.Recovery, skidSide = Handling.Side,
             corner = CornerSnapshot(), descent = Descent.Snapshot(Distance, Handling.OffTracks) };
+    }
+    private object? SectorSnapshot()
+    {
+        int index=Array.FindLastIndex(sectors,s=>Distance>=s.Start);
+        if(index<0)return null;
+        var sector=sectors[index];
+        return new {id=sector.Id,name=sector.Name,start=sector.Start,end=sector.End,index=index+1,count=sectors.Length};
     }
     private object? CornerSnapshot()
     {

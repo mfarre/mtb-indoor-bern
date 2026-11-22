@@ -1,0 +1,70 @@
+{
+  "name": "Eiger Bike Challenge 20 km",
+  "prepared": "2026-11-22",
+  "routeSource": "Official downloadable Eiger Bike Challenge 20 km GPX; title EBC-20KM, creator MySchweizMobil",
+  "routeUrl": "https://www.eigerbike.ch/wp-content/uploads/gpx/ebc20km.gpx",
+  "profileUrl": "https://www.eigerbike.ch/wp-content/uploads/profile/Track-20-EBC.pdf",
+  "sourceLastModified": "Tue, 30 Jun 2026 05:28:28 GMT",
+  "inputSha256": "7450b99b7f32d7054904a1e2d2cc4a5731df353b89d1780bdda521675ed1b28d",
+  "nominalDistanceKm": 20,
+  "advertisedAscentM": 900,
+  "measuredDistanceM": 19477.99243759055,
+  "smoothedAscentM": 873.8800000000001,
+  "originalPointCount": 1948,
+  "loopGapM": 35.48009048594373,
+  "routeMethod": "Resample at 5 m with approximately 40 m altitude smoothing; preserve interior GPX corner vertices when a short chord would cause a false steep grade. Road, HUD, physics and trainer share the same profile. Original 35.48 m finish/start gap retained; no artificial closing connector.",
+  "cornerVerticesRetained": 6,
+  "sectorMethod": "Three app-defined training starts, not official timed sectors",
+  "sectors": [
+    {
+      "id": "climb",
+      "name": "Grindelwald climb",
+      "start": 0,
+      "end": 8250
+    },
+    {
+      "id": "descent",
+      "name": "Upper traverse & descent",
+      "start": 8250,
+      "end": 13030
+    },
+    {
+      "id": "finish",
+      "name": "MÃ¼hlebach & finish",
+      "start": 13030,
+      "end": 19477.99243759055
+    }
+  ],
+  "imagerySource": "SWISSIMAGE Â© swisstopo",
+  "imageryZoom": 16,
+  "imageryPixels": [
+    3072,
+    3072
+  ],
+  "terrainSource": "Terrain Â© swisstopo, quantized mesh 20250101; zoom14 near route, zoom12 Alpine backdrop",
+  "terrainDatumOffsetM": 0.1310000000000855,
+  "mapSource": "Â© OpenStreetMap contributors â€” ODbL",
+  "raceAccessNote": "The organiser marks some sections as race-day-only. This is an indoor reconstruction, not outdoor navigation or an access guarantee.",
+  "visualLimitations": "Summer materials, vegetation species, spectators and race furniture are interpretations. Reference photos are not bundled as textures.",
+  "urls": [
+    "https://www.eigerbike.ch/en/race/profiles/",
+    "https://www.eigerbike.ch/en/race/informations/",
+    "https://www.eigerbike.ch/wp-content/uploads/gpx/ebc20km.gpx",
+    "https://www.eigerbike.ch/wp-content/uploads/profile/Track-20-EBC.pdf",
+    "https://docs.geo.admin.ch/visualize-data/xyz.html",
+    "https://docs.geo.admin.ch/visualize-data/terrain-service.html",
+    "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices",
+    "https://www.openstreetmap.org/copyright"
+  ],
+  "profilePdfLastModified": "2026-06-30T05:23:44Z",
+  "rawElevationComparison": {
+    "rawPoints": 1948,
+    "rawGpxMinusTerrainMedianM": -0.14566004207404148,
+    "rawGpxMinusTerrainRmseM": 1.6546948304687723,
+    "absoluteErrorP95M": 3.3604750271580315,
+    "absoluteErrorMaxM": 7.283967327109167,
+    "inputSha256": "7450b99b7f32d7054904a1e2d2cc4a5731df353b89d1780bdda521675ed1b28d",
+    "method": "Barycentric interpolation of original zoom-14 swisstopo quantized mesh at each unmodified GPX coordinate; compares original GPX heights before profile smoothing."
+  },
+  "elevationVerificationFile": "elevation-verification.json"
+}

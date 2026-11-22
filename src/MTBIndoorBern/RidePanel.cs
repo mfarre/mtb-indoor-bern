@@ -61,7 +61,7 @@ internal sealed class RidePanel : Panel
         clock.Start();
     }
 
-    private RideSession NewRide()=>new(Course.Load(CourseCatalog.RouteFile(selectedCourse)),equipment.Connections[SensorRole.Trainer],equipment.Connections[SensorRole.HeartRate],log,preferences,CourseCatalog.RouteFile(selectedCourse),new PersonalRecords(Path.Combine(AppContext.BaseDirectory,"records.json"))){TrainerIdentity=()=>trainerAdapter.Identity};
+    private RideSession NewRide()=>new(Course.Load(CourseCatalog.RouteFile(selectedCourse)),equipment.Connections[SensorRole.Trainer],equipment.Connections[SensorRole.HeartRate],log,preferences,CourseCatalog.RouteFile(selectedCourse),new PersonalRecords(Path.Combine(AppContext.BaseDirectory,"records.json")),selectedCourse.Sectors){TrainerIdentity=()=>trainerAdapter.Identity};
     private string CourseUrl=>"https://mtbindoor.local/index.html?course="+Uri.EscapeDataString(selectedCourse.Id);
 
     public async Task InitializeAsync()
@@ -104,7 +104,7 @@ internal sealed class RidePanel : Panel
             var message = json.RootElement;
             var action = message.GetProperty("action").GetString();
             if(calibration.Active && action is not ("heartbeat" or "stats" or "error" or "pause" or "stop" or "devices" or "profile-request" or "profile-close" or "calibration-cancel" or "profile-save")) {PostCalibration();return;}
-            if(profileOpen && action is ("start" or "demo" or "practice" or "resume" or "course" or "settings" or "preview"))return;
+            if(profileOpen && action is ("start" or "demo" or "practice" or "resume" or "course" or "settings" or "preview" or "start-sector"))return;
             switch (action)
             {
                 case "ready": web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type="catalog", ids=courses.Select(c=>c.Id).ToArray() })); ready = true; heartbeat = DateTime.UtcNow; web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
@@ -136,6 +136,7 @@ internal sealed class RidePanel : Panel
                     PostProfile(notice:preferences.Warning is null?"Result removed. Using the standard response.":null,error:preferences.Warning);break;
                 case "start": await Ride.StartAsync(false); break;
                 case "demo": await Ride.StartAsync(true); break;
+                case "start-sector": Ride.SelectStart(message.GetProperty("id").GetString());break;
                 case "preview":
                     if(Ride.Running||Ride.Busy)break;
                     double preview=message.GetProperty("distance").GetDouble();if(!double.IsFinite(preview))break;

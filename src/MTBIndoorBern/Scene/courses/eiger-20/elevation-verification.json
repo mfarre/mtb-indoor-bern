@@ -1,0 +1,106 @@
+{
+  "length": 19477.99243759055,
+  "ascent": 873.8800000000001,
+  "points": 3903,
+  "cornerVerticesRetained": 6,
+  "gradeMin": -31.0051,
+  "gradeMax": 23.3023,
+  "datumOffsetM": 0.1310000000000855,
+  "oppositeGrades": 0,
+  "maxGradeErrorPercent": 4.996100571119655e-05,
+  "alpineTiles": 40,
+  "alpineVertices": 288841,
+  "alpineTriangles": 572188,
+  "alpineMaxElevation": 4271.45,
+  "sectors": [
+    {
+      "id": "climb",
+      "name": "Grindelwald climb",
+      "start": 0,
+      "end": 8250
+    },
+    {
+      "id": "descent",
+      "name": "Upper traverse & descent",
+      "start": 8250,
+      "end": 13030
+    },
+    {
+      "id": "finish",
+      "name": "M\u00fchlebach & finish",
+      "start": 13030,
+      "end": 19477.99243759055
+    }
+  ],
+  "sourceElevationComparison": {
+    "rawPoints": 1948,
+    "rawGpxMinusTerrainMedianM": -0.14566004207404148,
+    "rawGpxMinusTerrainRmseM": 1.6546948304687723,
+    "absoluteErrorP95M": 3.3604750271580315,
+    "absoluteErrorMaxM": 7.283967327109167,
+    "marmorbruchSteepSection": [
+      {
+        "d": 16335,
+        "profileElevation": 1057.11,
+        "rawTerrainElevation": 1058.0436566754038,
+        "grade": -28.0093
+      },
+      {
+        "d": 16340,
+        "profileElevation": 1055.74,
+        "rawTerrainElevation": 1056.4980831777577,
+        "grade": -29.841
+      },
+      {
+        "d": 16345,
+        "profileElevation": 1054.28,
+        "rawTerrainElevation": 1054.952635627295,
+        "grade": -29.642
+      },
+      {
+        "d": 16350,
+        "profileElevation": 1052.83,
+        "rawTerrainElevation": 1053.5742981325218,
+        "grade": -29.8628
+      },
+      {
+        "d": 16355,
+        "profileElevation": 1051.37,
+        "rawTerrainElevation": 1053.437453498675,
+        "grade": -30.0435
+      },
+      {
+        "d": 16360,
+        "profileElevation": 1049.9,
+        "rawTerrainElevation": 1053.3800998904937,
+        "grade": -29.0323
+      },
+      {
+        "d": 16365,
+        "profileElevation": 1048.48,
+        "rawTerrainElevation": 1052.0436154436513,
+        "grade": -31.0051
+      },
+      {
+        "d": 16370,
+        "profileElevation": 1046.97,
+        "rawTerrainElevation": 1048.8318724607666,
+        "grade": -30.7438
+      },
+      {
+        "d": 16375,
+        "profileElevation": 1045.47,
+        "rawTerrainElevation": 1045.8373637658829,
+        "grade": -27.3905
+      },
+      {
+        "d": 16380,
+        "profileElevation": 1044.13,
+        "rawTerrainElevation": 1044.0018292649752,
+        "grade": -24.1209
+      }
+    ],
+    "inputSha256": "7450b99b7f32d7054904a1e2d2cc4a5731df353b89d1780bdda521675ed1b28d",
+    "method": "Barycentric interpolation of original zoom-14 swisstopo quantized mesh at each unmodified GPX coordinate; compares original GPX heights before profile smoothing."
+  }
+}

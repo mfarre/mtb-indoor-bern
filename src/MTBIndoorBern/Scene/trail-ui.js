@@ -17,7 +17,7 @@ export function setupTrail(send){
 }
 export function updateTrail(s){
  const running=s.mode==='ride'||s.mode==='demo',active=running&&(!s.demo||s.practice),down=s.grade<-1,up=s.grade>1;
- $('ride-focus').hidden=!running;$('corner-card').hidden=!active||!s.corner;$('descent-card').hidden=!active||!s.descent?.name;
+ $('ride-focus').hidden=!running;$('corner-card').hidden=!active||!s.corner;$('descent-card').hidden=!active||!s.descent?.name||s.descent.status==='passed';
  $('practice').disabled=!!s.busy;$('brake').disabled=!running||s.busy;
  $('brake').classList.toggle('pressed',!!s.brake);$('brake').setAttribute('aria-pressed',String(!!s.brake));
  $('brake').textContent=s.brake?'● BRAKING':'A / Space · Brake';
@@ -33,9 +33,9 @@ export function updateTrail(s){
   $('corner-card').classList.toggle('urgent',!!c.urgent);$('corner-instruction').textContent=c.urgent?'BRAKE BEFORE ENTERING':'GAME TARGET SPEED';}
  const r=s.descent;
  if(r){$('descent-name').textContent=r.name;$('descent-time').textContent=r.status==='waiting'?`${number(r.remaining)} m`:clock(r.seconds);
-  $('descent-label').textContent=r.status==='waiting'?'TO THE START':r.status==='finished'?(r.newBest?'NEW PERSONAL BEST':'DESCENT COMPLETE'):'DESCENT TIMER';
+  $('descent-label').textContent=r.status==='waiting'?'TO THE START':r.status==='finished'?(r.newBest?'NEW PERSONAL BEST':'DESCENT COMPLETE'):r.partial?'PARTIAL DESCENT':'DESCENT TIMER';
   $('descent-best').textContent=`Best ${r.best==null?'—':clock(r.best)} · ${r.offTracks} ${r.offTracks===1?'runout':'runouts'}`;
-  $('descent-valid').textContent=r.warning??(s.practice?'PRACTICE · NO RECORD':r.status!=='waiting'&&!r.eligible?'NOT ELIGIBLE · PAUSED':r.status==='running'?`${number(r.remaining)} m to finish`:'Local time · complete the whole stage');
+  $('descent-valid').textContent=r.warning??(s.practice?'PRACTICE · NO RECORD':r.partial?'PARTIAL DESCENT · NO RECORD':r.status!=='waiting'&&!r.eligible?'NOT ELIGIBLE · PAUSED':r.status==='running'?`${number(r.remaining)} m to finish`:'Local time · complete the whole stage');
  }
  const recovery=s.recovery??0,slip=s.slip??0;
  $('traction').hidden=!active;$('traction-fill').style.width=`${Math.min(100,slip*100)}%`;

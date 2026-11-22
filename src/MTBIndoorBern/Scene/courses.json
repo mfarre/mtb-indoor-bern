@@ -26,5 +26,34 @@
     "ascent": 289.16999999999996,
     "previewDistance": 5069,
     "features": "features.json"
+  },
+  {
+    "id": "eiger-20",
+    "name": "Eiger Bike Challenge 20 km",
+    "description": "Grindelwald · alpine summer · race atmosphere. Ride the official 20 km route, or start from one of three sectors.",
+    "folder": "courses/eiger-20",
+    "length": 19477.99243759055,
+    "ascent": 873.88,
+    "previewDistance": 10,
+    "sectors": [
+      {
+        "id": "climb",
+        "name": "Grindelwald climb",
+        "start": 0,
+        "end": 8250
+      },
+      {
+        "id": "descent",
+        "name": "Upper traverse & descent",
+        "start": 8250,
+        "end": 13030
+      },
+      {
+        "id": "finish",
+        "name": "Mühlebach & finish",
+        "start": 13030,
+        "end": 19477.99243759055
+      }
+    ]
   }
 ]

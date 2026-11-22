@@ -35,10 +35,10 @@ internal static class Program
         {
             try
             {
-                Packets.Verify(); PreferencesStore.Verify(); BikeProfileTests.Verify(); ProfileSettings.Verify(); CalibrationTests.Verify();
+                Packets.Verify(); PreferencesStore.Verify(); BikeProfileTests.Verify(); ProfileSettings.Verify(); CalibrationTests.Verify();CourseCatalog.Verify();
                 var courses=CourseCatalog.Load();
-                foreach(var course in courses) { RideSession.Verify(CourseCatalog.RouteFile(course)); TrailTests.Verify(CourseCatalog.RouteFile(course)); }
-                File.WriteAllText(args[1], "PASS: " + string.Join(", ",courses.Select(c=>c.Name)) + "; shared bike physics and custom gearing; torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE/FTMS; demo speed, pause/resume, seeking and finish; braking, grip and personal records.");
+                foreach(var course in courses) { RideSession.Verify(CourseCatalog.RouteFile(course)); TrailTests.Verify(CourseCatalog.RouteFile(course));SectorStartTests.Verify(course); }
+                File.WriteAllText(args[1], "PASS: " + string.Join(", ",courses.Select(c=>c.Name)) + "; shared bike physics and custom gearing; torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE/FTMS; demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records.");
             }
             catch (Exception e) { File.WriteAllText(args[1], e.ToString()); Environment.ExitCode = 1; }
             return;

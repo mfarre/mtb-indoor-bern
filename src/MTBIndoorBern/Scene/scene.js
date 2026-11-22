@@ -4,6 +4,7 @@ import {setupTrail,updateTrail} from './trail-ui.js';
 import {addTrailMarkers} from './trail-markers.js';
 import {setupProfileSeek,updateProfileSeek} from './profile-seek.js';
 import {setupBikeSettings,updateBikeSettings} from './bike-settings.js';
+import {setupCourseSectors,updateCourseSectors,drawSectorProfile} from './course-sectors.js';
 const $=id=>document.getElementById(id),bridge=window.chrome?.webview;
 const send=(action,extra={})=>bridge?.postMessage({action,...extra});
 const format=(v,n=0)=>Number(v).toLocaleString('en-GB',{minimumFractionDigits:n,maximumFractionDigits:n});
@@ -36,14 +37,14 @@ function refreshHud(){
  $('grade').textContent=`${state.grade>0?'+':''}${format(state.grade??0,1)}%`;$('applied').textContent=state.control?`${format(state.targetPower??0)} W · confirmed`:'Inactive';
  $('progress').style.width=`${Math.min(100,state.distance/(state.length??info?.length??1)*100)}%`;$('profile-distance').textContent=`${format(state.distance/1000,1)} km`;
  $('status').textContent=state.settingsWarning??state.message??'Preparing course…';$('connection-dot').classList.toggle('on',state.control);$('mode-tag').textContent=state.demo&&running?'DEMO · NO TRAINER CONTROL':'MTB INDOOR · SWITZERLAND';
- $('start').textContent=state.mode==='paused'&&state.distance>0?'Resume ride →':state.mode==='finished'?'Start again →':'Start ride →';
+ $('start').textContent=state.mode==='paused'&&state.elapsed>0?'Resume ride →':state.mode==='finished'?'Start again →':'Start ride →';
  $('pause').disabled=(!running&&!pausedDemo)||state.busy;$('pause').textContent=pausedDemo?'▶ Resume demo':'Pause';for(const id of['start','demo','stop'])$(id).disabled=!!state.busy;
  const demoSpeed=$('demo-speed'),rate=state.demoSpeed??1,nextRate=rate===8?1:rate*2;
  demoSpeed.hidden=state.practice||!(state.demo&&(state.mode==='demo'||state.mode==='paused'));demoSpeed.disabled=!!state.busy;
  demoSpeed.textContent=`⏩ Demo ×${rate}`;demoSpeed.title=`Speed ×${rate}. Click to switch to ×${nextRate}`;
  demoSpeed.setAttribute('aria-label',`Demo speed ×${rate}. Switch to ×${nextRate}`);
  $('bike-summary').textContent=`${state.bikeName??'My MTB'} · ${format(state.weight??75)} + ${format(state.bikeKg??14)} kg · ${state.gearCount??12} gears`;
- $('course-choice').disabled=running||state.busy;$('course-highlight').disabled=running||state.busy;refreshDevices();updateTrail(state);updateProfileSeek($('profile'),state);if(course){drawMap();drawProfile();}
+ $('course-choice').disabled=running||state.busy;$('course-highlight').disabled=running||state.busy;refreshDevices();updateTrail(state);updateCourseSectors(info,state);updateProfileSeek($('profile'),state);if(course){drawMap();drawProfile();}
 }
 function pointAt(d){
  const ps=course.points;d=THREE.MathUtils.clamp(d,0,course.length);let l=0,r=ps.length-1;while(r-l>1){const m=(l+r)>>1;if(ps[m].d<=d)l=m;else r=m;}const a=ps[l],b=ps[r],t=(d-a.d)/(b.d-a.d);return new THREE.Vector3(THREE.MathUtils.lerp(a.x,b.x,t),THREE.MathUtils.lerp(a.y,b.y,t),THREE.MathUtils.lerp(a.z,b.z,t));
@@ -54,22 +55,22 @@ function drawMap(){
  const b=mapBounds,scale=Math.min((w-45)/(b.maxX-b.minX),(h-35)/(b.maxZ-b.minZ));const x=v=>w/2+(v-(b.minX+b.maxX)/2)*scale,z=v=>h/2+(v-(b.minZ+b.maxZ)/2)*scale;
  c.strokeStyle='#9eb48515';c.lineWidth=1;for(let i=0;i<5;i++){c.beginPath();c.moveTo(0,i*h/4);c.lineTo(w,i*h/4);c.stroke();}
  c.lineWidth=4;c.strokeStyle='#8da17d';c.lineJoin='round';c.beginPath();course.points.forEach((p,i)=>i?c.lineTo(x(p.x),z(p.z)):c.moveTo(x(p.x),z(p.z)));c.stroke();
- c.strokeStyle='#d1ef91';c.lineWidth=5;c.beginPath();let moved=false;for(const p of course.points){if(p.d>state.distance)break;if(!moved){c.moveTo(x(p.x),z(p.z));moved=true;}else c.lineTo(x(p.x),z(p.z));}c.stroke();
+ c.strokeStyle='#d1ef91';c.lineWidth=5;c.beginPath();let moved=false;for(const p of course.points){if(p.d>state.distance)break;if(p.d<(state.startDistance??0))continue;if(!moved){c.moveTo(x(p.x),z(p.z));moved=true;}else c.lineTo(x(p.x),z(p.z));}c.stroke();
  const p=pointAt(state.distance);c.beginPath();c.fillStyle='#d1ef912d';c.arc(x(p.x),z(p.z),15,0,Math.PI*2);c.fill();c.beginPath();c.fillStyle='#d7f6a0';c.arc(x(p.x),z(p.z),6,0,Math.PI*2);c.fill();c.strokeStyle='#15271d';c.lineWidth=3;c.stroke();c.fillStyle='#bdc9b2';c.font='16px Segoe UI';c.fillText('N ↑',w-45,20);
 }
 function drawProfile(){
  const canvas=$('profile'),c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);
  const x=d=>d/course.length*w,y=alt=>h-7-(alt-profileBounds.min)/(profileBounds.max-profileBounds.min)*(h-18);
  c.beginPath();c.moveTo(0,h);for(let i=0;i<course.points.length;i+=4){const p=course.points[i];c.lineTo(x(p.d),y(p.alt));}c.lineTo(w,h);c.closePath();c.fillStyle='#99b87530';c.fill();c.strokeStyle='#adc78d';c.lineWidth=2;c.stroke();
- const px=x(state.distance);c.save();c.beginPath();c.rect(0,0,px,h);c.clip();c.fillStyle='#b7db8350';c.fill();c.restore();c.strokeStyle='#d7f69b';c.lineWidth=3;c.beginPath();c.moveTo(px,4);c.lineTo(px,h);c.stroke();
+ const px=x(state.distance),sx=x(state.startDistance??0);c.save();c.beginPath();c.rect(sx,0,Math.max(0,px-sx),h);c.clip();c.fillStyle='#b7db8350';c.fill();c.restore();drawSectorProfile(c,w,h,course.length,info.sectors,state.startSector);c.strokeStyle='#d7f69b';c.lineWidth=3;c.beginPath();c.moveTo(px,4);c.lineTo(px,h);c.stroke();
 }
 
-function animate(now){requestAnimationFrame(animate);if(!engine||errors.length)return;if(now-lastFrame<1000/30-.4)return;const dt=Math.min(.12,(now-lastFrame)/1000);lastFrame=now;engine.render(state.distance,dt,state.mode,overview,state);frames++;totalFrames++;
+function animate(now){requestAnimationFrame(animate);if(!engine||errors.length)return;if(now-lastFrame<1000/30-.4)return;const dt=Math.min(.12,(now-lastFrame)/1000);lastFrame=now;engine.render(state.distance,dt,state.mode==='ready'&&state.startSector?'paused':state.mode,overview,state);frames++;totalFrames++;
  if(now-lastStats>=3000){const fps=Math.round(frames*1000/(now-lastStats));frames=0;lastStats=now;$('performance').textContent=`${fps} fps · ${overview?'real aerial imagery':'first-person view'}`;engine.adjustQuality(fps);send('stats',{fps,...engine.stats(),width:innerWidth,height:innerHeight,routePoints:course.points.length,trees:engine.world.trees.length,distance:state.distance,mode:state.mode,maxGradeErrorPercent:gradeError,errors});}}
 let gradeError=0;
 try{
  const catalog=await fetch('./courses.json').then(r=>r.json()),id=new URLSearchParams(location.search).get('course');info=catalog.find(c=>c.id===id)??catalog[0];
- for(const c of catalog){const option=document.createElement('option');option.value=c.id;option.textContent=c.name;$('course-choice').append(option);}$('course-choice').value=info.id;
+ for(const c of catalog){const option=document.createElement('option');option.value=c.id;option.textContent=c.name;$('course-choice').append(option);}$('course-choice').value=info.id;setupCourseSectors(info,send);
  [course,world]=await Promise.all([fetch(`./${info.folder}/route.json`).then(r=>{if(!r.ok)throw Error('Route data not found');return r.json();}),fetch(`./${info.folder}/world.json`).then(r=>{if(!r.ok)throw Error('Terrain data not found');return r.json();})]);
  $('world').setAttribute('aria-label','3D course: '+info.name);document.querySelectorAll('.profile-axis span').forEach((el,i)=>el.textContent=i===0?'0':format(course.length/1000*i/4,i===4?2:1)+' km');$('course-name').textContent=info.name;$('course-description').textContent=info.description;$('map-title').textContent=info.name.toUpperCase()+' / RIDE 01';$('course-km').textContent=format(course.length/1000,2);$('total-km').textContent='/ '+format(course.length/1000,2)+' km';$('course-ascent').textContent=format(course.ascent);
  const xs=course.points.map(p=>p.x),zs=course.points.map(p=>p.z),alts=course.points.map(p=>p.alt);mapBounds={minX:Math.min(...xs),maxX:Math.max(...xs),minZ:Math.min(...zs),maxZ:Math.max(...zs)};profileBounds={min:Math.min(...alts)-10,max:Math.max(...alts)+10};

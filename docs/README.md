@@ -15,11 +15,13 @@
 - [Bike setup, physics model and guided calibration](bike-calibration.md)
 - [Downhill braking, grip, practice and records](downhill.md)
 - [Gurten route, visual references and limitations](GURTEN.md)
+- [Eiger Bike Challenge 20 km, summer scenery and starting sectors](EIGER.md)
 - [Track Lab: import, align, annotate and export](track-lab.md)
 
 ## Developer tools and assets
 
 - [GPX course import](../tools/course-import/README.md)
+- [Eiger 20 km geography importer](../tools/eiger-import/README.md)
 - [Renderer comparison and capture](../tools/render-comparison/README.md)
 - [Downhill capture harness](../tools/downhill/README.md)
 - [Bike profile and calibration UI checks](../tools/calibration-ui/README.md)
@@ -35,6 +37,7 @@ These reports record checks performed at each milestone. They are not claims tha
 
 | Milestone | Report |
 | --- | --- |
+| Eiger 20 km, summer race scenery and sector starts | [22 November 2026](verification-eiger-2026-11-22.json) |
 | English simulator, Track Lab and screenshots | [22 November 2026](verification-english-ui-2026-11-22.json) |
 | Gurten course and trail features | [19 November 2026](verification-gurten-2026-11-19.json) |
 | Bike profiles and guided calibration | [19 November 2026](verification-calibration-2026-11-19.json) |

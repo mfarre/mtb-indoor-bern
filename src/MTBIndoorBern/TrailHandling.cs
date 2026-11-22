@@ -132,14 +132,23 @@ internal sealed class DescentTimer
     public double Seconds { get; private set; }
     public bool Eligible { get; private set; }
     public bool NewBest { get; private set; }
+    public bool Partial { get; private set; }
     private int initialOffTracks;
     public double? Best => records.Best(key);
     public DescentTimer(TrailPlan plan, PersonalRecords records) { stage = plan.Stage; key = plan.RecordKey; this.records = records; }
-    public void Reset() { Status = "waiting"; Seconds = 0; Eligible = NewBest = false; initialOffTracks = 0; }
+    public void Reset() { Status = "waiting"; Seconds = 0; Eligible = NewBest = Partial = false; initialOffTracks = 0; }
+    // A positioned start has not crossed the timing gate, so it can never set a record.
+    public void ResetAt(double distance)
+    {
+        Reset();
+        if(stage is null||!double.IsFinite(distance)||distance<stage.Start)return;
+        if(distance>=stage.End){Status="passed";return;}
+        Status="running";Partial=true;
+    }
     public void Invalidate() { Eligible = false; }
     public void Tick(double from, double to, double dt, bool live, int offTracks = 0)
     {
-        if (stage is null || Status == "finished") return;
+        if (stage is null || Status is "finished" or "passed") return;
         double fraction = 1;
         if (Status == "waiting")
         {
@@ -149,7 +158,7 @@ internal sealed class DescentTimer
             fraction = (to - stage.Start) / Math.Max(.000001, to - from);
         }
         if (Status != "running") return;
-        if (!live) Eligible = false;
+        if (!live || Partial) Eligible = false;
         if (to >= stage.End)
         {
             fraction -= Math.Clamp((to - stage.End) / Math.Max(.000001, to - from), 0, 1);
@@ -158,6 +167,6 @@ internal sealed class DescentTimer
         }
         else Seconds += dt * fraction;
     }
-    public object Snapshot(double distance, int offTracks) => new { name = stage?.DisplayName(), status = Status, seconds = Seconds, eligible = Eligible, newBest = NewBest, best = Best,
+    public object Snapshot(double distance, int offTracks) => new { name = stage?.DisplayName(), status = Status, seconds = Seconds, eligible = Eligible, newBest = NewBest, best = Best, partial=Partial,
         remaining = stage is null ? 0 : Math.Max(0, (Status == "waiting" ? stage.Start : stage.End) - distance), offTracks = Status == "waiting" ? 0 : Math.Max(0, offTracks - initialOffTracks), warning = records.Warning };
 }

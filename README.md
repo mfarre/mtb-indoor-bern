@@ -19,12 +19,13 @@ A Windows MTB simulator with real elevation data, aerial imagery, direct Bluetoo
 
 ## Ride now
 
-**Uetliberg and Gurten are included in the public repository.** Dentenberg / Al Dente is available in the local installation; its personal route and recording assets are not distributed.
+**Uetliberg, Gurten and Eiger Bike Challenge 20 km are included in the public repository.** Dentenberg / Al Dente is available in the local installation; its personal route and recording assets are not distributed.
 
 | Course | Distance | Experience |
 | --- | ---: | --- |
 | [Gurten](docs/GURTEN.md) | 6.53 km | Climb from Kehrsatz, then descend the Gurtentrail to Wabern |
 | [Uetliberg](docs/simulator.md#courses-and-data) | 25.75 km | Zurich, Triemli, Uto Kulm and Ringlikon |
+| [Eiger Bike Challenge 20 km](docs/EIGER.md) | 19.48 km | Alpine summer around Grindelwald, race scenery and three selectable starting sectors |
 | Dentenberg / Al Dente | 12.24 km | Local woodland loop, informed by a recorded ride |
 
 On Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) installed:
@@ -35,6 +36,8 @@ On Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/1
 ```
 
 Select a course and choose **Explore in demo**. Pause, click the elevation profile to seek, resume, or accelerate up to ×8. On Gurten, **El Tony ↗** jumps directly to the featured section. Demo does not control the trainer.
+
+On **Eiger Bike Challenge 20 km**, choose the whole course or start from any of its three sectors before riding or exploring in demo. [Eiger route and sector guide](docs/EIGER.md).
 
 [Full setup and controls](docs/simulator.md) · [Bike profile and calibration](docs/bike-calibration.md) · [Downhill braking and records](docs/downhill.md)
 

@@ -22,3 +22,24 @@ body.riding .vignette{background:linear-gradient(180deg,#0b1c2130,transparent 23
   .intro .settings{margin:8px 0 6px;gap:6px}
   .intro .hint{font-size:8px;line-height:1.5}
 }
+
+#sector-picker{margin:10px 0 12px;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px 10px}
+#sector-picker[hidden],#sector-status[hidden]{display:none}
+#sector-picker label{font-size:8px;letter-spacing:1.2px;color:var(--lime);font-weight:650}
+#sector-choice{min-width:0;width:100%;background:#152a22ed;border:1px solid #c1d5a65f;border-radius:5px;padding:8px 25px 8px 8px;color:var(--ink);font-size:11px}
+#sector-choice:disabled{opacity:.6}
+#sector-help{grid-column:1 / -1;font-size:9px;line-height:1.4;color:#c2d1b5}
+#sector-status{font-size:9px;line-height:1.45;color:var(--lime);margin-top:8px;letter-spacing:.3px}
+.has-sectors #map{height:136px}
+.has-sectors .intro h1{font-size:37px;letter-spacing:-1.5px;line-height:1.05}
+.has-sectors .intro h1>span,.has-sectors .practice-note{display:none}
+.has-sectors .course-picker select{min-width:0;max-width:100%}
+@media(max-height:900px){
+ .has-sectors .intro h1{font-size:31px;margin:8px 0}
+ .has-sectors #sector-picker{margin:8px 0 10px;gap:5px 8px}
+ .has-sectors #sector-choice{padding:6px 22px 6px 8px;font-size:10px}
+ .has-sectors #sector-help{font-size:8px}
+ .has-sectors .route-facts{margin:8px 0}
+ .has-sectors .settings{margin:6px 0}
+}
+@media(max-height:800px){.has-sectors #map{height:80px}}

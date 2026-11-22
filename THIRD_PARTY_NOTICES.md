@@ -10,6 +10,8 @@ Included resources retain their original licences and attribution. The Dentenber
 | `Scene/courses/al-dente/aerial.jpg` | SWISSIMAGE, © swisstopo; mosaic from the `ch.swisstopo.swissimage` WMTS service, level 17 | swisstopo Open Government Data terms, with attribution; local asset |
 | `Scene/courses/uetliberg/aerial.jpg` | SWISSIMAGE, © swisstopo; level 16 WMTS mosaic | swisstopo Open Government Data terms, with attribution |
 | `Scene/courses/gurten/aerial.jpg` | SWISSIMAGE, © swisstopo; level 17 WMTS mosaic | swisstopo Open Government Data terms, with attribution |
+| `Scene/courses/eiger-20/aerial.jpg` | SWISSIMAGE, © swisstopo; level 16 WMTS mosaic | swisstopo Open Government Data terms, with attribution |
+| `Scene/courses/eiger-20/route.json` | Processed coordinates and elevations from the organisers' [20 km GPX](https://www.eigerbike.ch/wp-content/uploads/gpx/ebc20km.gpx) | Identifies the published Eiger Bike Challenge course; no organiser affiliation or sponsorship is claimed |
 | `Scene/courses/gurten/textures/el-tony-logo.png` | [Official El Tony Mate logo](https://www.eltonymate.com/site/templates/images/El-Tony-Mate-Logo.png) | El Tony Mate trademark and design; not relicensed with the code. Used to depict the trail's signage, without affiliation or app sponsorship |
 | Terrain in `world.json` | swisstopo elevation data | swisstopo Open Government Data terms, with attribution |
 | Forests, buildings and derived mapping in `world.json` | © OpenStreetMap contributors | Open Database License (ODbL) 1.0 for data derived from OpenStreetMap |
@@ -26,6 +28,8 @@ References:
 Publishing this repository grants no additional rights to third-party trademarks.
 
 The Gurten course is derived from public OpenStreetMap and swisstopo mapping. Photographs by trailnet and TRIEBHAUS informed the obstacle and signage design; those photographs are not included in the repository. See the [Gurten sources](docs/GURTEN.md).
+
+Eiger Bike Challenge uses the organisers' downloadable route with swisstopo terrain and imagery and OpenStreetMap mapping. Event and local tourism photographs informed the summer appearance; those photographs are not distributed. Race arches, spectators and furniture are code-generated interpretations. The event name identifies the recreated course, not an endorsement. See the [Eiger sources and scope](docs/EIGER.md).
 
 ## Track Lab and additional visual resources
 

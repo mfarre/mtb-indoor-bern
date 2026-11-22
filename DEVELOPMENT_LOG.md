@@ -4,6 +4,24 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 22 November 2026 · Eiger Bike Challenge 20 km, summer and three starts
+
+**A new course around Grindelwald is included in the simulator and public repository.** The organisers' published 20 km GPX measures **19.48 km**, with approximately **874 m of climbing** after smoothing. Its June 2026 route was cross-checked against the official profile map. SWISSIMAGE, mapped woodland/buildings and swisstopo terrain provide the geographic setting, including the actual distant Alpine silhouettes.
+
+![Native demo excerpts from three parts of the Eiger course](docs/images/eiger-summer-race.gif)
+
+Choose **Whole course** or one of three training starts before riding or entering demo: **Grindelwald climb at km 0**, **Upper traverse & descent at km 8.25**, or **Mühlebach & finish at km 13.03**. Each continues to the finish. The profile marks the boundaries and the route panel shows the current sector. Stop/restart returns to the selected entry point; a running or paused ride cannot teleport between starts. Partial descent starts are timed without record eligibility, and an already-passed stage is hidden.
+
+| Starting-sector selection | Summer Alpine panorama |
+| --- | --- |
+| ![Choose an Eiger course starting point](docs/images/eiger-welcome.png) | ![The Eiger landscape from the upper course](docs/images/eiger-panorama.png) |
+
+Summer scenery adds green meadows, conifers, timber-style chalets, race arches, flags, barriers, spectators and feed tents. Race installations are visual interpretations; source photos are not distributed, and no organiser or sponsor affiliation is claimed. The original road/elevation profile remains the source of graphics, physics and trainer gradient. A hairpin resampling correction removes artificial gradient spikes; clipping the near/far terrain boundary removes visible triangular gaps without moving the course.
+
+**Verified:** public and personal builds/self-tests; 28 native UI checks covering all three starts, fresh counters, stop/reset, pause/resume, profile seeking and teleport guards; partial-timer record protection; six screenshots and a nine-second GIF; normal and compact layouts. Captures reported approximately 30 fps on this PC. The installed app was updated while preserving device/settings files and local Dentenberg assets. No new physical trainer test was performed.
+
+[Course, sectors and sources](docs/EIGER.md) · [Verification](docs/verification-eiger-2026-11-22.json) · [Reusable geographic importer](tools/eiger-import/README.md).
+
 ## 22 November 2026 · Gurten in motion and animated brake design
 
 The repository landing page now opens with the existing **Gurtentrail riding GIF**, featuring the El Tony jump and signage, instead of a still screenshot.

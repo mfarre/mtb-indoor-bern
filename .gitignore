@@ -41,3 +41,8 @@ records.json.tmp
 !src/MTBIndoorBern/Scene/courses/gurten/route.json
 !src/MTBIndoorBern/Scene/courses/gurten/world.json
 !src/MTBIndoorBern/Scene/courses/gurten/aerial.jpg
+
+# Public Eiger Bike Challenge 20 km course and Swiss open geodata
+!src/MTBIndoorBern/Scene/courses/eiger-20/route.json
+!src/MTBIndoorBern/Scene/courses/eiger-20/world.json
+!src/MTBIndoorBern/Scene/courses/eiger-20/aerial.jpg
