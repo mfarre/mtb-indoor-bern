@@ -9,7 +9,11 @@ internal sealed record TrailCorner(double Distance, double Limit, int Direction,
     public double Start => Distance - 14;
     public double End => Distance + 14;
 }
-internal sealed record DescentStage(string Id, string Name, double Start, double End);
+internal sealed record DescentStage(string Id, string Name, double Start, double End)
+{
+    // A method, not a serialized property: existing record identities keep the original Name.
+    public string DisplayName() => Name == "Dentenberg · baixada del bosc" ? "Dentenberg · forest descent" : Name;
+}
 internal sealed class TrailPlan
 {
     public TrailCorner[] Corners { get; }
@@ -57,7 +61,7 @@ internal sealed class TrailPlan
             using var doc = JsonDocument.Parse(File.ReadAllText(handlingFile));
             var s = doc.RootElement.GetProperty("descent");
             var stage = new DescentStage(s.GetProperty("id").GetString()!, s.GetProperty("name").GetString()!, s.GetProperty("start").GetDouble(), s.GetProperty("end").GetDouble());
-            if (stage.Start < 0 || stage.End > course.Length || stage.End <= stage.Start + 100) throw new InvalidDataException("Tram de baixada invàlid");
+            if (stage.Start < 0 || stage.End > course.Length || stage.End <= stage.Start + 100) throw new InvalidDataException("Invalid downhill section");
             Stage = stage;
         }
         string identity = JsonSerializer.Serialize(new { version = 2, course.Points, Corners, Stage });
@@ -66,7 +70,8 @@ internal sealed class TrailPlan
     public TrailCorner? At(double distance) => Corners.FirstOrDefault(c => distance >= c.Start && distance <= c.End);
     public TrailCorner? Next(double distance, double range = 140) => Corners.FirstOrDefault(c => c.End >= distance && c.Start <= distance + range);
     public object Snapshot() => new { type = "trail", corners = Corners.Select(c => new { distance = c.Distance, limit = c.Limit * 3.6, direction = c.Direction, surface = c.Surface, width = c.Width }),
-        stage = Stage is null ? null : new { name = Stage.Name, start = Stage.Start, end = Stage.End } };
+        // Keep the stored stage name in RecordKey so an English UI preserves existing records.
+        stage = Stage is null ? null : new { name = Stage.DisplayName(), start = Stage.Start, end = Stage.End } };
 }
 
 internal sealed class TrailHandling
@@ -105,7 +110,7 @@ internal sealed class PersonalRecords
     {
         this.file = file;
         try { if (file is not null && File.Exists(file)) times = JsonSerializer.Deserialize<Dictionary<string, double>>(File.ReadAllText(file)) ?? []; }
-        catch { Warning = "No s’han pogut llegir els rècords locals."; }
+        catch { Warning = "Could not read local records."; }
     }
     public double? Best(string key) => times.TryGetValue(key, out double t) && double.IsFinite(t) && t > 0 ? t : null;
     public bool Submit(string key, double seconds)
@@ -113,7 +118,7 @@ internal sealed class PersonalRecords
         if (!double.IsFinite(seconds) || seconds <= 0 || (Best(key) is double best && seconds >= best)) return false;
         times[key] = seconds;
         try { if (file is not null) { File.WriteAllText(file + ".tmp", JsonSerializer.Serialize(times)); File.Move(file + ".tmp", file, true); } }
-        catch { Warning = "Rècord d’aquesta sessió; no s’ha pogut desar al disc."; }
+        catch { Warning = "Session record only; could not save it to disk."; }
         return true;
     }
 }
@@ -153,6 +158,6 @@ internal sealed class DescentTimer
         }
         else Seconds += dt * fraction;
     }
-    public object Snapshot(double distance, int offTracks) => new { name = stage?.Name, status = Status, seconds = Seconds, eligible = Eligible, newBest = NewBest, best = Best,
+    public object Snapshot(double distance, int offTracks) => new { name = stage?.DisplayName(), status = Status, seconds = Seconds, eligible = Eligible, newBest = NewBest, best = Best,
         remaining = stage is null ? 0 : Math.Max(0, (Status == "waiting" ? stage.Start : stage.End) - distance), offTracks = Status == "waiting" ? 0 : Math.Max(0, offTracks - initialOffTracks), warning = records.Warning };
 }

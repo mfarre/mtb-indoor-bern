@@ -10,8 +10,8 @@ internal enum SensorRole { Trainer, HeartRate, Controller }
 
 internal sealed record NearbyDevice(ulong Address, string Name, short Rssi, Guid[] Services, byte? ZwiftType = null)
 {
-    public string DisplayName => ZwiftType switch { 10 => "Zwift Click 2 · dret", 11 => "Zwift Click 2 · esquerre", 9 => "Zwift Click 1", _ => Name };
-    public override string ToString() => Rssi==0?$"{DisplayName}   ·   recordat":$"{DisplayName}   ·   {Rssi} dBm";
+    public string DisplayName => ZwiftType switch { 10 => "Zwift Click 2 · right", 11 => "Zwift Click 2 · left", 9 => "Zwift Click 1", _ => Name };
+    public override string ToString() => Rssi==0?$"{DisplayName}   ·   saved":$"{DisplayName}   ·   {Rssi} dBm";
     public bool Matches(SensorRole role) => role switch
     {
         SensorRole.Trainer => Services.Contains(BleIds.Ftms) || Services.Contains(BleIds.Power) || Name.Contains("KICKR", StringComparison.OrdinalIgnoreCase),
@@ -39,7 +39,7 @@ internal static class Discovery
     {
         var adapter = await BluetoothAdapter.GetDefaultAsync().AsTask(cancellationToken);
         if (adapter is null || !adapter.IsLowEnergySupported)
-            throw new InvalidOperationException("Windows no troba cap adaptador Bluetooth LE disponible.");
+            throw new InvalidOperationException("Windows cannot find an available Bluetooth LE adapter.");
         var devices = new ConcurrentDictionary<ulong, NearbyDevice>();
         var watcher = new BluetoothLEAdvertisementWatcher { ScanningMode = BluetoothLEScanningMode.Active };
         BluetoothError? stoppedError = null;
@@ -66,7 +66,7 @@ internal static class Discovery
         }
         finally { watcher.Stop(); }
         if (stoppedError is not null && stoppedError != BluetoothError.Success)
-            throw new InvalidOperationException($"La cerca Bluetooth s'ha aturat ({stoppedError}).");
+            throw new InvalidOperationException($"Bluetooth scanning stopped ({stoppedError}).");
         return devices.Values.Where(d => !string.IsNullOrWhiteSpace(d.Name) || d.Services.Length > 0)
             .Select(d => string.IsNullOrWhiteSpace(d.Name) ? d with { Name = $"Sensor {d.Address & 0xffff:X4}" } : d)
             .OrderBy(d => d.Name).ThenBy(d => d.ZwiftType).ToArray();
@@ -89,7 +89,7 @@ internal sealed class SensorConnection : IDisposable
     public event Action<string>? ControllerPacket;
     public bool BrakePressed { get; private set; }
     public SensorRole Role { get; }
-    public string Status { get; private set; } = "Sense connexió";
+    public string Status { get; private set; } = "Disconnected";
     public string DeviceName { get; private set; } = "";
     public bool Connected => ready && device?.ConnectionStatus == BluetoothConnectionStatus.Connected;
     public bool HasSession => device is not null;
@@ -136,7 +136,7 @@ internal sealed class SensorConnection : IDisposable
         try
         {
             DisconnectCore();
-            Status = "Connectant…";
+            Status = "Connecting…";
             DeviceName = selected.DisplayName;
             zwiftType = selected.ZwiftType;
             Changed?.Invoke();
@@ -144,7 +144,7 @@ internal sealed class SensorConnection : IDisposable
             timeout.CancelAfter(TimeSpan.FromSeconds(25));
             var token = timeout.Token;
             device = await BluetoothLEDevice.FromBluetoothAddressAsync(selected.Address).AsTask(token)
-                ?? throw new InvalidOperationException("El dispositiu no respon. Activa'l i torna-ho a provar.");
+                ?? throw new InvalidOperationException("The device is not responding. Wake it up and try again.");
             device.ConnectionStatusChanged += OnConnectionChanged;
             session = await GattSession.FromDeviceIdAsync(device.BluetoothDeviceId).AsTask(token);
             if (session is not null) session.MaintainConnection = true;
@@ -168,20 +168,20 @@ internal sealed class SensorConnection : IDisposable
             }
             if (!subscribed)
                 throw new InvalidOperationException(Role == SensorRole.Controller
-                    ? "El servei de botons no està disponible. Si és un Click 2, prova el comandament dret."
-                    : "No s'ha trobat el servei de dades esperat. Comprova el sensor seleccionat i tanca altres apps que l'utilitzin.");
+                    ? "The button service is unavailable. For Click 2, try the right controller."
+                    : "The expected data service was not found. Check the selected sensor and close other apps using it.");
             if (Role == SensorRole.Trainer && SupportsFtms)
             {
                 try
                 {
                     var features = await ReadAsync(0x1826, 0x2acc, token);
                     Control = await TrainerControl.CreateAsync(services.First(s => s.Uuid == BleIds.Ftms), features, token);
-                    ControlInfo = Control is null ? "Control no disponible. Tanca altres apps d’entrenament i reconnecta el KICKR." : "Resistència FTMS disponible";
+                    ControlInfo = Control is null ? "Control unavailable. Close other training apps and reconnect the KICKR." : "FTMS resistance available";
                 }
-                catch (Exception e) { ControlInfo = "Control no disponible: " + e.Message; }
+                catch (Exception e) { ControlInfo = "Control unavailable: " + e.Message; }
             }
             ready = true;
-            Status = "Connectat · esperant dades";
+            Status = "Connected · waiting for data";
             Changed?.Invoke();
             // Device information is optional. Its failure must not tear down a working sensor.
             try
@@ -197,7 +197,7 @@ internal sealed class SensorConnection : IDisposable
         catch (Exception e)
         {
             DisconnectCore();
-            Status = e is OperationCanceledException ? "Temps d'espera esgotat. Torna a connectar." : e.Message;
+            Status = e is OperationCanceledException ? "Connection timed out. Reconnect to try again." : e.Message;
             Changed?.Invoke();
             throw;
         }
@@ -207,7 +207,7 @@ internal sealed class SensorConnection : IDisposable
     private static void EnsureSuccess(GattCommunicationStatus status)
     {
         if (status != GattCommunicationStatus.Success)
-            throw new InvalidOperationException($"Bluetooth no ha completat la connexió ({status}). Comprova que el sensor estigui despert i disponible.");
+            throw new InvalidOperationException($"Bluetooth could not complete the connection ({status}). Check that the sensor is awake and available.");
     }
 
     private async Task<bool> SubscribeAsync(Guid serviceId, Guid characteristicId, CancellationToken token)
@@ -313,7 +313,7 @@ internal sealed class SensorConnection : IDisposable
                 }
             }
             LastPacket = DateTime.UtcNow;
-            Status = "Connectat · dades en directe";
+            Status = "Connected · live data";
             Changed?.Invoke();
         }
         catch (InvalidDataException) { /* Ignore a truncated radio packet, retaining the last valid sample. */ }
@@ -326,9 +326,9 @@ internal sealed class SensorConnection : IDisposable
         {
             Control?.ConnectionLost();
             ClearData();
-            Status = "Connexió perduda · intentant recuperar";
+            Status = "Connection lost · reconnecting";
         }
-        else if (ready) Status = "Connectat · esperant dades";
+        else if (ready) Status = "Connected · waiting for data";
         Changed?.Invoke();
     }
 
@@ -338,7 +338,7 @@ internal sealed class SensorConnection : IDisposable
         try
         {
             try { if (Control is not null) await Control.StopAsync(); } catch (Exception) { }
-            DisconnectCore(); Status = "Sense connexió"; Changed?.Invoke();
+            DisconnectCore(); Status = "Disconnected"; Changed?.Invoke();
         }
         finally { gate.Release(); }
     }

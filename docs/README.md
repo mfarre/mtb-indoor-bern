@@ -31,10 +31,11 @@
 
 ## Historical verification reports
 
-These reports record checks performed at each milestone. They are not claims that all hardware combinations have been tested. Historical UI strings and screenshots retain the language shown at capture time.
+These reports record checks performed at each milestone. They are not claims that all hardware combinations have been tested. Dated reports retain their original recorded values. Documentation screenshots have been refreshed to show the English interface.
 
 | Milestone | Report |
 | --- | --- |
+| English simulator, Track Lab and screenshots | [22 November 2026](verification-english-ui-2026-11-22.json) |
 | Gurten course and trail features | [19 November 2026](verification-gurten-2026-11-19.json) |
 | Bike profiles and guided calibration | [19 November 2026](verification-calibration-2026-11-19.json) |
 | Uetliberg and demo seeking | [19 November 2026](verification-uetliberg-2026-11-19.json) |

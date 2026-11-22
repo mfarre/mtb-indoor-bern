@@ -24,9 +24,9 @@ def main():
     archive = pathlib.Path(args.fit_zip).resolve()
     dest = pathlib.Path(args.output).resolve()
     if dest == source or dest.is_relative_to(source):
-        raise ValueError('La carpeta de treball ha de ser fora de la carpeta de vídeos originals.')
+        raise ValueError('The working folder must be outside the original video folder.')
     if not source.is_dir() or not archive.is_file():
-        raise ValueError('No es troba la carpeta de vídeos o el FIT/ZIP.')
+        raise ValueError('The video folder or FIT/ZIP file was not found.')
     dest.mkdir(parents=True, exist_ok=True)
     files = [(archive, pathlib.Path('originals/fit') / archive.name)]
     files += [(p, pathlib.Path('originals/video') / p.relative_to(source)) for p in sorted(source.rglob('*')) if p.is_file()]

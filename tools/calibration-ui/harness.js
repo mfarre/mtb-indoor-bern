@@ -4,7 +4,7 @@ import {setupBikeSettings,updateBikeSettings,readBikeProfile} from '../../src/MT
 // WebView bridge, Bluetooth code, network APIs or the main game module.
 const $=id=>document.getElementById(id);
 const clone=value=>JSON.parse(JSON.stringify(value));
-const baseProfile={name:'La meva MTB',riderKg:75,bikeKg:14,wheelCircumferenceM:2.3,chainring:32,sprockets:[51,45,39,33,28,24,21,18,16,14,12,10],difficulty:.5,lowCadenceAssist:true,physicalGearNote:'Plat 32 · pinyó 16'};
+const baseProfile={name:'My MTB',riderKg:75,bikeKg:14,wheelCircumferenceM:2.3,chainring:32,sprockets:[51,45,39,33,28,24,21,18,16,14,12,10],difficulty:.5,lowCadenceAssist:true,physicalGearNote:'32T chainring · 16T sprocket'};
 const sampleResult={completedUtc:'2026-11-19T08:00:00Z',settlingSeconds:3.2,meanErrorPercent:4.7,torqueRiseNmPerSecond:2.1,updateIntervalSeconds:.8,steps:5};
 const idle={type:'calibration',phase:'idle',active:false,stepIndex:0,stepCount:5,progress:0};
 let state,autoSave=true,running=false;
@@ -15,15 +15,15 @@ function emitCalibration(extra={}){updateBikeSettings({...idle,...extra});}
 function send(action,extra={}){
  actions.push({action,...clone(extra)});
  if(action==='profile-request'){emitProfile();emitCalibration();}
- if(action==='profile-save'&&autoSave){state.profile=clone(extra.profile);emitProfile({saved:true,notice:'Perfil de prova desat (només en aquesta pàgina).'});}
- if(action==='calibration-start')emitCalibration({phase:'preparing',active:true,instruction:'Preparant una resposta simulada…',message:'Dades de prova: no hi ha cap KICKR connectat.'});
- if(action==='calibration-cancel')emitCalibration({phase:'cancelled',active:false,instruction:'Prova simulada aturada.',message:extra.reason});
+ if(action==='profile-save'&&autoSave){state.profile=clone(extra.profile);emitProfile({saved:true,notice:'Test profile saved (on this page only).'});}
+ if(action==='calibration-start')emitCalibration({phase:'preparing',active:true,instruction:'Preparing a simulated response…',message:'Test data: no KICKR is connected.'});
+ if(action==='calibration-cancel')emitCalibration({phase:'cancelled',active:false,instruction:'Simulated test stopped.',message:extra.reason});
  if(action==='calibration-forget'){state.calibrationResult=null;state.calibrationValid=false;emitProfile();}
 }
 const api=setupBikeSettings(send);
 function reset(connected=false){
  api.close();autoSave=true;
- state={type:'bike-profile',profile:clone(baseProfile),calibrationResult:null,calibrationValid:false,trainerConnected:connected,canCalibrate:connected,notice:'Entorn de prova · no es desa res al joc.'};
+ state={type:'bike-profile',profile:clone(baseProfile),calibrationResult:null,calibrationValid:false,trainerConnected:connected,canCalibrate:connected,notice:'Test environment · nothing is saved to the game.'};
  emitCalibration();emitProfile({saved:true,settingsWarning:''});
 }
 function open(tab='profile'){$('harness-profile').focus();api.open();$('bike-tab-'+tab).click();}
@@ -33,7 +33,7 @@ function count(action){return actions.filter(item=>item.action===action).length;
 function assert(condition,message){if(!condition)throw new Error(message);}
 function equal(actual,expected,message){assert(JSON.stringify(actual)===JSON.stringify(expected),`${message}: ${JSON.stringify(actual)} ≠ ${JSON.stringify(expected)}`);}
 function startFake(){edit('bike-ready',true,'change');$('bike-cal-start').click();}
-function step(){emitCalibration({phase:'step',active:true,stepIndex:1,stepCount:5,instruction:'Mantén una pedalada estable.',targetCadenceMin:75,targetCadenceMax:90,targetPower:100,measuredPower:97,cadence:82,secondsRemaining:12,progress:.4});}
+function step(){emitCalibration({phase:'step',active:true,stepIndex:1,stepCount:5,instruction:'Keep pedalling steadily.',targetCadenceMin:75,targetCadenceMax:90,targetPower:100,measuredPower:97,cadence:82,secondsRemaining:12,progress:.4});}
 const pause=()=>new Promise(resolve=>requestAnimationFrame(resolve));
 
 async function test(name,fn){
@@ -44,92 +44,92 @@ async function test(name,fn){
 }
 
 async function run(){
- if(running)return;running=true;$('harness-run').disabled=true;results.length=0;actions.length=0;$('harness-results').replaceChildren();$('harness-result').textContent='Executant comprovacions amb sensors simulats…';
+ if(running)return;running=true;$('harness-run').disabled=true;results.length=0;actions.length=0;$('harness-results').replaceChildren();$('harness-result').textContent='Running checks with simulated sensors…';
  reset();
- await test('Carrega el perfil, converteix metres a mm i mostra 12 marxes',()=>{
-  open();assert(api.isOpen(),'El diàleg no s’ha obert');equal(count('profile-request'),1,'Peticions de perfil');equal($('bike-rider').value,'75','Pes');equal($('bike-wheel').value,'2300','Perímetre');equal($('bike-gear-count').textContent,'12 marxes','Nombre de marxes');assert(!$('bike-fields').disabled,'Formulari carregat bloquejat');
+ await test('Loads the profile, converts metres to mm and displays 12 gears',()=>{
+  open();assert(api.isOpen(),'The dialog did not open');equal(count('profile-request'),1,'Profile requests');equal($('bike-rider').value,'75','Weight');equal($('bike-wheel').value,'2300','Circumference');equal($('bike-gear-count').textContent,'12 gears','Gear count');assert(!$('bike-fields').disabled,'Loaded form is disabled');
  });
- await test('La previsualització reflecteix els canvis de transmissió',()=>{
-  edit('bike-chainring',30);equal($('bike-low-ratio').textContent,'30 × 51','Relació curta');equal($('bike-high-ratio').textContent,'30 × 10','Relació llarga');assert(!$('bike-save').disabled,'Desa no s’activa');
+ await test('Preview reflects drivetrain changes',()=>{
+  edit('bike-chainring',30);equal($('bike-low-ratio').textContent,'30 × 51','Low gear ratio');equal($('bike-high-ratio').textContent,'30 × 10','High gear ratio');assert(!$('bike-save').disabled,'Save did not become available');
  });
- await test('Les actualitzacions periòdiques conserven l’esborrany',()=>{
-  emitProfile({profile:{...state.profile,chainring:38}});equal($('bike-chainring').value,'30','El servidor ha sobreescrit el plat');equal($('bike-notice').textContent,'Canvis pendents de desar.','Avís d’esborrany');
+ await test('Periodic updates preserve the draft',()=>{
+  emitProfile({profile:{...state.profile,chainring:38}});equal($('bike-chainring').value,'30','The server overwrote the chainring');equal($('bike-notice').textContent,'Unsaved changes.','Draft notice');
  });
- await test('Rebutja pinyons duplicats i conserva l’error entre actualitzacions',()=>{
-  const before=count('profile-save');edit('bike-sprockets','51, 45, 45, 10');submit();equal(count('profile-save'),before,'S’ha enviat un perfil invàlid');equal($('bike-sprockets').getAttribute('aria-invalid'),'true','Camp invàlid');const error=$('bike-notice').textContent;emitProfile();equal($('bike-notice').textContent,error,'Avís esborrat');
+ await test('Rejects duplicate sprockets and preserves the error between updates',()=>{
+  const before=count('profile-save');edit('bike-sprockets','51, 45, 45, 10');submit();equal(count('profile-save'),before,'An invalid profile was sent');equal($('bike-sprockets').getAttribute('aria-invalid'),'true','Invalid field');const error=$('bike-notice').textContent;emitProfile();equal($('bike-notice').textContent,error,'Notice cleared');
  });
- await test('Valida ordre, límits, quantitat de marxes i perímetre',()=>{
+ await test('Validates order, limits, gear count and circumference',()=>{
   const values={...baseProfile,wheelMm:2300,sprockets:baseProfile.sprockets.join(',')};
-  for(const [key,value]of[['sprockets','10, 20, 30, 40'],['sprockets','51, 45, 10'],['sprockets','61, 50, 30, 10'],['riderKg',39],['bikeKg',36],['wheelMm',1499],['chainring',32.5],['difficulty',1.1],['difficulty','']])assert(readBikeProfile({...values,[key]:value}).errors[key],`S’ha acceptat ${key}=${value}`);
-  assert(readBikeProfile(values).profile,'Perfil vàlid rebutjat');
+  for(const [key,value]of[['sprockets','10, 20, 30, 40'],['sprockets','51, 45, 10'],['sprockets','61, 50, 30, 10'],['riderKg',39],['bikeKg',36],['wheelMm',1499],['chainring',32.5],['difficulty',1.1],['difficulty','']])assert(readBikeProfile({...values,[key]:value}).errors[key],`Accepted ${key}=${value}`);
+  assert(readBikeProfile(values).profile,'Valid profile rejected');
  });
- await test('Desa valors convertits i espera la confirmació del servidor',()=>{
-  autoSave=false;edit('bike-sprockets','46,37,32,28,24,21,19,17,15,13,11');edit('bike-wheel',2280);submit();const sent=actions.at(-1);equal(sent.action,'profile-save','Acció');equal(sent.profile.wheelCircumferenceM,2.28,'Conversió mm/m');equal(sent.profile.sprockets.length,11,'Cassette');assert($('bike-save').disabled&&$('bike-fields').disabled,'Petició pendent no bloquejada');emitProfile();equal($('bike-wheel').value,'2280','Esborrany pendent perdut');assert($('bike-fields').disabled,'Actualització ha eliminat l’espera');state.profile=clone(sent.profile);emitProfile({saved:true,notice:'Perfil desat.'});assert(!$('bike-fields').disabled&&$('bike-save').disabled,'Confirmació no aplicada');
+ await test('Saves converted values and waits for server confirmation',()=>{
+  autoSave=false;edit('bike-sprockets','46,37,32,28,24,21,19,17,15,13,11');edit('bike-wheel',2280);submit();const sent=actions.at(-1);equal(sent.action,'profile-save','Action');equal(sent.profile.wheelCircumferenceM,2.28,'mm/m conversion');equal(sent.profile.sprockets.length,11,'Cassette');assert($('bike-save').disabled&&$('bike-fields').disabled,'Pending request did not lock the form');emitProfile();equal($('bike-wheel').value,'2280','Pending draft lost');assert($('bike-fields').disabled,'Update removed the pending state');state.profile=clone(sent.profile);emitProfile({saved:true,notice:'Profile saved.'});assert(!$('bike-fields').disabled&&$('bike-save').disabled,'Confirmation not applied');
  });
- await test('Un error de desament conserva els valors i el missatge',()=>{
-  edit('bike-rider',81);submit();emitProfile({saved:true,error:'No s’ha pogut escriure la configuració.'});emitProfile();equal($('bike-rider').value,'81','Esborrany perdut');assert($('bike-notice').textContent.includes('No s’ha pogut escriure'),'Error no persistent');assert(!$('bike-save').disabled,'No es pot reintentar');
+ await test('A save error preserves values and the message',()=>{
+  edit('bike-rider',81);submit();emitProfile({saved:true,error:'Unable to write the settings.'});emitProfile();equal($('bike-rider').value,'81','Draft lost');assert($('bike-notice').textContent.includes('Unable to write'),'Error did not persist');assert(!$('bike-save').disabled,'Retry unavailable');
  });
- await test('settingsWarning persisteix fins a un desament correcte',()=>{
-  reset();open();emitProfile({settingsWarning:'Configuració recuperada: revisa els valors.'});emitProfile();assert($('bike-notice').textContent.includes('Configuració recuperada'),'Advertiment esborrat');edit('bike-rider',76);submit();assert(!$('bike-notice').textContent.includes('Configuració recuperada'),'Advertiment no eliminat després de desar');
+ await test('settingsWarning persists until a successful save',()=>{
+  reset();open();emitProfile({settingsWarning:'Settings recovered: review the values.'});emitProfile();assert($('bike-notice').textContent.includes('Settings recovered'),'Warning cleared');edit('bike-rider',76);submit();assert(!$('bike-notice').textContent.includes('Settings recovered'),'Warning remained after saving');
  });
- await test('Conserva dificultats existents de 60% i 0% sense arrodonir',()=>{
-  for(const difficulty of [.6,0]){state.profile.difficulty=difficulty;emitProfile({saved:true});equal($('bike-difficulty').value,String(difficulty),'Dificultat carregada');edit('bike-rider',77);submit();equal(actions.at(-1).profile.difficulty,difficulty,'Dificultat desada');}
+ await test('Preserves existing 60% and 0% difficulty without rounding',()=>{
+  for(const difficulty of [.6,0]){state.profile.difficulty=difficulty;emitProfile({saved:true});equal($('bike-difficulty').value,String(difficulty),'Loaded difficulty');edit('bike-rider',77);submit();equal(actions.at(-1).profile.difficulty,difficulty,'Saved difficulty');}
  });
- await test('Els pinyons predefinits actualitzen el nombre de marxes',()=>{
-  edit('bike-cassette','11-46','change');equal($('bike-gear-count').textContent,'11 marxes','Cassette 11v');edit('bike-cassette','10-52','change');equal($('bike-low-ratio').textContent,'32 × 52','Cassette 52');submit();
+ await test('Cassette presets update the gear count',()=>{
+  edit('bike-cassette','11-46','change');equal($('bike-gear-count').textContent,'11 gears','11-speed cassette');edit('bike-cassette','10-52','change');equal($('bike-low-ratio').textContent,'32 × 52','Cassette 52');submit();
  });
- await test('Sense connexió, la prova queda bloquejada malgrat marcar preparat',()=>{
-  $('bike-tab-guide').click();edit('bike-ready',true,'change');assert($('bike-cal-start').disabled,'Inici habilitat sense KICKR');equal($('bike-calibration-badge').textContent,'Pendent de prova','Resultat inventat');
+ await test('Without a connection, the test stays blocked even when ready is selected',()=>{
+  $('bike-tab-guide').click();edit('bike-ready',true,'change');assert($('bike-cal-start').disabled,'Start enabled without KICKR');equal($('bike-calibration-badge').textContent,'Test pending','Result invented');
  });
- await test('Un calibratge desat espera el KICKR per validar la compatibilitat',()=>{
-  state.calibrationResult=clone(sampleResult);emitProfile();equal($('bike-calibration-badge').textContent,'Desat · pendent de KICKR','Estat desconnectat');assert($('bike-guide-result').textContent.includes('Pendent de connectar'),'Detall de compatibilitat');
+ await test('A saved calibration waits for the KICKR to validate compatibility',()=>{
+  state.calibrationResult=clone(sampleResult);emitProfile();equal($('bike-calibration-badge').textContent,'Saved · awaiting KICKR','Disconnected status');assert($('bike-guide-result').textContent.includes('Connect the KICKR to verify compatibility.'),'Compatibility detail');
  });
- await test('La prova requereix una confirmació nova en cada obertura',()=>{
-  reset(true);open('guide');assert(!$('bike-ready').checked&&$('bike-cal-start').disabled,'Confirmació inicial absent');edit('bike-ready',true,'change');api.close();open('guide');assert(!$('bike-ready').checked&&$('bike-cal-start').disabled,'Confirmació anterior reutilitzada');
+ await test('The test requires fresh confirmation each time it opens',()=>{
+  reset(true);open('guide');assert(!$('bike-ready').checked&&$('bike-cal-start').disabled,'Initial confirmation missing');edit('bike-ready',true,'change');api.close();open('guide');assert(!$('bike-ready').checked&&$('bike-cal-start').disabled,'Previous confirmation reused');
  });
- await test('Les dades idle periòdiques no desmarquen la confirmació',()=>{
-  edit('bike-ready',true,'change');emitCalibration();emitCalibration();emitProfile();assert($('bike-ready').checked&&!$('bike-cal-start').disabled,'Actualització ha reiniciat la confirmació');
+ await test('Periodic idle data does not clear the ready confirmation',()=>{
+  edit('bike-ready',true,'change');emitCalibration();emitCalibration();emitProfile();assert($('bike-ready').checked&&!$('bike-cal-start').disabled,'Update reset the confirmation');
  });
- await test('Començar envia una sola ordre i bloqueja el perfil',()=>{
-  const before=count('calibration-start');$('bike-cal-start').click();equal(count('calibration-start'),before+1,'Nombre d’inicis');assert($('bike-fields').disabled&&$('bike-tab-profile').disabled,'Perfil actiu editable');assert(!$('bike-cal-stop').hidden&&$('bike-cal-start').hidden,'Atura no visible');equal($('bike-step-label').textContent,'PREPARANT','Etiqueta preparació');
+ await test('Starting sends one command and locks the profile',()=>{
+  const before=count('calibration-start');$('bike-cal-start').click();equal(count('calibration-start'),before+1,'Start count');assert($('bike-fields').disabled&&$('bike-tab-profile').disabled,'Active profile is editable');assert(!$('bike-cal-stop').hidden&&$('bike-cal-start').hidden,'Stop not visible');equal($('bike-step-label').textContent,'PREPARING','Preparation label');
  });
- await test('Mostra el pas zero-based, la cadència, els watts i el progrés',()=>{
-  step();equal($('bike-step-label').textContent,'PAS 2 / 5','Pas');equal($('bike-live-cadence').textContent,'82','Cadència');equal($('bike-target-watts').textContent,'100','Objectiu');equal($('bike-measured-watts').textContent,'97','Mesurat');equal($('bike-cal-progress').value,.4,'Progrés');assert($('bike-live-cadence').classList.contains('in-range'),'Cadència en rang');
+ await test('Displays the zero-based step, cadence, watts and progress',()=>{
+  step();equal($('bike-step-label').textContent,'STEP 2 / 5','Step');equal($('bike-live-cadence').textContent,'82','Cadence');equal($('bike-target-watts').textContent,'100','Target');equal($('bike-measured-watts').textContent,'97','Measured');equal($('bike-cal-progress').value,.4,'Progress');assert($('bike-live-cadence').classList.contains('in-range'),'Cadence in range');
  });
- await test('Aturar cancel·la la prova i no fabrica un resultat',()=>{
-  const before=count('calibration-cancel');$('bike-cal-stop').click();equal(count('calibration-cancel'),before+1,'Cancel·lacions');equal($('bike-step-label').textContent,'ATURADA','Etiqueta final');assert(!$('bike-ready').checked,'Confirmació no reiniciada');equal($('bike-calibration-badge').textContent,'Pendent de prova','Resultat fabricat');
+ await test('Stopping cancels the test without inventing a result',()=>{
+  const before=count('calibration-cancel');$('bike-cal-stop').click();equal(count('calibration-cancel'),before+1,'Cancellations');equal($('bike-step-label').textContent,'STOPPED','Final label');assert(!$('bike-ready').checked,'Confirmation not reset');equal($('bike-calibration-badge').textContent,'Test pending','Result fabricated');
  });
- await test('Les etiquetes de fase tenen prioritat sobre stepCount',()=>{
-  for(const [phase,label]of[['warmup','PREPARACIÓ'],['complete','RESULTAT'],['failed','PROVA NO VÀLIDA'],['cancelled','ATURADA']]){emitCalibration({phase,active:phase==='warmup'});equal($('bike-step-label').textContent,label,'Etiqueta '+phase);}
+ await test('Phase labels take precedence over stepCount',()=>{
+  for(const [phase,label]of[['warmup','WARM-UP'],['complete','RESULT'],['failed','INVALID TEST'],['cancelled','STOPPED']]){emitCalibration({phase,active:phase==='warmup'});equal($('bike-step-label').textContent,label,'Label '+phase);}
  });
- await test('Un resultat antic no revalida un perfil incompatible',()=>{
-  state.calibrationResult=clone(sampleResult);state.calibrationValid=false;emitProfile();emitCalibration({phase:'complete',result:sampleResult});equal($('bike-calibration-badge').textContent,'Cal repetir la prova','Validesa sobreescrita');
+ await test('An old result does not revalidate an incompatible profile',()=>{
+  state.calibrationResult=clone(sampleResult);state.calibrationValid=false;emitProfile();emitCalibration({phase:'complete',result:sampleResult});equal($('bike-calibration-badge').textContent,'Test needed','Validity overwritten');
  });
- await test('Un resultat vàlid mostra mètriques i es pot esborrar',()=>{
-  state.calibrationValid=true;emitProfile();equal($('bike-calibration-badge').textContent,'Calibratge vigent','Validesa');assert($('bike-guide-result').textContent.includes('3,2 s'),'Temps de resposta absent');$('bike-cal-forget').click();equal($('bike-calibration-badge').textContent,'Pendent de prova','Resultat no esborrat');
+ await test('A valid result displays metrics and can be cleared',()=>{
+  state.calibrationValid=true;emitProfile();equal($('bike-calibration-badge').textContent,'Calibration current','Validity');assert($('bike-guide-result').textContent.includes('3.2 s'),'Response time missing');$('bike-cal-forget').click();equal($('bike-calibration-badge').textContent,'Test pending','Result not cleared');
  });
- await test('Tancar una prova envia cancel·lació i profile-close',()=>{
-  startFake();const cancels=count('calibration-cancel'),closes=count('profile-close');api.close();equal(count('calibration-cancel'),cancels+1,'Cancel·lació en tancar');equal(count('profile-close'),closes+1,'Avís de tancament');assert(!api.isOpen(),'Diàleg obert');equal(document.activeElement.id,'harness-profile','Focus no restaurat');
+ await test('Closing a test sends cancellation and profile-close',()=>{
+  startFake();const cancels=count('calibration-cancel'),closes=count('profile-close');api.close();equal(count('calibration-cancel'),cancels+1,'Cancellation on close');equal(count('profile-close'),closes+1,'Close notification');assert(!api.isOpen(),'Dialog open');equal(document.activeElement.id,'harness-profile','Focus not restored');
  });
- await test('Tancar inactiu només envia profile-close',()=>{
-  open();const cancels=count('calibration-cancel'),closes=count('profile-close');api.close();equal(count('calibration-cancel'),cancels,'Cancel·lació innecessària');equal(count('profile-close'),closes+1,'Avís inactiu');api.close();equal(count('profile-close'),closes+1,'Tancament duplicat');
+ await test('Closing while idle only sends profile-close',()=>{
+  open();const cancels=count('calibration-cancel'),closes=count('profile-close');api.close();equal(count('calibration-cancel'),cancels,'Unnecessary cancellation');equal(count('profile-close'),closes+1,'Idle notification');api.close();equal(count('profile-close'),closes+1,'Duplicate close');
  });
- await test('Escape cancel·la i no arriba als controls del joc',()=>{
-  open('guide');startFake();let reached=false;const listener=()=>{reached=true;};window.addEventListener('keydown',listener);const cancels=count('calibration-cancel');$('bike-cal-stop').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));window.removeEventListener('keydown',listener);assert(!api.isOpen()&&!reached,'Escape ha arribat al joc');equal(count('calibration-cancel'),cancels+1,'Cancel·lació Escape');
+ await test('Escape cancels without reaching the game controls',()=>{
+  open('guide');startFake();let reached=false;const listener=()=>{reached=true;};window.addEventListener('keydown',listener);const cancels=count('calibration-cancel');$('bike-cal-stop').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));window.removeEventListener('keydown',listener);assert(!api.isOpen()&&!reached,'Escape reached the game');equal(count('calibration-cancel'),cancels+1,'Escape cancellation');
  });
- await test('Perdre el focus atura una prova activa',()=>{
-  open('guide');startFake();const cancels=count('calibration-cancel');window.dispatchEvent(new Event('blur'));equal(count('calibration-cancel'),cancels+1,'Cancel·lació blur');assert($('bike-cal-stop').hidden,'Prova segueix activa');
+ await test('Losing focus stops an active test',()=>{
+  open('guide');startFake();const cancels=count('calibration-cancel');window.dispatchEvent(new Event('blur'));equal(count('calibration-cancel'),cancels+1,'Blur cancellation');assert($('bike-cal-stop').hidden,'Test remains active');
  });
- await test('Les fletxes canvien de pestanya sense executar dreceres del joc',()=>{
-  $('bike-tab-profile').click();$('bike-tab-profile').focus();$('bike-tab-profile').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true}));equal($('bike-tab-guide').getAttribute('aria-selected'),'true','Fletxa de pestanyes bloquejada');equal(document.activeElement.id,'bike-tab-guide','Focus de pestanya');let reached=false;const listener=()=>{reached=true;};window.addEventListener('keydown',listener);$('bike-tab-guide').dispatchEvent(new KeyboardEvent('keydown',{key:'b',bubbles:true,cancelable:true}));window.removeEventListener('keydown',listener);assert(!reached,'Drecera ha arribat al joc');
+ await test('Arrow keys switch tabs without triggering game shortcuts',()=>{
+  $('bike-tab-profile').click();$('bike-tab-profile').focus();$('bike-tab-profile').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true}));equal($('bike-tab-guide').getAttribute('aria-selected'),'true','Tab arrow key blocked');equal(document.activeElement.id,'bike-tab-guide','Tab focus');let reached=false;const listener=()=>{reached=true;};window.addEventListener('keydown',listener);$('bike-tab-guide').dispatchEvent(new KeyboardEvent('keydown',{key:'b',bubbles:true,cancelable:true}));window.removeEventListener('keydown',listener);assert(!reached,'Shortcut reached the game');
  });
- await test('El focus queda dins el diàleg amb Tab i Maj+Tab',()=>{
-  $('bike-tab-profile').click();edit('bike-rider',79);$('bike-save').focus();$('bike-save').dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}));equal(document.activeElement.id,'bike-close','Tab no torna al primer control');$('bike-close').dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true}));equal(document.activeElement.id,'bike-save','Maj+Tab no torna al final');
+ await test('Focus stays inside the dialog with Tab and Shift+Tab',()=>{
+  $('bike-tab-profile').click();edit('bike-rider',79);$('bike-save').focus();$('bike-save').dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}));equal(document.activeElement.id,'bike-close','Tab did not return to the first control');$('bike-close').dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true}));equal(document.activeElement.id,'bike-save','Shift+Tab did not return to the last control');
  });
- await test('El diàleg i els controls de tancament caben a la finestra',async()=>{
-  await pause();const rect=$('bike-dialog').getBoundingClientRect(),close=$('bike-close').getBoundingClientRect(),footer=$('bike-save').getBoundingClientRect();assert(rect.left>=0&&rect.right<=innerWidth+1&&rect.top>=0&&rect.bottom<=innerHeight+1,'Diàleg fora de la finestra');assert(close.top>=0&&footer.bottom<=innerHeight+1,'Controls de tancament fora de la finestra');assert($('bike-dialog').scrollWidth<=$('bike-dialog').clientWidth+1,'Desbordament horitzontal');
+ await test('The dialog and close controls fit within the window',async()=>{
+  await pause();const rect=$('bike-dialog').getBoundingClientRect(),close=$('bike-close').getBoundingClientRect(),footer=$('bike-save').getBoundingClientRect();assert(rect.left>=0&&rect.right<=innerWidth+1&&rect.top>=0&&rect.bottom<=innerHeight+1,'Dialog outside the window');assert(close.top>=0&&footer.bottom<=innerHeight+1,'Close controls outside the window');assert($('bike-dialog').scrollWidth<=$('bike-dialog').clientWidth+1,'Horizontal overflow');
  });
- reset();const failed=results.filter(result=>!result.passed).length;$('harness-result').textContent=`${results.length-failed}/${results.length} comprovacions correctes · ${failed} errors · cap accés al maquinari`;$('harness-result').classList.toggle('fail',failed>0);running=false;$('harness-run').disabled=false;console.info('BIKE_UI_RESULTS',JSON.stringify(results));
+ reset();const failed=results.filter(result=>!result.passed).length;$('harness-result').textContent=`${results.length-failed}/${results.length} checks passed · ${failed} failures · no hardware access`;$('harness-result').classList.toggle('fail',failed>0);running=false;$('harness-run').disabled=false;console.info('BIKE_UI_RESULTS',JSON.stringify(results));
  // An optional test-only WebView host may collect this report. No device or
  // profile actions are ever sent to that host; those stay in the fake bridge.
  window.chrome?.webview?.postMessage?.({type:'test-result',running:false,total:results.length,failed,results:clone(results),viewport:{width:innerWidth,height:innerHeight}});

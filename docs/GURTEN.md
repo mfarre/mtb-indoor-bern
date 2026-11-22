@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Simulator](simulator.md) · [Development log](../DEVELOPMENT_LOG.md)
 
-A public course of **6.53 km with 289 m of climbing**, starting in Kehrsatz, climbing to the Gurtentrail entrance beside Gurten Kulm and descending to Wabern. Select **Gurten** on the welcome screen and press **Explore in demo** (`Explora en demo`), or start a ride with your sensors. **El Tony ↗** opens a demo just before the sign; pause, resume, profile seeking and ×1–×8 acceleration work as on the other courses.
+A public course of **6.53 km with 289 m of climbing**, starting in Kehrsatz, climbing to the Gurtentrail entrance beside Gurten Kulm and descending to Wabern. Select **Gurten** on the welcome screen and press **Explore in demo**, or **Start ride** with your sensors. **El Tony ↗** opens a demo just before the sign; **Pause**, **Resume demo**, profile seeking and **⏩ Demo ×1** through ×8 work as on the other courses.
 
 ![Climbing the Gurten](images/gurten-climb.png)
 

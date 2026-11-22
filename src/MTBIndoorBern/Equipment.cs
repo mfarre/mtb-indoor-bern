@@ -12,7 +12,7 @@ internal sealed class Equipment : IDisposable
     public Dictionary<SensorRole, SensorConnection> Connections { get; } = Roles.ToDictionary(r=>r,r=>new SensorConnection(r));
     public NearbyDevice[] Nearby { get; private set; } = [];
     public bool Searching { get; private set; }
-    public string ScanStatus { get; private set; } = "Cerca automàtica cada 5 segons";
+    public string ScanStatus { get; private set; } = "Automatic search every 5 seconds";
     public event Action? Changed;
     public Func<Task>? BeforeTrainerChange;
     public Equipment(PreferencesStore preferences, CancellationToken token, Action<string> log)
@@ -23,11 +23,11 @@ internal sealed class Equipment : IDisposable
     public async Task ScanAsync()
     {
         if(Searching||token.IsCancellationRequested)return;
-        Searching=true;ScanStatus="Cercant l’equip recordat · nova cerca cada 5 s";Changed?.Invoke();
+        Searching=true;ScanStatus="Searching for saved devices · retrying every 5 s";Changed?.Invoke();
         try
         {
             Nearby=await Discovery.ScanAsync(token,4);
-            ScanStatus=$"{Nearby.Length} dispositius detectats · cerca automàtica cada 5 s";
+            ScanStatus=$"{Nearby.Length} devices found · automatic search every 5 s";
             foreach(var role in Roles)
             {
                 if(paused.Contains(role)||busy[role]||Connections[role].Connected)continue;
@@ -50,7 +50,7 @@ internal sealed class Equipment : IDisposable
             if(role==SensorRole.Trainer&&BeforeTrainerChange is not null)await BeforeTrainerChange();
             if(Connections[role].HasSession)await Connections[role].DisconnectAsync();
             await Connections[role].ConnectAsync(device,token);
-            preferences.Remember(role,device); log($"{device.DisplayName} connectat i recordat.");
+            preferences.Remember(role,device); log($"{device.DisplayName} connected and saved.");
         }
         catch(OperationCanceledException) { }
         catch(Exception e){log($"{device.DisplayName}: {e.Message}");}
@@ -73,7 +73,7 @@ internal sealed class Equipment : IDisposable
     {
         var c=Connections[role];var saved=Saved(role);
         string state=c.Connected?"connected":busy[role]?"connecting":paused.Contains(role)?"paused":saved is not null?"searching":"unpaired";
-        string label=role switch{SensorRole.Trainer=>"KICKR",SensorRole.Controller=>"Click dret",_=>"Pulsòmetre"};
+        string label=role switch{SensorRole.Trainer=>"KICKR",SensorRole.Controller=>"Right Click",_=>"Heart rate"};
         return (object)new {role=role.ToString(),label,state,name=c.Connected?c.DeviceName:saved?.Name??"",battery=c.Battery};
     }).ToArray();
     public async Task ShutdownAsync(){await Task.WhenAll(pending);await Task.WhenAll(Connections.Values.Select(c=>c.DisconnectAsync()));}

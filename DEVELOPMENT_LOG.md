@@ -2,7 +2,27 @@
 
 [Project overview](README.md) · [Simulator](docs/simulator.md) · [Data acquisition](docs/data-acquisition.md) · [Bluetooth brakes](docs/bluetooth-brakes.md)
 
-This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; the screenshots are historical captures and retain the app's Catalan interface. Planning work is identified explicitly when it has not been implemented or tested.
+This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
+
+## 22 November 2026 · English apps and refreshed screenshots
+
+**The simulator and Track Lab now use English throughout their interfaces.** Course selection, ride data, gearing, device pairing, brake and corner warnings, bike setup, guided calibration, video alignment, observations and import/export messages have been translated. Number and date formatting uses English conventions. The guides now use the actual English control names.
+
+| Choose a course | Configure the bike |
+| --- | --- |
+| ![English course selection screen](docs/images/welcome.png) | ![English bike and calibration screen](docs/images/bike-profile.png) |
+
+| Connect devices | Align outdoor recordings |
+| --- | --- |
+| ![English device pairing screen](docs/images/devices.png) | ![English Track Lab interface](docs/images/track-lab.png) |
+
+**Seventeen interface screenshots and three GIFs have been refreshed.** The moving Gurten and Dentenberg captures use the running English application. The before/after renderer comparison keeps its original paired frames and now has English captions; its historical geometry is preserved. Other interface screenshots illustrate the current English app, including those linked from earlier milestones.
+
+Existing settings, device identities, calibration results, course IDs, personal records and annotation schemas remain compatible. Legacy descent names are translated only when displayed, keeping record keys unchanged. User-entered names and recording notes remain as saved; the Track Lab screenshot uses a separate copy with an English session title and timing note.
+
+**Verified:** public and personal simulator builds and self-tests, production Track Lab build and video playback, all **27 calibration UI checks**, normal-size screenshots and compact 1100×772 calibration dialogs. The welcome controls also fit both 1440×852 and 1100×772 views without overlapping the elevation profile. Captures used demo/practice or disconnected hardware; no new physical trainer test is claimed. The local simulator and Track Lab were updated while preserving their settings and records.
+
+[English UI verification](docs/verification-english-ui-2026-11-22.json) · [Simulator controls](docs/simulator.md) · [Track Lab guide](docs/track-lab.md).
 
 ## 22 November 2026 · Maneta v01: from mechanical design to realistic render
 
@@ -20,7 +40,7 @@ The [render provenance](docs/brake-v01-render.md) records the source hashes and 
 
 ## 22 November 2026 · English documentation and three project sections
 
-The repository now has a visual landing page and separate guides for the **[simulator](docs/simulator.md)**, **[data acquisition](docs/data-acquisition.md)** and **[Bluetooth brakes](docs/bluetooth-brakes.md)**. The full milestone history has moved from the README into this development log. User guides, tool READMEs and third-party notices are now in English; historical screenshots and recorded UI strings retain their original language.
+The repository now has a visual landing page and separate guides for the **[simulator](docs/simulator.md)**, **[data acquisition](docs/data-acquisition.md)** and **[Bluetooth brakes](docs/bluetooth-brakes.md)**. The full milestone history has moved from the README into this development log. User guides, tool READMEs and third-party notices are now in English; the application interface was translated in the English UI milestone above; dated verification reports retain their original recorded values.
 
 The acquisition guide documents the working camera/FIT alignment workflow and links the hardware and manuals. The recording metadata identifies the camera as a **DJI Osmo Action 5 Pro**. The **Wahoo ELEMNT ROAM** is documented without assuming its generation. Additional sensor streams are described as future work, separate from the fields the current decoder imports.
 
@@ -58,7 +78,7 @@ Official photographs guided the pale compacted earth, summer woodland and **40 r
 
 ## 19 November 2026 · MTB profile and guided calibration
 
-**New Bicycle and calibration section** (**Bicicleta i calibratge**), accessible from the top navigation and welcome screen. It saves rider and bike weight, wheel circumference, chainring, virtual cassette, gradient scaling and low-cadence assistance. Presets include 10–51, 10–52 and 11–46, with custom sprockets supported; the game and Click respect the selected number of gears.
+**New Bike and calibration section**, accessible from the top navigation and welcome screen. It saves rider and bike weight, wheel circumference, chainring, virtual cassette, gradient scaling and low-cadence assistance. Presets include 10–51, 10–52 and 11–46, with custom sprockets supported; the game and Click respect the selected number of gears.
 
 | Bike profile | Guided response test |
 | --- | --- |
@@ -82,7 +102,7 @@ Uetliberg includes a **4352×5120 SWISSIMAGE © swisstopo orthophoto**, real ele
 | --- | --- |
 | ![Uetliberg demo paused with profile seeking and the resume button](docs/images/uetliberg-demo.png) | ![SWISSIMAGE orthophoto and elevation around Uto Kulm](docs/images/uetliberg-aerial.png) |
 
-**Explore in demo → Pause → Resume demo** (**Explora en demo → Pausa → Reprèn demo**) continues from the same point and preserves the ×1–×8 multiplier. Click anywhere on the elevation profile to seek: a paused demo stays paused, and a moving demo keeps moving. With the profile focused, arrow keys move 100 m, Shift + arrow moves 1 km, and Home/End move to the endpoints. Seeking backward also works after reaching the finish. Seeking is demo-only and neither creates records nor activates the KICKR.
+**Explore in demo → Pause → Resume demo** continues from the same point and preserves the ×1–×8 multiplier. Click anywhere on the elevation profile to seek: a paused demo stays paused, and a moving demo keeps moving. With the profile focused, arrow keys move 100 m, Shift + arrow moves 1 km, and Home/End move to the endpoints. Seeking backward also works after reaching the finish. Seeking is demo-only and neither creates records nor activates the KICKR.
 
 The course also includes **Practice the descent · Uetliberg · Ringlikon** (**Practica la baixada · Uetliberg · Ringlikon**), covering **km 11.355–14.565**, with the same braking and line-control rules as Dentenberg.
 
@@ -106,7 +126,7 @@ Corner guidance shows direction, distance and a target game speed based on geome
 | --- | --- |
 | ![Climb with a prominent 12.2% gradient indicator](docs/images/dentenberg-climb.png) | ![Three-second recovery after entering a corner too fast](docs/images/dentenberg-runout.png) |
 
-**Practice the descent · Dentenberg** (**Practica la baixada · Dentenberg**) starts before the timed section without sensors. The challenge covers **km 4.480–6.980 of Al Dente**, with a start, finish and local personal record. Practice provides automatic propulsion on flatter sections; records are only saved for real sessions that complete the section without pauses. The separate ×1–×8 sightseeing demo remains available.
+**Practice the descent · Dentenberg** starts before the timed section without sensors. The challenge covers **km 4.480–6.980 of Al Dente**, with a start, finish and local personal record. Practice provides automatic propulsion on flatter sections; records are only saved for real sessions that complete the section without pauses. The separate ×1–×8 sightseeing demo remains available.
 
 In the automated descent test including the approach, no braking produces **4 runouts and 384.3 s**; anticipating corners finishes with **0 runouts and 365.1 s**. Braking on a −20% slope, coasting at 0 W, record persistence, and exclusion of paused sessions and demos were also checked. Climb and descent captures maintain **30 FPS at 1440×852** with adaptive resolution.
 
@@ -122,7 +142,7 @@ A recording of a real ride was used to revise the course's appearance: asphalt, 
 
 ![Al Dente singletrack in motion: previous version and new autumn style](docs/images/al-dente-before-after.gif)
 
-**Accelerated demo:** the **⏩ Demo ×1** button beside Pause cycles **×1 → ×2 → ×4 → ×8 → ×1**. Speed is retained when pausing and resuming; Stop / restart (**Atura / reinicia**) returns to ×1. It changes demo movement only: the timer shows real seconds and trainer control stays inactive. At ×8, the entire circuit can be reviewed in approximately four minutes. All four speeds, pause, resume, finishing and the build with all visual assets were checked.
+**Accelerated demo:** the **⏩ Demo ×1** button beside Pause cycles **×1 → ×2 → ×4 → ×8 → ×1**. Speed is retained when pausing and resuming; Stop / restart returns to ×1. It changes demo movement only: the timer shows real seconds and trainer control stays inactive. At ×8, the entire circuit can be reviewed in approximately four minutes. All four speeds, pause, resume, finishing and the build with all visual assets were checked.
 
 The [capture and comparison tools](tools/render-comparison/README.md) allow the comparison to be repeated for other versions or sections. [Demo and GIF verification](docs/verification-demo-2026-11-15.json).
 
@@ -130,7 +150,7 @@ The [capture and comparison tools](tools/render-comparison/README.md) allow the 
 
 | Previous version | New autumn style |
 | --- | --- |
-| ![Before: wide trail and uniform vegetation](docs/images/circuit-3d.png) | ![After: singletrack, leaves, undergrowth and autumn trees](docs/images/autumn-forest.png) |
+| ![Before: wide trail and uniform vegetation, original renderer capture](docs/images/circuit-3d-before.png) | ![After: singletrack, leaves, undergrowth and autumn trees](docs/images/autumn-forest.png) |
 
 Terrain near the road now uses a finer mesh so the verges do not cover the asphalt on steep slopes. The route elevations used by the physics are preserved. Surface, estimated width, forest sections and confidence are defined in `appearance.json`.
 
@@ -158,4 +178,4 @@ A 3D course with aerial imagery, direct KICKR CORE, right Click 2 and HRM-Dual c
 
 ![SWISSIMAGE aerial photograph over the course's 3D terrain](docs/images/aerial-view.png)
 
-These captures use demo mode. The terrain imagery is real; trees and first-person details are recreated.
+These views have been refreshed with the current English interface in demo mode. The terrain imagery is real; trees and first-person details are recreated. The original milestone and its hardware checks remain historical.

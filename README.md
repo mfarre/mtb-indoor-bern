@@ -34,7 +34,7 @@ On Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/1
 .\artifacts\publish\win-x64\MTBIndoorBern.exe
 ```
 
-Select a course and choose **Explore in demo** (`Explora en demo`). Pause, click the elevation profile to seek, resume, or accelerate up to ×8. On Gurten, **El Tony ↗** jumps directly to the featured section. Demo does not control the trainer.
+Select a course and choose **Explore in demo**. Pause, click the elevation profile to seek, resume, or accelerate up to ×8. On Gurten, **El Tony ↗** jumps directly to the featured section. Demo does not control the trainer.
 
 [Full setup and controls](docs/simulator.md) · [Bike profile and calibration](docs/bike-calibration.md) · [Downhill braking and records](docs/downhill.md)
 
@@ -51,7 +51,7 @@ The brake image above is an AI-generated concept, not a photograph or a validate
 
 **Maneta v01: the actual mechanical design.** A render assembled from the supplied STL files and PDF drawings, with ImageGen material and lighting treatment. [Design, hardware and CAD reference](docs/brake-v01-render.md). Physical testing and custom BLE integration are still pending.
 
-Documentation is in English; current application controls and historical screenshots retain the Catalan UI.
+The simulator, Track Lab, documentation and current screenshots are in English.
 
 ## Follow development
 

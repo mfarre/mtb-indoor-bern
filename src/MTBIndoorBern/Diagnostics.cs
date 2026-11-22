@@ -16,8 +16,8 @@ internal static class Diagnostics
             var preferences=new PreferencesStore(Path.Combine(AppContext.BaseDirectory,"settings.json"));
             var nearby=await Discovery.ScanAsync(lifetime.Token,4);
             var saved=preferences.Data.Sensors.First(s=>s.Role==SensorRole.Trainer);
-            await trainer.ConnectAsync(saved.Find(nearby)??throw new IOException("KICKR recordat no trobat"),lifetime.Token);
-            var control=trainer.Control??throw new IOException("Sense control FTMS");
+            await trainer.ConnectAsync(saved.Find(nearby)??throw new IOException("Saved KICKR not found"),lifetime.Token);
+            var control=trainer.Control??throw new IOException("FTMS control unavailable");
             control.Trace+=trace=>events.Enqueue(new{time=DateTime.UtcNow,trace});
             await control.StartAsync(lifetime.Token,true);
             try

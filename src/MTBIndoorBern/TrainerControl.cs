@@ -20,7 +20,7 @@ internal sealed class TrainerControl : IDisposable
     public bool SupportsPower => (TargetFeatures & (1 << 3)) != 0;
     private bool powerMode;
     public uint TargetFeatures { get; }
-    public string Status { get; private set; } = "Control disponible";
+    public string Status { get; private set; } = "Control available";
     public event Action<string>? Trace;
 
     private TrainerControl(GattCharacteristic point, uint features)
@@ -80,15 +80,15 @@ internal sealed class TrainerControl : IDisposable
             using var writer = new DataWriter();
             writer.WriteBytes(data);
             var status = await point.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithResponse).AsTask(timeout.Token);
-            if (status != GattCommunicationStatus.Success) throw new IOException($"KICKR: escriptura {status}.");
+            if (status != GattCommunicationStatus.Success) throw new IOException($"KICKR: write {status}.");
             byte response = await completion.Task.WaitAsync(timeout.Token);
             Trace?.Invoke($"FTMS {Convert.ToHexString(data)} → {response}");
             if (response != 1) throw new IOException(response switch
             {
-                2 => "El KICKR no admet aquesta ordre de resistència.",
-                3 => "El KICKR ha rebutjat el valor de resistència.",
-                5 => "Control del KICKR denegat. Tanca les altres apps d’entrenament i torna a iniciar.",
-                _ => $"El KICKR no ha completat l’ordre ({response})."
+                2 => "The KICKR does not support this resistance command.",
+                3 => "The KICKR rejected the resistance value.",
+                5 => "KICKR control denied. Close other training apps and start again.",
+                _ => $"The KICKR did not complete the command ({response})."
             });
         }
         finally { pending = null; }
@@ -111,13 +111,13 @@ internal sealed class TrainerControl : IDisposable
             IsControlling = true;
             await SendAsync([0x07], token);
             powerMode=usePowerMode;
-            if(powerMode&&!SupportsPower)throw new IOException("El rodillo no admet el control de càrrega MTB.");
+            if(powerMode&&!SupportsPower)throw new IOException("The trainer does not support MTB load control.");
             await SendAsync(powerMode?PowerPacket(0):SimulationPacket(0), token);
             AppliedGrade = 0;
             AppliedPower = 0;
-            Status = "Control actiu · confirmat pel KICKR";
+            Status = "Control active · confirmed by KICKR";
         }
-        catch { Status = "No s’ha pogut iniciar el control"; throw; }
+        catch { Status = "Could not start control"; throw; }
         finally { commands.Release(); }
     }
 
@@ -126,11 +126,11 @@ internal sealed class TrainerControl : IDisposable
         await commands.WaitAsync(token);
         try
         {
-            if (!IsControlling) throw new IOException("El KICKR ha perdut el control. Torna a iniciar la ruta.");
+            if (!IsControlling) throw new IOException("KICKR control was lost. Start the ride again.");
             var packet = SimulationPacket(grade);
             await SendAsync(packet, token);
             AppliedGrade = BinaryPrimitives.ReadInt16LittleEndian(packet.AsSpan(3)) / 100.0;
-            Status = "Control actiu · confirmat pel KICKR";
+            Status = "Control active · confirmed by KICKR";
         }
         finally { commands.Release(); }
     }
@@ -144,9 +144,9 @@ internal sealed class TrainerControl : IDisposable
         await commands.WaitAsync(token);
         try
         {
-            if(!IsControlling||!SupportsPower)throw new IOException("Control MTB del KICKR no disponible.");
+            if(!IsControlling||!SupportsPower)throw new IOException("KICKR MTB control unavailable.");
             await SendAsync(PowerPacket(watts),token);AppliedPower=Math.Clamp(watts,0,600);powerMode=true;
-            Status="Càrrega MTB confirmada pel KICKR";
+            Status="MTB load confirmed by KICKR";
         }
         finally{commands.Release();}
     }
@@ -165,7 +165,7 @@ internal sealed class TrainerControl : IDisposable
             try { await SendAsync([0x08, 0x01], timeout.Token); }
             catch (Exception e) { failure ??= e; }
             IsControlling = false;
-            Status = failure is null ? "Aturat · pendent 0% confirmat" : "Aturada sense confirmació del KICKR";
+            Status = failure is null ? "Stopped · 0% gradient confirmed" : "Stop not confirmed by KICKR";
             if (failure is not null) throw new IOException(Status, failure);
         }
         finally { commands.Release(); }
@@ -174,8 +174,8 @@ internal sealed class TrainerControl : IDisposable
     public void ConnectionLost()
     {
         IsControlling = false;
-        Status = "Control interromput · torna a iniciar";
-        pending?.TrySetException(new IOException("Connexió del KICKR perduda."));
+        Status = "Control interrupted · start again";
+        pending?.TrySetException(new IOException("KICKR connection lost."));
     }
 
     public void Dispose()

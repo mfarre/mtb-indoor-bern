@@ -6,7 +6,7 @@
 
 ![El Tony jump scenery on the Gurten course](images/gurten-el-tony.png)
 
-The documentation is in English. The current application interface remains in Catalan; instructions below include the exact on-screen labels.
+The simulator interface and documentation are in English. The screenshots show the current English interface.
 
 ## Features
 
@@ -69,11 +69,13 @@ Keep the `Scene` folder beside the executable. Imagery, terrain and Three.js are
 ## First connection
 
 1. Power on the KICKR, put on the heart-rate strap and press a Click button to wake it.
-2. Open Devices (**Dispositius**), select each sensor and press Connect (**Connecta**).
-3. Open Bicycle and calibration (**Bicicleta i calibratge**), set the weights, wheel and drivetrain, then press Save profile (**Desa el perfil**). The guided response test is optional.
-4. Pedal for a few seconds until power and cadence arrive, then press Start ride (**Inicia la ruta**).
+2. Open **Devices**, select each sensor and press **Connect**.
+3. Open **Bike and calibration**, set the weights, wheel and drivetrain, then press **Save profile**. The guided response test is optional.
+4. Pedal for a few seconds until power and cadence arrive, then press **Start ride**.
 
-The public repository starts with no paired sensors. Once connected, devices are remembered in `settings.json` beside the executable; this file is excluded from Git. Disconnecting manually pauses reconnection until Connect is pressed or the app is reopened. Forget (**Oblida**) removes the saved pairing.
+The public repository starts with no paired sensors. Once connected, devices are remembered in `settings.json` beside the executable; this file is excluded from Git. **Disconnect** pauses reconnection until **Connect** is pressed or the app is reopened. **Forget this device** removes the saved pairing.
+
+![English device pairing and reconnection screen](images/devices.png)
 
 ## Controls
 
@@ -81,15 +83,15 @@ The public repository starts with no paired sensors. Once connected, devices are
 | --- | --- |
 | Right Click `+` / keyboard `+` | Shift up |
 | Right Click `B` / keyboard `B` or `−` | Shift down |
-| Right Click `A` / keyboard `A` or Space / brake button (**A / Espai · Fre**) | Hold to brake; release to coast |
-| Practice descent (**Practica la baixada**) | Start before the selected course's downhill section, without trainer control or a record |
-| Escape / Pause (**Pausa**) | Pause and release trainer control |
-| Resume demo (**Reprèn demo**) | Continue a paused demo from the same position |
+| Right Click `A` / keyboard `A` or Space / brake button | Hold to brake; release to coast |
+| Practise the descent · … | Start before the selected course's downhill section, without trainer control or a record |
+| Escape / Pause | Pause and release trainer control |
+| Resume demo | Continue a paused demo from the same position |
 | Click the elevation profile / arrow keys | Seek to a position in demo mode, including while paused |
-| Stop / restart (**Atura / reinicia**) | Return to the start |
+| Stop / restart | Return to the start |
 | F11 | Toggle the maximized window |
-| Aerial view (**Vista aèria**) | Change camera |
-| Explore in demo (**Explora en demo**) | Travel through the course without controlling the trainer |
+| Aerial view | Change camera |
+| Explore in demo | Travel through the course without controlling the trainer |
 | **⏩ Demo ×1** | Cycle demo speed through ×1 → ×2 → ×4 → ×8 |
 | **El Tony ↗**, on Gurten | Open a demo before the jump with the El Tony sign |
 

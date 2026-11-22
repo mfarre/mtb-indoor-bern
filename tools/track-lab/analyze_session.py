@@ -14,7 +14,7 @@ def main():
     ap.add_argument('--rotation',type=int,choices=[0,180],default=180)
     args=ap.parse_args(); session=args.session.resolve()
     ff=pathlib.Path(shutil.which(str(args.ffmpeg)) or args.ffmpeg).resolve(); probe=ff.with_name('ffprobe.exe')
-    if not ff.is_file() or not probe.is_file():raise FileNotFoundError('Cal configurar ffmpeg.exe i ffprobe.exe a la mateixa carpeta.')
+    if not ff.is_file() or not probe.is_file():raise FileNotFoundError('Configure ffmpeg.exe and ffprobe.exe in the same folder.')
     frames=session/'frames'; frames.mkdir(exist_ok=True)
     track=json.loads((session/'track.json').read_text(encoding='utf-8'))
     pts=track['points']; times=[p['time'] for p in pts]
@@ -52,7 +52,7 @@ def main():
             valid=p and abs(p['time']-t)<=3
             entries.append({'image':target.relative_to(session).as_posix(),'video':vi,'seconds':sec,'time':t,'timestamp':dt.datetime.fromtimestamp(t,dt.timezone.utc).isoformat(),'point':p if valid else None})
             print(f'{video.name} {sec}s',flush=True)
-    result={'version':1,'title':session.name,'rotation':args.rotation,'offsetSeconds':args.offset,'clockNote':'Hora UTC de la càmera + ajust manual. La coincidència GPS no garanteix la sincronització del rellotge.','videos':videos,'frames':entries,'track':track}
+    result={'version':1,'title':session.name,'rotation':args.rotation,'offsetSeconds':args.offset,'clockNote':'Camera UTC time plus manual adjustment. GPS matching does not guarantee clock synchronisation.','videos':videos,'frames':entries,'track':track}
     (session/'analysis.json').write_text(json.dumps(result,ensure_ascii=False),encoding='utf-8')
     for page,start in enumerate(range(0,len(entries),16),1):
         sheet=Image.new('RGB',(1280,4*204),'#141b19'); draw=ImageDraw.Draw(sheet)
@@ -60,7 +60,7 @@ def main():
             x=n%4*320;y=n//4*204
             im=Image.open(session/e['image']);im.thumbnail((320,180));sheet.paste(im,(x,y))
             p=e['point']
-            d=f"{p['courseDistance']/1000:.2f} km / {p['courseError']:.0f} m" if p and p.get('courseDistance') is not None else (f"FIT {p['distance']/1000:.2f} km" if p and not track.get('matching') else 'fora de ruta / pausa')
+            d=f"{p['courseDistance']/1000:.2f} km / {p['courseError']:.0f} m" if p and p.get('courseDistance') is not None else (f"FIT {p['distance']/1000:.2f} km" if p and not track.get('matching') else 'off route / stopped')
             draw.text((x+5,y+183),f"V{e['video']+1} {e['seconds']}s | {d}",fill='white')
         sheet.save(session/f'contact-{page:02d}.jpg',quality=90)
     print(json.dumps({'videos':videos,'frames':len(entries)},indent=2))

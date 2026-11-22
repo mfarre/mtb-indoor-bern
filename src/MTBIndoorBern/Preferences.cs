@@ -39,7 +39,7 @@ internal sealed class PreferencesStore
         FilePath = file;
         try { Data = File.Exists(file) ? JsonSerializer.Deserialize<Preferences>(File.ReadAllText(file), Options) ?? new() : new(); }
         catch (Exception e) when(e is IOException or JsonException or UnauthorizedAccessException)
-        { Data = new(); Warning = "No s’han pogut llegir els ajustos. " + e.Message; }
+        { Data = new(); Warning = "Could not read the settings. " + e.Message; }
         Data.RiderKg = double.IsFinite(Data.RiderKg) ? Math.Clamp(Data.RiderKg, 40, 160) : 75;
         Data.Difficulty = double.IsFinite(Data.Difficulty) ? Math.Clamp(Data.Difficulty, 0, 1) : .5;
         Data.Chainring = Data.Chainring is >=20 and <=60 ? Data.Chainring : 32;
@@ -64,7 +64,7 @@ internal sealed class PreferencesStore
             File.Move(temporary, FilePath, true); Warning = null;
         }
         catch (Exception e) when(e is IOException or UnauthorizedAccessException)
-        { Warning = "No s’han pogut desar els ajustos. " + e.Message; }
+        { Warning = "Could not save the settings. " + e.Message; }
     }
     public static void Verify()
     {

@@ -7,6 +7,10 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        // Keep native labels and numeric formatting consistent with the English UI.
+        var uiCulture = System.Globalization.CultureInfo.GetCultureInfo("en-GB");
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = uiCulture;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = uiCulture;
         if(args.Length >= 2 && args[0] == "--test-trail")
         {
             try { File.WriteAllText(args[1], JsonSerializer.Serialize(TrailTests.Verify(CourseCatalog.RouteFile(CourseCatalog.Load()[0])), new JsonSerializerOptions { WriteIndented = true })); }
@@ -99,8 +103,8 @@ internal static class Program
         }
         ApplicationConfiguration.Initialize();
         using var instance = new Mutex(true, "Local\\AlDente.MtbIndoor", out bool firstInstance);
-        if (!firstInstance) { MessageBox.Show("MTB Indoor - Bern ja està obert. Fes servir la finestra existent per evitar dues connexions al KICKR.", "MTB Indoor - Bern"); return; }
+        if (!firstInstance) { MessageBox.Show("MTB Indoor - Bern is already open. Use the existing window to avoid two connections to the KICKR.", "MTB Indoor - Bern"); return; }
         try { Application.Run(new MainForm(args.Length >= 2 && args[0] is "--render-smoke" or "--render-welcome" ? args[1] : null, args.Length == 0 || args[0] != "--render-welcome")); }
-        catch (Exception e) { MessageBox.Show("No s’ha pogut iniciar MTB Indoor - Bern. Mantén la carpeta Scene al costat de l’executable.\n\n" + e.Message, "MTB Indoor - Bern"); }
+        catch (Exception e) { MessageBox.Show("Could not start MTB Indoor - Bern. Keep the Scene folder beside the executable.\n\n" + e.Message, "MTB Indoor - Bern"); }
     }
 }

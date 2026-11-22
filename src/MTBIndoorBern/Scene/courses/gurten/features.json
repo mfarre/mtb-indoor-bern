@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "name": "Gurtentrail · elements visuals",
+  "name": "Gurtentrail · visual features",
   "approximatePlacement": true,
   "previewDistance": 5069,
   "palette": {
@@ -11,7 +11,7 @@
   "jumps": [
     {
       "id": "gurten-01",
-      "name": "Gurten · taula 01",
+      "name": "Gurten · tabletop 01",
       "distance": 4173.0,
       "length": 14.0,
       "height": 0.85,
@@ -35,7 +35,7 @@
     },
     {
       "id": "gurten-03",
-      "name": "Gurten · taula 03",
+      "name": "Gurten · tabletop 03",
       "distance": 4277.5,
       "length": 17.0,
       "height": 1.11,
@@ -47,7 +47,7 @@
     },
     {
       "id": "gurten-04",
-      "name": "Gurten · taula 04",
+      "name": "Gurten · tabletop 04",
       "distance": 4347.75,
       "length": 18.5,
       "height": 1.24,
@@ -71,7 +71,7 @@
     },
     {
       "id": "gurten-06",
-      "name": "Gurten · taula 06",
+      "name": "Gurten · tabletop 06",
       "distance": 4481.25,
       "length": 15.5,
       "height": 0.85,
@@ -83,7 +83,7 @@
     },
     {
       "id": "gurten-07",
-      "name": "Gurten · taula 07",
+      "name": "Gurten · tabletop 07",
       "distance": 4525.5,
       "length": 17.0,
       "height": 0.98,
@@ -107,7 +107,7 @@
     },
     {
       "id": "gurten-09",
-      "name": "Gurten · taula 09",
+      "name": "Gurten · tabletop 09",
       "distance": 4653.0,
       "length": 14.0,
       "height": 1.24,
@@ -119,7 +119,7 @@
     },
     {
       "id": "gurten-10",
-      "name": "Gurten · taula 10",
+      "name": "Gurten · tabletop 10",
       "distance": 4715.25,
       "length": 15.5,
       "height": 1.37,
@@ -143,7 +143,7 @@
     },
     {
       "id": "gurten-12",
-      "name": "Gurten · taula 12",
+      "name": "Gurten · tabletop 12",
       "distance": 4831.75,
       "length": 18.5,
       "height": 0.98,
@@ -155,7 +155,7 @@
     },
     {
       "id": "gurten-13",
-      "name": "Gurten · taula 13",
+      "name": "Gurten · tabletop 13",
       "distance": 4871.0,
       "length": 14.0,
       "height": 1.11,
@@ -179,7 +179,7 @@
     },
     {
       "id": "gurten-15",
-      "name": "Gurten · taula 15",
+      "name": "Gurten · tabletop 15",
       "distance": 4997.5,
       "length": 17.0,
       "height": 1.37,
@@ -191,7 +191,7 @@
     },
     {
       "id": "el-tony-jump-line",
-      "name": "El Tony · Jump Line (recreació)",
+      "name": "El Tony · Jump Line (recreation)",
       "distance": 5090,
       "length": 22,
       "height": 1.65,
@@ -215,7 +215,7 @@
     },
     {
       "id": "gurten-18",
-      "name": "Gurten · taula 18",
+      "name": "Gurten · tabletop 18",
       "distance": 5198.25,
       "length": 15.5,
       "height": 1.11,
@@ -227,7 +227,7 @@
     },
     {
       "id": "gurten-19",
-      "name": "Gurten · taula 19",
+      "name": "Gurten · tabletop 19",
       "distance": 5222.5,
       "length": 17.0,
       "height": 1.24,
@@ -251,7 +251,7 @@
     },
     {
       "id": "gurten-21",
-      "name": "Gurten · taula 21",
+      "name": "Gurten · tabletop 21",
       "distance": 5358.0,
       "length": 14.0,
       "height": 0.85,
@@ -263,7 +263,7 @@
     },
     {
       "id": "gurten-22",
-      "name": "Gurten · taula 22",
+      "name": "Gurten · tabletop 22",
       "distance": 5426.25,
       "length": 15.5,
       "height": 0.98,
@@ -287,7 +287,7 @@
     },
     {
       "id": "gurten-24",
-      "name": "Gurten · taula 24",
+      "name": "Gurten · tabletop 24",
       "distance": 5514.75,
       "length": 18.5,
       "height": 1.24,
@@ -299,7 +299,7 @@
     },
     {
       "id": "gurten-25",
-      "name": "Gurten · taula 25",
+      "name": "Gurten · tabletop 25",
       "distance": 5624.0,
       "length": 14.0,
       "height": 1.37,
@@ -323,7 +323,7 @@
     },
     {
       "id": "gurten-27",
-      "name": "Gurten · taula 27",
+      "name": "Gurten · tabletop 27",
       "distance": 5740.6,
       "length": 17.0,
       "height": 0.98,
@@ -335,7 +335,7 @@
     },
     {
       "id": "gurten-28",
-      "name": "Gurten · taula 28",
+      "name": "Gurten · tabletop 28",
       "distance": 5768.75,
       "length": 18.5,
       "height": 1.11,
@@ -359,7 +359,7 @@
     },
     {
       "id": "gurten-30",
-      "name": "Gurten · taula 30",
+      "name": "Gurten · tabletop 30",
       "distance": 5918.51,
       "length": 15.5,
       "height": 1.37,
@@ -371,7 +371,7 @@
     },
     {
       "id": "gurten-31",
-      "name": "Gurten · taula 31",
+      "name": "Gurten · tabletop 31",
       "distance": 5938.5,
       "length": 17.0,
       "height": 0.85,
@@ -395,7 +395,7 @@
     },
     {
       "id": "gurten-33",
-      "name": "Gurten · taula 33",
+      "name": "Gurten · tabletop 33",
       "distance": 6084.0,
       "length": 14.0,
       "height": 1.11,
@@ -407,7 +407,7 @@
     },
     {
       "id": "gurten-34",
-      "name": "Gurten · taula 34",
+      "name": "Gurten · tabletop 34",
       "distance": 6132.25,
       "length": 15.5,
       "height": 1.24,
@@ -431,7 +431,7 @@
     },
     {
       "id": "gurten-36",
-      "name": "Gurten · taula 36",
+      "name": "Gurten · tabletop 36",
       "distance": 6235.75,
       "length": 18.5,
       "height": 0.85,
@@ -443,7 +443,7 @@
     },
     {
       "id": "gurten-37",
-      "name": "Gurten · taula 37",
+      "name": "Gurten · tabletop 37",
       "distance": 6305.0,
       "length": 14.0,
       "height": 0.98,
@@ -467,7 +467,7 @@
     },
     {
       "id": "gurten-39",
-      "name": "Gurten · taula 39",
+      "name": "Gurten · tabletop 39",
       "distance": 6437.5,
       "length": 17.0,
       "height": 1.24,
@@ -479,7 +479,7 @@
     },
     {
       "id": "gurten-40",
-      "name": "Gurten · taula 40",
+      "name": "Gurten · tabletop 40",
       "distance": 6487.75,
       "length": 18.5,
       "height": 1.37,
@@ -625,7 +625,7 @@
       "offset": 3.4,
       "side": -1,
       "label": "IL BRUNELLO",
-      "detail": "Kehrsatz · sortida",
+      "detail": "Kehrsatz · start",
       "kind": "simulation-wayfinding"
     },
     {
@@ -633,8 +633,8 @@
       "distance": 4139,
       "offset": 3.4,
       "side": 1,
-      "label": "ACCES A PEU",
-      "detail": "15 m · entrada al trail",
+      "label": "WALKING ACCESS",
+      "detail": "15 m · trail entrance",
       "kind": "simulation-wayfinding"
     },
     {
@@ -652,7 +652,7 @@
       "offset": 3.4,
       "side": -1,
       "label": "WABERN",
-      "detail": "Final del Gurtentrail",
+      "detail": "End of the Gurtentrail",
       "kind": "simulation-wayfinding"
     }
   ],

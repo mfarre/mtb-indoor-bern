@@ -2,17 +2,17 @@
 
 [Data acquisition](data-acquisition.md) · [Project overview](../README.md)
 
-A local video and FIT viewer for studying a route before recreating it in 3D. Track Lab is separate from the simulator: it does not connect to or control sensors. The interface currently uses Catalan labels; the instructions below retain those labels where needed to find a control.
+A local video and FIT viewer for studying a route before recreating it in 3D. Track Lab is separate from the simulator: it does not connect to or control sensors. The interface and the controls described below are in English.
 
 ## Using the viewer
 
-1. Select **Importa FIT i vídeos** (import FIT and videos): choose a FIT file, or a ZIP containing a single FIT file, and the video folder. Specify whether the new videos need a 180° rotation.
+1. Select **Import FIT and videos**: choose a FIT file, or a ZIP containing a single FIT file, and the video folder. Specify whether the new videos need a 180° rotation.
 2. The importer copies all originals into a new session and verifies each copy with SHA-256. It extracts the FIT file and creates preview videos and one thumbnail per minute. Short clips are supported too.
 3. Select a thumbnail or move the video timeline. The map shows the GPS point nearest the video time, including the clock offset.
-4. Adjust **Hora FIT = hora càmera + segons** (FIT time = camera time + seconds). Find a stop or a recognisable location. Positions are not interpolated across long gaps in the FIT recording.
-5. Select **Marca** (mark), then enter the segment end, surface, estimated width and observations. **Desa observació** (save observation) writes `annotations.json` into the session.
-6. **Extreu fotograma** (extract frame) saves a correctly oriented JPEG in `details/`. When a matching LRF exists, extraction uses the full-resolution original MP4.
-7. **Exporta JSON** (export JSON) makes the annotations available when preparing a course's appearance. Exporting does not automatically modify the game.
+4. Adjust **FIT time = camera time + seconds**. Find a stop or a recognisable location. Positions are not interpolated across long gaps in the FIT recording.
+5. Select **Mark**, then enter the segment end, surface, estimated width and observations. **Save observation** writes `annotations.json` into the session.
+6. **Extract frame** saves a correctly oriented JPEG in `details/`. When a matching LRF exists, extraction uses the full-resolution original MP4.
+7. **Export JSON** makes the annotations available when preparing a course's appearance. Exporting does not automatically modify the game.
 
 Video rotation happens in the viewer without changing the originals; extracted JPEGs contain the rotated pixels. MP4 files in `preview/` are working files whose orientation is applied during playback. H.264 LRF files are remuxed without re-encoding. Other codecs are converted to 720p H.264 when necessary.
 

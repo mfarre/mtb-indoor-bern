@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="ca">
+<html lang="en">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
- <title>MTB Indoor · proves de bicicleta i calibratge</title>
+ <title>MTB Indoor · bike and calibration checks</title>
  <link rel="stylesheet" href="../../src/MTBIndoorBern/Scene/style.css">
  <link rel="stylesheet" href="../../src/MTBIndoorBern/Scene/bike-settings.css">
  <style>
@@ -12,13 +12,13 @@
 </head>
 <body>
  <main class="harness">
-  <span class="harness-eyebrow">BANC DE PROVES UI · SENSORS SIMULATS</span>
-  <h1>Bicicleta i calibratge</h1>
-  <p>Aquesta pàgina importa els fitxers reals de la pantalla i comprova el seu comportament amb un pont local simulat. Cap connexió Bluetooth, cap ordre al KICKR, cap canvi a la configuració de l’app.</p>
-  <div class="harness-actions"><button id="harness-profile" type="button">Obre el perfil de prova</button><button id="harness-guide" type="button">Veure la prova guiada</button><button id="harness-run" type="button">Executa les comprovacions</button></div>
-  <div id="harness-result" class="harness-result" role="status">Preparant les comprovacions…</div>
+  <span class="harness-eyebrow">UI TEST HARNESS · SIMULATED SENSORS</span>
+  <h1>Bike and calibration</h1>
+  <p>This page imports the actual UI files and checks their behaviour through a simulated local bridge. It does not connect to Bluetooth, send KICKR commands or change application settings.</p>
+  <div class="harness-actions"><button id="harness-profile" type="button">Open test profile</button><button id="harness-guide" type="button">View guided test</button><button id="harness-run" type="button">Run checks</button></div>
+  <div id="harness-result" class="harness-result" role="status">Preparing checks…</div>
   <ol id="harness-results" class="harness-results"></ol>
-  <small>La previsualització sempre comença amb el KICKR desconnectat. Les dades de resposta que apareixen durant les proves són exemples sintètics.</small>
+  <small>The preview always starts with the KICKR disconnected. Response data shown during tests is synthetic.</small>
  </main>
  <script type="module" src="harness.js"></script>
 </body>

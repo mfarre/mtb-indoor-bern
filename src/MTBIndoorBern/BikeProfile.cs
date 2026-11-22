@@ -2,7 +2,7 @@ namespace MTBIndoorBern;
 
 internal sealed class BikeProfile
 {
-    public string Name { get; set; } = "La meva MTB";
+    public string Name { get; set; } = "My MTB";
     public double BikeKg { get; set; } = 14;
     public double WheelCircumferenceM { get; set; } = 2.30;
     // First sprocket is gear 1: the easiest climbing gear.
@@ -22,7 +22,7 @@ internal sealed class BikeProfile
     // Repair old/corrupt saved data. Submitted form values are validated before saving.
     public BikeProfile Normalize()
     {
-        Name = string.IsNullOrWhiteSpace(Name) ? "La meva MTB" : Name.Trim();
+        Name = string.IsNullOrWhiteSpace(Name) ? "My MTB" : Name.Trim();
         if (Name.Length > 60) Name = Name[..60];
         PhysicalGearNote = PhysicalGearNote?.Trim() ?? "";
         if (PhysicalGearNote.Length > 120) PhysicalGearNote = PhysicalGearNote[..120];
@@ -35,15 +35,15 @@ internal sealed class BikeProfile
     public bool TryValidate(out string error)
     {
         if (string.IsNullOrWhiteSpace(Name) || Name.Trim().Length > 60)
-            error = "Posa un nom de bicicleta d’entre 1 i 60 caràcters.";
+            error = "Enter a bike name between 1 and 60 characters.";
         else if (!double.IsFinite(BikeKg) || BikeKg < 5 || BikeKg > 35)
-            error = "El pes de la bicicleta ha d’estar entre 5 i 35 kg.";
+            error = "Bike weight must be between 5 and 35 kg.";
         else if (!double.IsFinite(WheelCircumferenceM) || WheelCircumferenceM < 1.5 || WheelCircumferenceM > 3)
-            error = "El perímetre de la roda ha d’estar entre 1,50 i 3,00 metres.";
+            error = "Wheel circumference must be between 1.50 and 3.00 metres.";
         else if (!ValidSprockets(Sprockets))
-            error = "Introdueix entre 4 i 24 pinyons, de 9 a 60 dents, ordenats del més gran al més petit i sense repetir.";
+            error = "Enter 4 to 24 sprockets, with 9 to 60 teeth, from largest to smallest without duplicates.";
         else if ((PhysicalGearNote?.Trim().Length ?? 0) > 120)
-            error = "La nota sobre la marxa física pot tenir com a màxim 120 caràcters.";
+            error = "The physical gear note can contain up to 120 characters.";
         else { error = ""; return true; }
         return false;
     }

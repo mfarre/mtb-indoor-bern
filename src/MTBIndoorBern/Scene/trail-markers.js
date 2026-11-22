@@ -10,6 +10,6 @@ export function addTrailMarkers(engine,plan){
   const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
   const sign=new T.Mesh(new T.PlaneGeometry(1.45*size,.725*size),new T.MeshBasicMaterial({map:texture,side:T.DoubleSide}));sign.position.y=1.5;node.add(sign);group.add(node);
  }
- for(const c of plan.corners)board(Math.max(0,c.distance-55),c.width/2+1.15,`${c.direction>0?'↱':'↰'} ${Math.round(c.limit)}`,'REVOLT · km/h', '#f0ce8e');
- if(plan.stage){for(const [d,label]of[[plan.stage.start,'SORTIDA'],[plan.stage.end,'META']])for(const side of[-1,1])board(d,side*2.2,label,plan.stage.name.toUpperCase(),'#d9f5ac',1.25);}
+ for(const c of plan.corners)board(Math.max(0,c.distance-55),c.width/2+1.15,`${c.direction>0?'↱':'↰'} ${Math.round(c.limit)}`,'CORNER · km/h', '#f0ce8e');
+ if(plan.stage){for(const [d,label]of[[plan.stage.start,'START'],[plan.stage.end,'FINISH']])for(const side of[-1,1])board(d,side*2.2,label,plan.stage.name.toUpperCase(),'#d9f5ac',1.25);}
 }

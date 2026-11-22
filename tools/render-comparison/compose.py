@@ -24,16 +24,16 @@ def main():
         temporary=Path(temporary)
         for index in range(count):
             canvas=Image.new('RGB',(1120,391),'#14231c');draw=ImageDraw.Draw(canvas)
-            draw.text((20,13),'VERSIÓ ANTERIOR',font=font,fill='#dbe3d4')
-            draw.text((580,13),'NOU ESTIL · TARDOR',font=font,fill='#d1ef91')
+            draw.text((20,13),'PREVIOUS VERSION',font=font,fill='#dbe3d4')
+            draw.text((580,13),'NEW STYLE · AUTUMN',font=font,fill='#d1ef91')
             for side,folder in enumerate([args.before,args.after]):
                 with Image.open(folder/f'{index:04d}.png') as frame:
                     if frame.size!=(960,540):raise ValueError(f'Unexpected capture dimensions: {frame.size}')
                     canvas.paste(frame.convert('RGB').resize((560,315),Image.Resampling.LANCZOS),(side*560,48))
             draw.line((560,0,560,363),fill='#14231c',width=3)
             distance=before['StartMeters']+index*before['SpeedMps']/before['Fps']
-            draw.text((20,369),f"AL DENTE · Corriol de bosc · km {distance/1000:.2f}".replace('.',','),font=small,fill='#dbe3d4')
-            draw.text((580,369),'Mateix traçat, posició i velocitat · captura del motor 3D',font=small,fill='#b8c5b3')
+            draw.text((20,369),f"AL DENTE · Forest singletrack · km {distance/1000:.2f}",font=small,fill='#dbe3d4')
+            draw.text((580,369),'Same route, position and speed · 3D engine capture',font=small,fill='#b8c5b3')
             canvas.save(temporary/f'{index:04d}.png')
             if index==count//2:canvas.save(args.output.with_suffix('.png'))
         subprocess.run([ffmpeg,'-y','-v','error','-framerate',str(before['Fps']),'-i',str(temporary/'%04d.png'),

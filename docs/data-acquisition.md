@@ -6,7 +6,7 @@
 
 ![Track Lab: video, route position, clock alignment and segment annotations](images/track-lab.png)
 
-The screenshot shows the existing Catalan interface. [Open the Track Lab guide](track-lab.md) for the controls, installation and build commands.
+The screenshot shows Track Lab in English. [Open the Track Lab guide](track-lab.md) for the controls, installation and build commands.
 
 ## Hardware and source files
 

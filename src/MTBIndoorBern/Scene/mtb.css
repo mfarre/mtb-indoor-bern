@@ -10,3 +10,15 @@ body.riding .vignette{background:linear-gradient(180deg,#0b1c2130,transparent 23
 .settings{align-items:center;flex-wrap:wrap;gap:10px}.settings #bike-settings{font-size:13px;padding:9px 13px}.settings #bike-summary{font-size:11px;color:#bcc9b3}
 
 #course-highlight{padding:6px 9px;font-size:10px;color:#ead598;border-color:#c8aa5b66;white-space:nowrap}#course-highlight[hidden]{display:none}
+
+/* Keep welcome controls above the elevation profile on laptop-height windows. */
+@media(max-height:900px){
+  .intro{top:219px}
+  .intro h1{font-size:43px;margin:8px 0}
+  .intro h1>span{font-size:17px;line-height:1.15;margin-top:8px}
+  .intro #course-description{display:none}
+  .intro .route-facts{margin:10px 0}
+  .intro-actions button{padding:10px 15px}
+  .intro .settings{margin:8px 0 6px;gap:6px}
+  .intro .hint{font-size:8px;line-height:1.5}
+}

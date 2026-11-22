@@ -24,7 +24,17 @@ internal sealed class CalibrationStepResult
     public double MeanErrorPercent { get; set; }
     public double SettlingSeconds { get; set; }
     public int Samples { get; set; }
-    internal object Snapshot() => new { name = Name, targetPower = TargetPower, meanPower = MeanPower, meanCadence = MeanCadence, meanErrorPercent = MeanErrorPercent, settlingSeconds = SettlingSeconds, samples = Samples };
+    // Existing results keep their saved values; only their visible stage names change.
+    private string DisplayName => Name switch
+    {
+        "Base suau" => "Easy baseline",
+        "Resposta a 70 rpm" => "Response at 70 rpm",
+        "Recuperació a 70 rpm" => "Recovery at 70 rpm",
+        "Resposta a 85 rpm" => "Response at 85 rpm",
+        "Recuperació a 85 rpm" => "Recovery at 85 rpm",
+        _ => Name
+    };
+    internal object Snapshot() => new { name = DisplayName, targetPower = TargetPower, meanPower = MeanPower, meanCadence = MeanCadence, meanErrorPercent = MeanErrorPercent, settlingSeconds = SettlingSeconds, samples = Samples };
 }
 
 internal sealed class CalibrationResult
@@ -60,11 +70,11 @@ internal sealed class CalibrationSession
     private sealed record Stage(string Name, int Power, double MinCadence, double MaxCadence, double Seconds);
     private sealed record Sample(double Seconds, double Power, double Cadence);
     private static readonly Stage[] Stages = [
-        new("Base suau", 70, 65, 75, 20),
-        new("Resposta a 70 rpm", 110, 65, 75, 24),
-        new("Recuperació a 70 rpm", 70, 65, 75, 20),
-        new("Resposta a 85 rpm", 110, 80, 90, 24),
-        new("Recuperació a 85 rpm", 70, 80, 90, 20)
+        new("Easy baseline", 70, 65, 75, 20),
+        new("Response at 70 rpm", 110, 65, 75, 24),
+        new("Recovery at 70 rpm", 70, 65, 75, 20),
+        new("Response at 85 rpm", 110, 80, 90, 24),
+        new("Recovery at 85 rpm", 70, 80, 90, 20)
     ];
     private readonly ICalibrationTrainer trainer;
     private readonly Action<string> log;
@@ -81,7 +91,7 @@ internal sealed class CalibrationSession
     private readonly List<CalibrationStepResult> results = [];
     private int targetPower;
     public string Phase { get; private set; } = "idle";
-    public string Message { get; private set; } = "Prova opcional de resposta del KICKR · uns 2 minuts · 70–110 W.";
+    public string Message { get; private set; } = "Optional KICKR response test · about 2 minutes · 70–110 W.";
     public bool Active => Phase is "warmup" or "preparing" or "step" or "cadence" or "stopping";
     public CalibrationResult? Result { get; private set; }
     public event Action<CalibrationResult>? Completed;
@@ -95,20 +105,20 @@ internal sealed class CalibrationSession
     {
         if (Active) return Task.CompletedTask;
         if (!trainer.Connected || !trainer.SupportsPower || string.IsNullOrWhiteSpace(trainer.Identity))
-        { Phase = "failed"; Message = "Connecta el KICKR amb control de potència abans d’iniciar la prova."; return Task.CompletedTask; }
+        { Phase = "failed"; Message = "Connect the KICKR with power control before starting the test."; return Task.CompletedTask; }
         if (string.IsNullOrWhiteSpace(profileSignature))
-        { Phase = "failed"; Message = "Desa primer el perfil de bicicleta."; return Task.CompletedTask; }
+        { Phase = "failed"; Message = "Save the bike profile first."; return Task.CompletedTask; }
         cancellation?.Dispose(); cancellation = new(); generation++;
         commandTask = Task.CompletedTask; endingTask = null; claimed = false; pendingFailure = "";
         elapsed = stageElapsed = stableSeconds = slowSeconds = 0; stageIndex = -1; freshCount = 0; targetPower = 0;
         samples.Clear(); results.Clear(); lastSamplePacket = null; Result = null;
         signature = profileSignature; identity = trainer.Identity; Phase = "warmup";
-        Message = "Pedala entre 65 i 75 rpm durant 5 segons. Mantén la mateixa marxa física tota la prova.";
-        log("Calibratge de resposta preparat; esperant cadència estable.");
+        Message = "Pedal at 65–75 rpm for 5 seconds. Keep the same physical gear throughout the test.";
+        log("Response calibration ready; waiting for steady cadence.");
         return Task.CompletedTask;
     }
 
-    public Task CancelAsync(string reason = "Prova cancel·lada") => EndAsync("cancelled", reason);
+    public Task CancelAsync(string reason = "Test cancelled") => EndAsync("cancelled", reason);
 
     public void Tick(double dt)
     {
@@ -116,17 +126,17 @@ internal sealed class CalibrationSession
         if (!double.IsFinite(dt) || dt <= 0) return;
         dt = Math.Min(dt, 1); elapsed += dt; stageElapsed += dt;
         if (pendingFailure.Length > 0) { _ = EndAsync("failed", pendingFailure); return; }
-        if (!trainer.Connected || trainer.Identity != identity) { _ = EndAsync("failed", "Prova aturada: s’ha desconnectat o canviat el KICKR. Torna-ho a provar."); return; }
+        if (!trainer.Connected || trainer.Identity != identity) { _ = EndAsync("failed", "Test stopped: the KICKR disconnected or changed. Please try again."); return; }
         bool valid = Fresh();
         if (!valid)
         {
             stableSeconds = 0; freshCount = 0;
-            if (claimed || elapsed > 15) _ = EndAsync("failed", "Prova aturada: falten dades recents de potència o cadència. Torna-ho a provar.");
+            if (claimed || elapsed > 15) _ = EndAsync("failed", "Test stopped: no recent power or cadence data. Please try again.");
             return;
         }
         double cadence = trainer.Cadence!.Value, power = trainer.Power!.Value;
         slowSeconds = claimed && cadence < 35 ? slowSeconds + dt : 0;
-        if (slowSeconds >= 1) { _ = EndAsync("failed", "Prova aturada en deixar de pedalar. Càrrega alliberada; torna-ho a provar quan estiguis a punt."); return; }
+        if (slowSeconds >= 1) { _ = EndAsync("failed", "Test stopped because pedalling stopped. Load released; try again when ready."); return; }
         bool unique = !lastSamplePacket.HasValue || trainer.LastPacket!.Value > lastSamplePacket.Value;
         if (unique) lastSamplePacket = trainer.LastPacket;
         if (Phase is "warmup" or "cadence")
@@ -140,7 +150,7 @@ internal sealed class CalibrationSession
             else { stableSeconds = 0; freshCount = 0; }
             if (stableSeconds >= 5 && freshCount >= 5) BeginStage(Phase == "warmup" ? 0 : 3);
             else if (stageElapsed > (Phase == "warmup" ? 60 : 40))
-                _ = EndAsync("failed", "No s’ha mantingut la cadència indicada. La prova no es desa; pots repetir-la.");
+                _ = EndAsync("failed", "The requested cadence was not maintained. The test was not saved; you can try again.");
             return;
         }
         if (Phase != "step") return;
@@ -157,12 +167,12 @@ internal sealed class CalibrationSession
                 // A conservative ramp recommendation, not a gain correction to measured watts.
                 TorqueRiseNmPerSecond = Math.Round(Math.Clamp(20 / Math.Max(3.4, settling), 3, 6), 2),
                 UpdateIntervalSeconds = 1, Steps = results.ToArray() };
-            _ = EndAsync("complete", "Prova completada. Resposta mesurada; ajustos de transició preparats. No verifica l’exactitud absoluta dels watts.", final);
+            _ = EndAsync("complete", "Test complete. Response measured and transition settings prepared. This does not verify absolute power accuracy.", final);
         }
         else if (stageIndex == 2)
         {
             Phase = "cadence"; stageElapsed = stableSeconds = 0; freshCount = 0;
-            Message = "Ara puja suaument a 80–90 rpm, mantenint la mateixa marxa física. La càrrega continua a 70 W.";
+            Message = "Gradually increase to 80–90 rpm in the same physical gear. Load remains at 70 W.";
         }
         else BeginStage(stageIndex + 1);
     }
@@ -177,7 +187,7 @@ internal sealed class CalibrationSession
     private void BeginStage(int index)
     {
         if (!commandTask.IsCompleted || Phase == "stopping") return;
-        stageIndex = index; stageElapsed = 0; Phase = "preparing"; Message = "Preparant el següent tram de la prova…";
+        stageIndex = index; stageElapsed = 0; Phase = "preparing"; Message = "Preparing the next test stage…";
         commandTask = SetStageAsync(index, generation, cancellation!.Token);
     }
 
@@ -192,16 +202,16 @@ internal sealed class CalibrationSession
             if (run != generation || Phase == "stopping") return;
             stageIndex = index; stageElapsed = stableSeconds = 0; freshCount = 0; samples.Clear();
             lastSamplePacket = trainer.LastPacket; targetPower = Stages[index].Power; Phase = "step";
-            Message = $"{Stages[index].Name}: mantén {Stages[index].MinCadence:0}–{Stages[index].MaxCadence:0} rpm. No canviïs la marxa física.";
-            log($"Calibratge: tram {index + 1}/{Stages.Length}, objectiu {targetPower} W confirmat; mesurant la resposta.");
+            Message = $"{Stages[index].Name}: hold {Stages[index].MinCadence:0}–{Stages[index].MaxCadence:0} rpm. Keep the same physical gear.";
+            log($"Calibration: stage {index + 1}/{Stages.Length}, target {targetPower} W confirmed; measuring response.");
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { }
-        catch (Exception e) { pendingFailure = "No s’ha pogut completar l’ordre al KICKR. " + e.Message; }
+        catch (Exception e) { pendingFailure = "Could not complete the KICKR command. " + e.Message; }
     }
 
     private bool AnalyzeStage(out CalibrationStepResult? result, out string failure)
     {
-        result = null; failure = "Dades insuficients o inestables: aquesta prova no es desa. Repeteix-la mantenint la cadència indicada.";
+        result = null; failure = "Insufficient or unstable data: this test was not saved. Try again while maintaining the requested cadence.";
         var stage = Stages[stageIndex];
         var tail = samples.Where(s => s.Seconds >= stage.Seconds - 10).ToArray();
         if (samples.Count < 12 || tail.Length < 6 || tail[^1].Seconds - tail[0].Seconds < 6) return false;
@@ -212,7 +222,7 @@ internal sealed class CalibrationSession
             tail.Count(s => s.Cadence >= stage.MinCadence && s.Cadence <= stage.MaxCadence) < tail.Length * .75) return false;
         double meanPower = tail.Average(s => s.Power), error = tail.Average(s => Math.Abs(s.Power - stage.Power) / stage.Power * 100);
         if (Math.Abs(meanPower - stage.Power) > Math.Max(8, stage.Power * .15) || error > 20)
-        { failure = "El KICKR no ha seguit prou bé la càrrega de prova. No es corregeixen ni es multipliquen els watts; revisa la connexió i repeteix-la."; return false; }
+        { failure = "The KICKR did not track the test load closely enough. Measured watts are not corrected or scaled; check the connection and try again."; return false; }
         double? anchor = null, settling = null; double previous = -1;
         foreach (var sample in samples)
         {
@@ -222,7 +232,7 @@ internal sealed class CalibrationSession
             previous = sample.Seconds;
         }
         if (!settling.HasValue || settling > 15)
-        { failure = "La càrrega no s’ha estabilitzat a temps. Aquesta prova no es desa; pots repetir-la amb una cadència més estable."; return false; }
+        { failure = "The load did not settle in time. This test was not saved; try again with a steadier cadence."; return false; }
         result = new() { Name = stage.Name, TargetPower = stage.Power, MeanPower = Math.Round(meanPower, 2), MeanCadence = Math.Round(meanCadence, 2),
             MeanErrorPercent = Math.Round(error, 2), SettlingSeconds = Math.Round(settling.Value, 2), Samples = samples.Count };
         return true;
@@ -232,7 +242,7 @@ internal sealed class CalibrationSession
     {
         if (endingTask is not null) return endingTask;
         if (!Active) return Task.CompletedTask;
-        generation++; cancellation?.Cancel(); Phase = "stopping"; Message = "Alliberant la càrrega del KICKR…";
+        generation++; cancellation?.Cancel(); Phase = "stopping"; Message = "Releasing the KICKR load…";
         endingTask = ReleaseAsync(commandTask, endPhase, message, result);
         return endingTask;
     }
@@ -250,7 +260,7 @@ internal sealed class CalibrationSession
         }
         claimed = false; targetPower = 0;
         if (failure is not null)
-        { Phase = "failed"; Message = "Prova aturada, però el KICKR no ha confirmat l’alliberament de càrrega. " + failure; }
+        { Phase = "failed"; Message = "Test stopped, but the KICKR did not confirm load release. " + failure; }
         else
         {
             Phase = endPhase; Message = message;
@@ -258,7 +268,7 @@ internal sealed class CalibrationSession
             {
                 Result = result;
                 try { Completed?.Invoke(result); }
-                catch (Exception e) { Message = "Prova completada, però no s’ha pogut desar el resultat. " + e.Message; }
+                catch (Exception e) { Message = "Test complete, but the result could not be saved. " + e.Message; }
             }
         }
         log(Message);

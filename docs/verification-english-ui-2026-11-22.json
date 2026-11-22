@@ -1,0 +1,222 @@
+{
+  "date": "2026-11-22",
+  "scope": "English simulator and Track Lab UI, screenshots, GIF captions and documentation",
+  "language": "en",
+  "number_date_locale": "en-GB",
+  "builds": {
+    "public_simulator": "PASS: Uetliberg and Gurten",
+    "personal_simulator": "PASS: Dentenberg, Uetliberg and Gurten",
+    "production_track_lab": "PASS"
+  },
+  "self_tests": {
+    "public": "PASS",
+    "personal": "PASS",
+    "coverage": [
+      "shared bike physics",
+      "custom gearing",
+      "torque ramp",
+      "guided calibration success, cancellation and failures with fake trainer",
+      "profile migration, validation and persistence",
+      "BLE and FTMS packets",
+      "demo pause/resume and seeking",
+      "braking, grip and personal records"
+    ]
+  },
+  "calibration_ui_checks": {
+    "passed": 27,
+    "failed": 0,
+    "compact_viewport": [
+      1100,
+      772
+    ]
+  },
+  "track_lab_capture": {
+    "native_webview": true,
+    "decoded_video_size": [
+      1280,
+      720
+    ],
+    "rotation_degrees": 180,
+    "frame_time_seconds": 1925,
+    "clock_offset_seconds": -226,
+    "errors": [],
+    "fixture": "Copy of recording session with English title/timing note; original recording and annotation files preserved"
+  },
+  "compatibility": [
+    "Saved sensor identities and settings preserved",
+    "Calibration and descent display names translated without changing stored identities or record hash inputs",
+    "Track Lab annotation keys and category values preserved",
+    "Existing user-entered names and notes retained"
+  ],
+  "screenshots_refreshed": 17,
+  "gifs_refreshed": 3,
+  "capture_method": "Native WinForms/WebView2 captures; real app demo/practice. Original paired 3D frames retained for historical renderer comparison. No generated or repainted UI screenshots.",
+  "hardware_test": "No new physical trainer test; captures used disconnected hardware/demo/practice",
+  "local_installation": "English simulator and Track Lab installed; settings, records and configuration hashes unchanged",
+  "assets": [
+    {
+      "file": "docs/images/welcome.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "795b5ca143839d83b4e266e1f72ba26f86da9bdba3ca6dc3ea02790a892287c3"
+    },
+    {
+      "file": "docs/images/devices.png",
+      "width": 1440,
+      "height": 900,
+      "frames": 1,
+      "sha256": "f7de07f8f2773176990ca81e52fc9d75ed616bcbd3e3b4d7b7fead578821f79e"
+    },
+    {
+      "file": "docs/images/aerial-view.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "e6d45cd253227b861ea18a5bb28709fe48cfa09b5d8bee07b9417c23b911cd20"
+    },
+    {
+      "file": "docs/images/asphalt-climb.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "7290935642b9d4a5fcfc9a122722b4b28e34310bcabc31d362721715bcbcf0c8"
+    },
+    {
+      "file": "docs/images/autumn-forest.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "f2ecea1de043c3de731e126287e1e50d68a840f560ab98983e3eceaea44942fa"
+    },
+    {
+      "file": "docs/images/bike-profile.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "5ad60f58fa87e754b7bc05cf54666b63a0628de5087f583d672b4f340b16717a"
+    },
+    {
+      "file": "docs/images/calibration-guide.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "685f5a7f36378d78fc3d8b89ac14610627e20246d1282b29148d3796c941067a"
+    },
+    {
+      "file": "docs/images/circuit-3d.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "50d0155929d54c11a4a648987fb663c5ee0fe0de1acdc2af1a2795637e7b63a6"
+    },
+    {
+      "file": "docs/images/dentenberg-braking.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "6f1e48602b73c73eb9e02cabe986d385adf5a9746d0ba7e48598a6bd1083237a"
+    },
+    {
+      "file": "docs/images/dentenberg-climb.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "7290935642b9d4a5fcfc9a122722b4b28e34310bcabc31d362721715bcbcf0c8"
+    },
+    {
+      "file": "docs/images/dentenberg-runout.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "b5b481f7b1dc75346d41d7460f7778d57b295c5ff7a5f17a2ac2b39ae7bf0ae1"
+    },
+    {
+      "file": "docs/images/gurten-climb.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "c8d5104bcce4c13b64d7d11fa82af1157fc216de5384f041784a19207df6e557"
+    },
+    {
+      "file": "docs/images/gurten-el-tony.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "49e740ea5e15e9eca539891bc8a1794ecd5cfa8936ed26df43a8faca1ef1a45a"
+    },
+    {
+      "file": "docs/images/gurten-overview.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "a9ce897302e9edc6e82b26975bf4727f9353bd4663b7d0632d2734231325e133"
+    },
+    {
+      "file": "docs/images/track-lab.png",
+      "width": 1440,
+      "height": 940,
+      "frames": 1,
+      "sha256": "976ef2fea5f6eaa29ef68717f92cb69227ab9dc263b4eb7984af39012a0b8a3d"
+    },
+    {
+      "file": "docs/images/uetliberg-aerial.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "8854790b9ff2f24c660be4ffe52d833a53d721d1d881ab4e68e522b33edb4fdb"
+    },
+    {
+      "file": "docs/images/uetliberg-demo.png",
+      "width": 1440,
+      "height": 852,
+      "frames": 1,
+      "sha256": "d636b7bdd129238449c9c48ef5916636a91d9c3d9f3464349a06c72301a4d971"
+    },
+    {
+      "file": "docs/images/gurten-trail.gif",
+      "width": 1100,
+      "height": 651,
+      "frames": 80,
+      "sha256": "7bb65bc46351b19250ea570495123a8f6576c0542ac89ad8d052a24855b9d5dd"
+    },
+    {
+      "file": "docs/images/dentenberg-braking.gif",
+      "width": 1100,
+      "height": 651,
+      "frames": 90,
+      "sha256": "edb74a1ee590a7360759bc00cc644fb4706dd48a6b3e925e2efa0e1e4514a831"
+    },
+    {
+      "file": "docs/images/al-dente-before-after.gif",
+      "width": 800,
+      "height": 279,
+      "frames": 80,
+      "sha256": "88cf54e1001c071e52cdb342ebc21e5d2a9a4bd6d43de3d54658b78716a45354"
+    }
+  ],
+  "welcome_layout_checks": [
+    {
+      "viewport": [
+        1440,
+        852
+      ],
+      "horizontal_overflow": [],
+      "runtime_errors": [],
+      "welcome_bottom": 601.953125,
+      "footer_top": 684,
+      "controls_clear_of_footer": true
+    },
+    {
+      "viewport": [
+        1100,
+        772
+      ],
+      "horizontal_overflow": [],
+      "runtime_errors": [],
+      "welcome_bottom": 572.953125,
+      "footer_top": 619,
+      "controls_clear_of_footer": true
+    }
+  ]
+}

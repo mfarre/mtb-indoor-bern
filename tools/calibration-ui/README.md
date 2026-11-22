@@ -10,7 +10,7 @@ From the repository root:
 python -m http.server 8766 --bind 127.0.0.1
 ```
 
-Open the [test harness](http://127.0.0.1:8766/tools/calibration-ui/). Checks run automatically and write their results to the page and console. **Executa les comprovacions** (run checks) repeats them. `window.bikeUiHarness.getSummary()` returns the counts, while `window.bikeUiHarness.results` contains the details.
+Open the [test harness](http://127.0.0.1:8766/tools/calibration-ui/). Checks run automatically and write their results to the page and console. **Run checks** repeats them. `window.bikeUiHarness.getSummary()` returns the counts, while `window.bikeUiHarness.results` contains the details.
 
 To inspect the appearance after the checks:
 

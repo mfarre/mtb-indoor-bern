@@ -33,7 +33,7 @@ internal sealed class CaptureForm:Form
     private readonly System.Windows.Forms.Timer watchdog=new(){Interval=30000};
     public CaptureForm(CaptureSpec spec)
     {
-        this.spec=spec;Text="MTB Indoor · Captura de comparació";ClientSize=new Size(960,540);
+        this.spec=spec;Text="MTB Indoor · Comparison capture";ClientSize=new Size(960,540);
         AutoScaleMode=AutoScaleMode.None;StartPosition=FormStartPosition.CenterScreen;Controls.Add(web);
         watchdog.Tick+=(_,_)=>Fail(new TimeoutException("No rendered frame received within 30 seconds"));
         Shown+=async(_,_)=>{try{await InitializeAsync();}catch(Exception ex){Fail(ex);}};
@@ -89,7 +89,7 @@ internal sealed class CaptureForm:Form
         watchdog.Start();
         var args=JsonSerializer.Serialize(new{distance=spec.StartMeters+frame*spec.SpeedMps/spec.Fps,dt=1.0/spec.Fps});
         await web.CoreWebView2.ExecuteScriptAsync($"window.renderCaptureFrame({args})");
-        Text=$"MTB Indoor · Captura {frame+1}/{spec.Seconds*spec.Fps}";
+        Text=$"MTB Indoor · Capture {frame+1}/{spec.Seconds*spec.Fps}";
     }
     private void Fail(Exception ex)
     {

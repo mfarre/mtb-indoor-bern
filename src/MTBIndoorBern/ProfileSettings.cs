@@ -19,9 +19,9 @@ internal sealed class ProfileInput
         Sprockets=Sprockets, LowCadenceAssist=LowCadenceAssist, PhysicalGearNote=PhysicalGearNote };
     public bool TryValidate(out string error)
     {
-        if(!double.IsFinite(RiderKg)||RiderKg is <40 or >160)error="El pes del ciclista ha d’estar entre 40 i 160 kg.";
-        else if(Chainring is <20 or >60)error="El plat ha de tenir entre 20 i 60 dents.";
-        else if(!double.IsFinite(Difficulty)||Difficulty is <0 or >1)error="El pendent al KICKR ha d’estar entre el 0% i el 100%.";
+        if(!double.IsFinite(RiderKg)||RiderKg is <40 or >160)error="Rider weight must be between 40 and 160 kg.";
+        else if(Chainring is <20 or >60)error="The chainring must have between 20 and 60 teeth.";
+        else if(!double.IsFinite(Difficulty)||Difficulty is <0 or >1)error="KICKR gradient scaling must be between 0% and 100%.";
         else return Bike.TryValidate(out error);
         return false;
     }
@@ -95,10 +95,10 @@ internal sealed class CalibrationTrainerAdapter(Equipment equipment) : ICalibrat
     }
     public async Task StartAsync(CancellationToken token)
     {
-        ownedControl=Sensor.Control??throw new IOException("Connecta un KICKR amb control de potència.");
+        ownedControl=Sensor.Control??throw new IOException("Connect a KICKR with power control.");
         await ownedControl.StartAsync(token,true);
     }
-    public Task SetPowerAsync(int watts,CancellationToken token)=>(ownedControl??throw new IOException("Control de calibratge no disponible.")).SetPowerAsync(watts,token);
+    public Task SetPowerAsync(int watts,CancellationToken token)=>(ownedControl??throw new IOException("Calibration control unavailable.")).SetPowerAsync(watts,token);
     public async Task StopAsync()
     {
         var control=ownedControl;

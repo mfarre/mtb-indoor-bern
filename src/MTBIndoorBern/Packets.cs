@@ -6,7 +6,7 @@ internal static class Packets
 {
     private static ushort U16(byte[] bytes, int offset)
     {
-        if (offset + 2 > bytes.Length) throw new InvalidDataException("Paquet Bluetooth incomplet.");
+        if (offset + 2 > bytes.Length) throw new InvalidDataException("Incomplete Bluetooth packet.");
         return BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset, 2));
     }
 

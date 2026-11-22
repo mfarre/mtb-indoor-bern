@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "notes": "Tram de joc dins el circuit Al Dente existent. Adherència calibrada per a la simulació; no és una mesura del terreny real.",
+  "notes": "Game stage within the existing Al Dente course. Grip is tuned for the simulation; it is not a measurement of the real terrain.",
   "descent": {
     "id": "dentenberg-forest",
     "name": "Dentenberg · baixada del bosc",

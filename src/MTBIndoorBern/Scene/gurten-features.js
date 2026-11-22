@@ -84,7 +84,7 @@ function normalized(descriptors,length){
  data.berms=(descriptors?.berms??[]).filter(b=>Number.isFinite(b.distance)&&Number.isFinite(b.length)&&b.length>0&&b.distance>=0&&b.distance+b.length<=length)
   .map(b=>({...b,height:clamp(finite(b.height,1),.2,2.8),width:clamp(finite(b.width,3.5),2.5,7),side:b.side<0?-1:1}));
  data.landmarks=(descriptors?.landmarks??[]).filter(s=>Number.isFinite(s.distance)&&s.distance>=0&&s.distance<=length);
- if(data.branding&&(!Number.isFinite(data.branding.distance)||data.branding.distance<0||data.branding.distance>length))throw Error('Posició del rètol El Tony fora del circuit.');
+ if(data.branding&&(!Number.isFinite(data.branding.distance)||data.branding.distance<0||data.branding.distance>length))throw Error('The El Tony sign position is outside the course.');
  return data;
 }
 
@@ -251,7 +251,7 @@ export async function addGurtenFeatures(engine,descriptors=engine.gurtenFeatures
  for(const mark of data.landmarks)addBoard(engine,group,wood,labelTexture(mark.label,mark.detail),mark);
  let logo=null,logoTexture=null,brandBoard=null,flagCount=0;
  if(data.branding){
-  if(!data.branding.logo)throw Error('El circuit Gurten necessita el logotip El Tony.');
+  if(!data.branding.logo)throw Error('The Gurten course requires the El Tony logo.');
   logoTexture=await new T.TextureLoader().loadAsync(`${engine.info.folder}/${data.branding.logo}`);logo=logoTexture.image;
   brandBoard=addBoard(engine,group,wood,logoBoardTexture(logo),data.branding,true);
   if(data.branding.flags!==false){

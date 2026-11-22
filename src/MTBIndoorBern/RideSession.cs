@@ -22,7 +22,7 @@ internal sealed class Course
         var route = JsonSerializer.Deserialize<Course>(File.ReadAllText(file), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
         if (route.Points.Length < 2 || route.Length < 100 || route.Points.Any(p => !double.IsFinite(p.Grade)) ||
             route.Points.Zip(route.Points.Skip(1)).Any(p => p.First.D >= p.Second.D))
-            throw new InvalidDataException("El traçat del circuit no és vàlid.");
+            throw new InvalidDataException("The course route is invalid.");
         return route;
     }
     public RoutePoint At(double distance)
@@ -64,7 +64,7 @@ internal sealed class RideSession
     public Func<string> TrainerIdentity { get; set; } = () => "";
     private CalibrationResult? ValidCalibration => preferences?.Data.Calibration is { } c && c.IsValidFor(ProfileSettings.Signature(preferences.Data),TrainerIdentity()) ? c : null;
     public string Mode { get; private set; } = "ready";
-    public string Message { get; private set; } = "Connecta el KICKR i inicia la ruta, o explora-la en mode demo.";
+    public string Message { get; private set; } = "Connect the KICKR and start riding, or explore in demo mode.";
     public double Distance { get; private set; }
     public double Velocity { get; private set; }
     public double Elapsed { get; private set; }
@@ -111,9 +111,9 @@ internal sealed class RideSession
         bool wasFinished = Mode == "finished";
         Distance = Math.Clamp(distance, 0, course.Length); Velocity = 0;
         Handling.Reset(); Descent.Reset(); screenBrake = controllerBrake = false;
-        if (Distance >= course.Length) { Mode = "finished"; Message = "Final de la demo · clica el perfil per tornar a un altre punt"; }
-        else if (wasFinished) { Mode = "paused"; Message = "Demo en pausa · prem Reprèn per continuar des d’aquest punt"; }
-        else Message = Mode == "paused" ? "Demo en pausa · posició canviada al perfil" : Practice ? "PRÀCTICA · nova posició · sense rècord" : "DEMO · posició canviada al perfil";
+        if (Distance >= course.Length) { Mode = "finished"; Message = "Demo finished · click the profile to return to another point"; }
+        else if (wasFinished) { Mode = "paused"; Message = "Demo paused · select Resume to continue from here"; }
+        else Message = Mode == "paused" ? "Demo paused · position changed using the profile" : Practice ? "PRACTICE · new position · no record" : "DEMO · position changed using the profile";
     }
     public Task ResumeAsync() => Mode == "paused" && !Busy ? StartAsync(IsDemo) : Task.CompletedTask;
     public async Task StartPracticeAsync()
@@ -121,7 +121,7 @@ internal sealed class RideSession
         if (Trail.Stage is null || Busy || Running) return;
         await ResetAsync(); await StartAsync(true);
         Practice = true; JumpDemo(Math.Max(0, Trail.Stage.Start - 55)); Velocity = 5;
-        Message = "PRÀCTICA · A / Espai: mantén per frenar · sense KICKR ni rècord";
+        Message = "PRACTICE · hold A / Space to brake · no KICKR control or record";
     }
     public void Configure(double weight, double difficulty,int chainring=32)
     {
@@ -146,7 +146,7 @@ internal sealed class RideSession
         {
             if (Running) return;
             if (!demo && (!Fresh || trainer.Control?.SupportsPower!=true||!trainer.Cadence.HasValue))
-                throw new InvalidOperationException("Esperant el KICKR amb potència i cadència. Pedala uns segons i torna a iniciar.");
+                throw new InvalidOperationException("Waiting for KICKR power and cadence. Pedal for a few seconds, then start again.");
             if (Distance >= course.Length || IsDemo != demo) ResetProgress();
             IsDemo = demo;
             if (!demo) Practice = false;
@@ -158,9 +158,9 @@ internal sealed class RideSession
             }
             torqueRamp.Reset();
             Mode = demo ? "demo" : "ride";
-            Message = Practice ? "PRÀCTICA · A / Espai: mantén per frenar · sense KICKR ni rècord" : demo ? "DEMO · recorregut automàtic, sense controlar el KICKR" : $"MTB 1×{GearCount} · + puja marxa · B baixa marxa";
+            Message = Practice ? "PRACTICE · hold A / Space to brake · no KICKR control or record" : demo ? "DEMO · automatic ride, without KICKR control" : $"MTB 1×{GearCount} · + shifts up · B shifts down";
             pedalled = demo || pedalled; lastControl = DateTime.MinValue; lastConfirmation = DateTime.UtcNow;
-            log(demo ? "Demo 3D iniciada. KICKR sense control." : "Ruta iniciada. Control del KICKR confirmat.");
+            log(demo ? "3D demo started. KICKR control is inactive." : "Ride started. KICKR control confirmed.");
         }
         catch (Exception e)
         {
@@ -176,7 +176,7 @@ internal sealed class RideSession
         {
             Mode = Distance >= course.Length ? "finished" : "paused"; Velocity = 0;
             Descent.Invalidate(); screenBrake = controllerBrake = false; Handling.Release();
-            Message = reason ?? "Ruta en pausa · resistència alliberada";
+            Message = reason ?? "Ride paused · resistance released";
             string? failure = await ReleaseControlAsync();
             if (failure is not null) Message += " · " + failure;
             log(Message);
@@ -186,7 +186,7 @@ internal sealed class RideSession
 
     public async Task ResetAsync()
     {
-        await PauseAsync("Ruta aturada");
+        await PauseAsync("Ride stopped");
         ResetProgress(); Mode = "ready";
     }
     private void ResetProgress() { Distance = 0; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); Descent.Reset(); screenBrake = controllerBrake = false; }
@@ -204,7 +204,7 @@ internal sealed class RideSession
         if (!Running || Busy) return;
         dt = Math.Clamp(dt, 0, .25);
         if (Live && (!Fresh || activeControl != trainer.Control || activeControl?.IsControlling != true))
-        { _ = PauseAsync("Ruta pausada: s’ha perdut el senyal o el control del KICKR"); return; }
+        { _ = PauseAsync("Ride paused: KICKR signal or control was lost"); return; }
         // Small fixed upper step keeps braking and corner penalties stable at 10 Hz or after a delayed frame.
         for (double remaining = dt; remaining > .000001;)
         {
@@ -222,7 +222,7 @@ internal sealed class RideSession
             }
             if (!IsDemo || Practice) Descent.Tick(oldDistance, Distance, step, Live, Handling.OffTracks);
         }
-        if (Distance >= course.Length) { _ = PauseAsync("Volta completada. Bona ruta!"); return; }
+        if (Distance >= course.Length) { _ = PauseAsync("Course complete. Enjoy the ride!"); return; }
         if (Live && !controlBusy && (DateTime.UtcNow - lastControl).TotalSeconds >= (ValidCalibration?.UpdateIntervalSeconds ?? 1))
             _ = UpdateResistanceAsync();
     }
@@ -244,7 +244,7 @@ internal sealed class RideSession
             }
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { }
-        catch (Exception e) { if (Live) await PauseAsync("Control interromput: " + e.Message); }
+        catch (Exception e) { if (Live) await PauseAsync("Control interrupted: " + e.Message); }
         finally { controlBusy = false; }
     }
 

@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Simulator](simulator.md) · [Bluetooth brake project](bluetooth-brakes.md) · [Development log](../DEVELOPMENT_LOG.md)
 
-Hold **A on the right Zwift Click 2** to brake; release it to coast again. You can also hold **Space**, the **A** key or the on-screen brake button. `+` shifts up and `B` shifts down, as before. Detection of A being pressed and released has been checked with the real controller.
+Hold **A on the right Zwift Click 2** to brake; release it to coast again. You can also hold **Space**, the **A** key or the on-screen **A / Space · Brake** button. `+` shifts up and `B` shifts down, as before. Detection of A being pressed and released has been checked with the real controller.
 
 The brake reduces virtual bicycle speed. **It does not apply a physical brake or increase KICKR load.** On descents, gravity moves the bicycle even at zero power. Small flat sections and rises may require pedalling during a real ride.
 
@@ -16,7 +16,7 @@ Climbs emphasise **gradient percentage**; descents show **speed**, gradient and 
 
 ## Practice and personal records
 
-**Practise the descent · Dentenberg** (`Practica la baixada · Dentenberg`) on the welcome screen places you 55 m before the sector starts. It needs no sensors and does not control the KICKR. It uses the same braking and grip as a real ride, with automatic propulsion on flat sections and rises so you can complete it using only the controls. The sightseeing demo remains available at ×1, ×2, ×4 and ×8; this automatic tour neither scores a time nor applies runouts.
+**Practise the descent · Dentenberg · forest descent** on the welcome screen places you 55 m before the sector starts. It needs no sensors and does not control the KICKR. It uses the same braking and grip as a real ride, with automatic propulsion on flat sections and rises so you can complete it using only the controls. **Explore in demo** remains available at ×1, ×2, ×4 and ×8; this automatic tour neither scores a time nor applies runouts.
 
 The timed **Dentenberg · forest descent** sector covers **km 4.480–6.980 of the existing Al Dente course**. It is not a second imported track. `handling.json` defines the sector boundaries and can define sectors for other courses.
 
