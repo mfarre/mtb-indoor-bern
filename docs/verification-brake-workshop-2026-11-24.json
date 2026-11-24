@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-24",
+  "scope": "Public brake workshop, printable v01 sources, T-Beam Supreme firmware and browser tester",
+  "firmware": {
+    "date": "2026-11-24",
+    "firmware": "firmware/brake-bench",
+    "platformio": "6.1.18",
+    "platform": "espressif32@6.10.0",
+    "arduinoEsp32": "2.0.17 (framework package 3.20017.0)",
+    "target": "ESP32-S3 8 MB flash, native USB CDC",
+    "build": "PASS",
+    "ramBytes": 44508,
+    "flashBytes": 908481,
+    "firmwareSha256": "f27a668a943a9bb25243eb6fe3bcc066d22758fc24e670f335c3b882ae2163d0",
+    "hostTests": "PASS: production acquisition and packet encoding; failure isolation, invalidation, magnetic flags, AGC limits, golden frame, boundaries",
+    "hostCompiler": "Zig 0.13.0, official download SHA256 verified",
+    "physicalTest": "NOT PERFORMED",
+    "hardwareFlashing": "NOT PERFORMED"
+  },
+  "tester": {
+    "core_tests": 13,
+    "result": "PASS",
+    "scenarios": [
+      "wire format and invalid sentinels",
+      "magnetic status and AGC bounds",
+      "signed and wrapped endpoint calibration",
+      "unstable capture rejection",
+      "stale and duplicate packets",
+      "out-of-order packets and reboot",
+      "long background gaps and sequence wraps",
+      "device/protocol calibration isolation",
+      "CSV escaping"
+    ]
+  },
+  "browser": {
+    "browser": "Desktop Chrome on Windows",
+    "served_from": "localhost",
+    "mode": "DEMO only",
+    "observed_pass": [
+      "Manual desktop hero and assembly content",
+      "Two independent healthy sensor channels",
+      "Stable released/full-pull capture on both levers",
+      "Left 4050 to 204 wrap and right 1200 to 950 reverse direction",
+      "Weak-field fault disables affected endpoint captures",
+      "Paused telemetry blanks readings and disables captures after stale timeout",
+      "Healthy readings recover when demo telemetry resumes",
+      "CSV download with 12000 explicitly labelled simulated samples"
+    ],
+    "csv_rows_verified": 12000,
+    "csv_columns_verified": 30,
+    "capture": "images/brake-bench-demo.png",
+    "limitations": [
+      "No real Bluetooth controller connected or flashed",
+      "Compact viewport checks not completed",
+      "Browser control ended because the automation could not verify the current URL; the corrected BOM table and final links were validated structurally"
+    ]
+  },
+  "hardware": "NOT physically tested; source dimensions and electrical mapping require assembly validation",
+  "simulator": "Unchanged; custom proportional brake integration remains future work",
+  "publication_content": "General English instructions; no personal assembly photos or conversation-specific fit discussion"
+}

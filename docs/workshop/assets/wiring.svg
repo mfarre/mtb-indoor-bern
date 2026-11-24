@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" role="img" aria-labelledby="title desc">
+<title id="title">Two AS5600 encoders wired to a TCA9548A and T-Beam Supreme</title><desc id="desc">T-Beam Supreme V3.1 CNC1 pin 3 GPIO43 to mux SDA; pin 4 GPIO44 to mux SCL; pin 2 3.3 volts and pin 1 ground supply all boards. Left encoder SDA and SCL go to mux SD0 and SC0. Right encoder SDA and SCL go to SD1 and SC1. Both encoders receive the common 3.3 volt supply and ground.</desc>
+<defs><style>text{font-family:system-ui,-apple-system,Segoe UI,sans-serif;fill:#183c35}.title{font-size:17px;font-weight:750}.sub{font-size:12px;fill:#596b64}.pin{font-size:13px}.small{font-size:11px}.node{fill:#fffef9;stroke:#c9d5c8;stroke-width:1.5}.wire{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.sda{stroke:#216d8a}.scl{stroke:#84933c}.power{stroke:#ce5827}.gnd{stroke:#51615b}.blue{fill:#216d8a}.olive{fill:#697933}</style></defs>
+<rect width="1000" height="560" rx="12" fill="#e8eee3"/>
+<text x="26" y="30" class="sub">LOGICAL WIRING • CONNECTOR VIEW IS NOT TO SCALE OR PHYSICAL PIN ORDER</text>
+<rect x="24" y="185" width="260" height="222" rx="12" class="node"/>
+<text x="43" y="216" class="title">T-Beam Supreme</text><text x="43" y="237" class="sub">V3.1 • CNC1 connector</text>
+<text x="43" y="273" class="pin">pin 3 / GPIO43 → SDA</text><text x="43" y="307" class="pin">pin 4 / GPIO44 → SCL</text><text x="43" y="341" class="pin">pin 2 / VDD3V3</text><text x="43" y="375" class="pin">pin 1 / GND</text>
+<rect x="360" y="185" width="260" height="222" rx="12" class="node"/>
+<text x="379" y="216" class="title">TCA9548A</text><text x="379" y="237" class="sub">A0 / A1 / A2 low → 0x70</text>
+<text x="379" y="273" class="pin">SDA</text><text x="379" y="307" class="pin">SCL</text><text x="379" y="341" class="pin">VCC</text><text x="379" y="375" class="pin">GND</text>
+<path class="wire sda" d="M284 269H360"/><path class="wire scl" d="M284 303H360"/><path class="wire power" d="M284 337H360"/><path class="wire gnd" d="M284 371H360"/>
+<text x="554" y="273" class="pin">SD0</text><text x="554" y="307" class="pin">SC0</text><text x="554" y="341" class="pin">SD1</text><text x="554" y="375" class="pin">SC1</text>
+<rect x="745" y="58" width="230" height="177" rx="12" class="node"/>
+<text x="764" y="89" class="title">LEFT AS5600</text><text x="764" y="109" class="sub">channel 0 • address 0x36</text>
+<text x="764" y="144" class="pin">SDA</text><text x="764" y="175" class="pin">SCL</text><text x="764" y="212" class="small">VCC → 3.3 V    GND → GND</text>
+<rect x="745" y="321" width="230" height="177" rx="12" class="node"/>
+<text x="764" y="352" class="title">RIGHT AS5600</text><text x="764" y="372" class="sub">channel 1 • address 0x36</text>
+<text x="764" y="407" class="pin">SDA</text><text x="764" y="438" class="pin">SCL</text><text x="764" y="475" class="small">VCC → 3.3 V    GND → GND</text>
+<path class="wire sda" d="M620 269H660V140H745"/><path class="wire scl" d="M620 303H682V171H745"/>
+<path class="wire sda" d="M620 337H704V403H745"/><path class="wire scl" d="M620 371H681V434H745"/>
+<rect x="28" y="441" width="602" height="67" rx="8" fill="#dce5d6"/>
+<text x="44" y="466" class="pin">Shared power: 3.3 V and GND to mux + both sensors.</text>
+<text x="44" y="490" class="sub">Power branches are listed above; only the data branches are drawn.</text>
+<text x="28" y="541" class="sub">Use module pad labels. Configure GPIO43/44 as I2C in the supplied firmware; they are labelled U0TXD/U0RXD in the board schematic.</text>
+</svg>

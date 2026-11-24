@@ -4,6 +4,22 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 24 November 2026 · A public brake workshop and Bluetooth bench
+
+**The brake project now has an [illustrated web manual](https://mfarre.github.io/mtb-indoor-bern/workshop/) and a [browser tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/).** The general English guide covers the original Maneta v01 assembly, sensor mounting, return spring, bill of materials and manufacturer references. Mirrored STL files and editable OpenSCAD are available in the repository and as a download. The instructions describe the design independently of any individual build or private assembly discussion.
+
+![The Bluetooth bench tester, showing calibrated simulated input rather than connected hardware](docs/images/brake-bench-demo.png)
+
+The wiring guide connects two **AS5600 encoders** through separate **TCA9548A channels** to a **LilyGO T-Beam Supreme**. Its V3.1 CNC1 mapping uses regulated 3.3 V, ground, GPIO43 as SDA and GPIO44 as SCL. Connector numbering follows the schematic; cable colours are not a pinout. The guide explains pull-ups, mux addressing, magnetic alignment and diagnostic checks.
+
+The included firmware has pinned PlatformIO dependencies, USB build/upload/boot instructions and a documented 20-byte BLE telemetry format. It advertises **MTB Brake Bench** automatically and sends both raw angles, magnetic status and AGC. The tester supports stable endpoint calibration in either direction, angle wraparound, fault/stale detection, optional per-device local calibration and CSV export. Its clearly labelled demo works without hardware and stays separate from real-device profiles. No encoder OTP settings are programmed.
+
+**Verified:** ESP32-S3 firmware compilation (44,508 bytes RAM; 908,481 bytes flash), native acquisition/protocol failure tests, 13 tester core tests, and desktop browser demo checks covering both calibrations, weak-field and stale faults, recovery and CSV export. A downloaded CSV was checked for 12,000 simulated records and 30 columns. CAD meshes are unchanged from the supplied source; source archives and local documentation links were checked. Browser control ended before compact-layout checks, so those are not claimed.
+
+**Still pending:** physical fit and sensor/Bluetooth measurements on an assembled controller, battery operation, and proportional-brake integration with the simulator. Compilation and demo readings are not hardware validation. Existing Click button braking is unchanged.
+
+[Workshop](https://mfarre.github.io/mtb-indoor-bern/workshop/) · [Printable hardware](hardware/maneta-v01/) · [Firmware](firmware/brake-bench/) · [BLE protocol](docs/brake-protocol.md) · [Verification](docs/verification-brake-workshop-2026-11-24.json).
+
 ## 22 November 2026 · Eiger Bike Challenge 20 km, summer and three starts
 
 **A new course around Grindelwald is included in the simulator and public repository.** The organisers' published 20 km GPX measures **19.48 km**, with approximately **874 m of climbing** after smoothing. Its June 2026 route was cross-checked against the official profile map. SWISSIMAGE, mapped woodland/buildings and swisstopo terrain provide the geographic setting, including the actual distant Alpine silhouettes.

@@ -24,7 +24,7 @@ The loop illustrates the design's nominal travel; it does not model measured for
 
 ## Source and assembly
 
-The package contains the five printable shapes for each hand, `maneta.scad`, `planol.pdf` and `MUNTATGE.md`. Each assembled lever uses six printed PETG pieces because the clamp half is printed twice. The original archive and its files remain in the local working folder; they are not bundled with this documentation.
+The package contains the five printable shapes for each hand, `maneta.scad`, `planol.pdf` and `MUNTATGE.md`. Each assembled lever uses six printed PETG pieces because the clamp half is printed twice. The [printable meshes and editable CAD](../hardware/maneta-v01/README.md) are now included in the repository. The original archive and historical assembly documents remain local; the [online workshop](https://mfarre.github.io/mtb-indoor-bern/workshop/) provides current English assembly and bench-test instructions.
 
 [Design-attachment conversation](https://chatgpt.com/s/t_6b02aac7f4a8819189ca3bd0214c126f) · [Initial planning discussion](https://chatgpt.com/share/6b02a20d-5db8-83eb-93a7-cbb479549aaa)
 
@@ -49,7 +49,7 @@ The reference fixes the six printed parts, their proportions and their assembled
 
 PETG colours and surface finish, the detailed spring coils, fastener recesses, sensor-board details, wire routing and the handlebar/grip/stem appearance are visualization choices. ImageGen can interpret small details; use the original CAD and PDF for dimensions. The AS5600 PCB is under the cover. The four-wire lead goes to an external controller: the design does not specify a local Bluetooth pod or LED on the lever.
 
-This is a rendering of a proposed mechanical prototype, not a photograph of a built device or evidence of fit, strength, sensor accuracy or working firmware. The package defines lever-angle sensing; it does not measure hydraulic pressure or finger force. The [hardware guide](bluetooth-brakes.md#maneta-v01-planned-hardware) records the proposed components and pending validation.
+This is a rendering of a proposed mechanical prototype, not a photograph of a built device or evidence of fit, strength or sensor accuracy. The package defines lever-angle sensing; it does not measure hydraulic pressure or finger force. The [hardware guide](bluetooth-brakes.md#maneta-v01-bench-hardware) links the components, bench firmware and pending physical validation.
 
 ## Generation method and prompt
 

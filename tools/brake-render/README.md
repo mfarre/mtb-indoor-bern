@@ -6,7 +6,7 @@ Build the right-hand Maneta v01 assembly directly from its five STL files. The c
 
 ## Inputs and running
 
-Use Blender 4.5 LTS with Cycles. Extract the owner-supplied `Maneta-MTB-v01.zip` into a local directory; that package is not bundled with this tool. The directory must contain `STL/dreta/base.stl`, `palanca.stl`, `guia.stl`, `tapa.stl` and `mordassa.stl`.
+Use Blender 4.5 LTS with Cycles. The printable geometry is available in [hardware/maneta-v01](../../hardware/maneta-v01/README.md); use that directory as `--source`. An extracted original design package also works. The source directory must contain `STL/dreta/base.stl`, `palanca.stl`, `guia.stl`, `tapa.stl` and `mordassa.stl`.
 
 ```powershell
 & 'C:/path/to/blender.exe' --background --factory-startup `

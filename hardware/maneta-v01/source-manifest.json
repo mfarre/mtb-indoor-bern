@@ -1,0 +1,49 @@
+{
+  "design": "Maneta v01",
+  "units": "mm",
+  "geometry": "Original STL meshes; OpenSCAD comments translated to English without changing executable source.",
+  "original_archive_sha256": "5e63dc93afddf633b9277a3e9b5ed62c21faf550c1b60a05819cefd13b896ba8",
+  "files": [
+    {
+      "file": "STL/dreta/base.stl",
+      "sha256": "839bb2f31463146d76b6e370953651d5644da0058aa9266b536dd1f4ea5405de"
+    },
+    {
+      "file": "STL/dreta/guia.stl",
+      "sha256": "5dafac1bc97fe84dff171c87c1179efccf11e9683fd4c6d7c6e4800ecaa6ba86"
+    },
+    {
+      "file": "STL/dreta/mordassa.stl",
+      "sha256": "34757e43a07f7573348cb414b5dd0b633220f2361de280b0fc0ce134c4917e17"
+    },
+    {
+      "file": "STL/dreta/palanca.stl",
+      "sha256": "b158e601ec104d01e2df9f0481a35fd914aec5585826376db5ef5d531b45f18c"
+    },
+    {
+      "file": "STL/dreta/tapa.stl",
+      "sha256": "5d993dbe10dadbd733e9ee3ddd851cd3a9db2bb827bef3a6b6b970d4b7aeb88f"
+    },
+    {
+      "file": "STL/esquerra/base.stl",
+      "sha256": "8829563dc42ae9583d38d06a129fb88261de61fcce254972f99a8f5587c2ee7e"
+    },
+    {
+      "file": "STL/esquerra/guia.stl",
+      "sha256": "08b01462d9780166771b58cad49fe81cfd3a4ece2adcf5e9956256c2d16c14be"
+    },
+    {
+      "file": "STL/esquerra/mordassa.stl",
+      "sha256": "3914fe15ecbb7a14c3a3d581035715916144c1f926cc26ffa1ee4b0321e359a0"
+    },
+    {
+      "file": "STL/esquerra/palanca.stl",
+      "sha256": "259cb8d2fd6c4dbb865e18daf35e80e15f34a4963bcfd129edf63aa063e4a02b"
+    },
+    {
+      "file": "STL/esquerra/tapa.stl",
+      "sha256": "6f3421499c6e9d397d55cf1cc1f32c05974325c70fe85dd427b5ffde5ea622fc"
+    }
+  ],
+  "physical_validation": "Prototype geometry; physical fit, strength, return force and clamp performance require validation."
+}

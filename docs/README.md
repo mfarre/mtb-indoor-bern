@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Simulator | [Setup, controls, courses and architecture](simulator.md) | Working Windows application |
 | Data acquisition | [Recording workflow and hardware](data-acquisition.md) | Track Lab works with FIT and video; additional sensor streams are planned |
-| Bluetooth brakes | [Input devices, hardware references and design work](bluetooth-brakes.md) | Right Click 2 button braking works; dedicated brake accessory is exploratory |
+| Bluetooth brakes | [Input devices and hardware](bluetooth-brakes.md) · [Online workshop](https://mfarre.github.io/mtb-indoor-bern/workshop/) | Click button braking works; printable lever, bench firmware and browser tester are available; custom hardware validation is pending |
 
 ## User guides
 
@@ -17,6 +17,8 @@
 - [Gurten route, visual references and limitations](GURTEN.md)
 - [Eiger Bike Challenge 20 km, summer scenery and starting sectors](EIGER.md)
 - [Track Lab: import, align, annotate and export](track-lab.md)
+- [Brake assembly, wiring and firmware: online workshop](https://mfarre.github.io/mtb-indoor-bern/workshop/)
+- [Bluetooth brake bench tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/)
 
 ## Developer tools and assets
 
@@ -29,6 +31,9 @@
 - [Bluetooth brake concept render provenance](brake-concept-render.md)
 - [Maneta v01 render from the actual CAD design](brake-v01-render.md)
 - [Reusable brake CAD reference renderer](../tools/brake-render/README.md)
+- [Printable Maneta v01 parts](../hardware/maneta-v01/README.md)
+- [T-Beam Supreme brake bench firmware](../firmware/brake-bench/README.md)
+- [Brake bench BLE protocol](brake-protocol.md)
 - [Third-party notices](../THIRD_PARTY_NOTICES.md)
 
 ## Historical verification reports

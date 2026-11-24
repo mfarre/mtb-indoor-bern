@@ -3,6 +3,7 @@ artifacts/
 **/obj/
 .vs/
 .idea/
+.pio/
 *.user
 *.suo
 settings.json

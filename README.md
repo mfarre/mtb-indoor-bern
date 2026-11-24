@@ -14,7 +14,7 @@ A Windows MTB simulator with real elevation data, aerial imagery, direct Bluetoo
 
 | [01 · Simulator](docs/simulator.md) | [02 · Data acquisition](docs/data-acquisition.md) | [03 · Bluetooth brakes](docs/bluetooth-brakes.md) |
 | --- | --- | --- |
-| **The main application.** Ride local trails with a KICKR, MTB gears, heart rate and downhill braking. Explore without sensors in demo mode. | **Track Lab and import tools.** Align action-camera footage with FIT data, annotate trail surfaces and extract reference frames. | **Controls and hardware research.** The right Zwift Click 2 already provides button braking. A dedicated brake-lever accessory is being explored. |
+| **The main application.** Ride local trails with a KICKR, MTB gears, heart rate and downhill braking. Explore without sensors in demo mode. | **Track Lab and import tools.** Align action-camera footage with FIT data, annotate trail surfaces and extract reference frames. | **Printable levers and a Bluetooth bench.** Assemble AS5600 controls, wire a TCA9548A and T-Beam Supreme, then inspect both sensors in a browser. Click button braking remains the implemented simulator input. |
 | [Setup and controls →](docs/simulator.md#build-and-run) | [Workflow and hardware →](docs/data-acquisition.md) | [Current support and hardware →](docs/bluetooth-brakes.md) |
 
 ## Ride now
@@ -52,7 +52,11 @@ The brake image above is an AI-generated concept, not a photograph or a validate
 
 [![Maneta v01 brake lever pulling and returning, rendered from the supplied STL design](docs/images/bluetooth-brake-v01-motion.gif)](docs/bluetooth-brakes.md#maneta-v01-render-from-the-actual-design)
 
-**Maneta v01: the actual mechanical design in motion.** A looping Blender render of the lever pulling and returning, based on the supplied STL files and assembly drawings. [Animation, original still and CAD reference](docs/brake-v01-render.md). Physical testing and custom BLE integration are still pending.
+**Maneta v01: the actual mechanical design in motion.** A looping Blender render of the lever pulling and returning, based on the supplied STL files and assembly drawings. [Animation, original still and CAD reference](docs/brake-v01-render.md). Physical electronics testing and proportional simulator integration are still pending.
+
+**[Open the brake workshop →](https://mfarre.github.io/mtb-indoor-bern/workshop/)**
+
+An illustrated web manual covers assembly, wiring, firmware installation and Bluetooth diagnostics. Download the [printable parts](hardware/maneta-v01/), build the [T-Beam Supreme firmware](firmware/brake-bench/), and open the **[Bluetooth bench tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/)** in desktop Chrome or Edge. The tester includes a clearly labelled demo, raw angle and magnetic-health readings, endpoint calibration and local CSV export. Physical electronics verification and proportional-brake integration with the simulator remain separate steps.
 
 The simulator, Track Lab, documentation and current screenshots are in English.
 
