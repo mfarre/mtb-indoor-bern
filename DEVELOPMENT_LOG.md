@@ -4,9 +4,9 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
-## 24 November 2026 · A public brake workshop and Bluetooth bench
+## 24 November 2026 · Maneta v01 assembly guide and Bluetooth bench
 
-**The brake project now has an [illustrated web manual](https://mfarre.github.io/mtb-indoor-bern/workshop/) and a [browser tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/).** The general English guide covers the original Maneta v01 assembly, sensor mounting, return spring, bill of materials and manufacturer references. Mirrored STL files and editable OpenSCAD are available in the repository and as a download. The instructions describe the design independently of any individual build or private assembly discussion.
+**The brake project now has an [illustrated assembly guide inside its GitHub Markdown document](docs/bluetooth-brakes.md#maneta-v01) and a [browser tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/).** The general English guide covers the original Maneta v01 assembly, sensor mounting, return spring, bill of materials and manufacturer references. Mirrored STL files and editable OpenSCAD are available in the repository and as a download. The instructions describe the design independently of any individual build or private assembly discussion. The full instructions sit directly below **Maneta v01**, with native STL/CAD views replacing the conceptual hero in the project overview and brake document. The separate guide website has been retired; its old address redirects to the Markdown document. Only the interactive Bluetooth tester needs a hosted page.
 
 ![The Bluetooth bench tester, showing calibrated simulated input rather than connected hardware](docs/images/brake-bench-demo.png)
 
@@ -18,7 +18,7 @@ The included firmware has pinned PlatformIO dependencies, USB build/upload/boot 
 
 **Still pending:** physical fit and sensor/Bluetooth measurements on an assembled controller, battery operation, and proportional-brake integration with the simulator. Compilation and demo readings are not hardware validation. Existing Click button braking is unchanged.
 
-[Workshop](https://mfarre.github.io/mtb-indoor-bern/workshop/) · [Printable hardware](hardware/maneta-v01/) · [Firmware](firmware/brake-bench/) · [BLE protocol](docs/brake-protocol.md) · [Verification](docs/verification-brake-workshop-2026-11-24.json).
+[Assembly guide](docs/bluetooth-brakes.md#maneta-v01) · [Printable hardware](hardware/maneta-v01/) · [Firmware](firmware/brake-bench/) · [BLE protocol](docs/brake-protocol.md) · [Verification](docs/verification-brake-workshop-2026-11-24.json).
 
 ## 22 November 2026 · Eiger Bike Challenge 20 km, summer and three starts
 

@@ -1,6 +1,6 @@
 # Maneta v01 printable parts
 
-[Online assembly and wiring guide](https://mfarre.github.io/mtb-indoor-bern/workshop/) · [Bluetooth brake project](../../docs/bluetooth-brakes.md)
+[Assembly and wiring guide](https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md#maneta-v01) · [Bluetooth brake project](https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md)
 
 An indoor simulator lever with a rotating diametric magnet, fixed AS5600 angle sensor, extension spring and rubber end stop. The files describe a prototype; printed fit, clamp performance and return behaviour need a physical check.
 

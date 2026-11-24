@@ -1,5 +1,7 @@
 # Brake bench tester
 
+[Prototype assembly and wiring guide](../../bluetooth-brakes.md#maneta-v01)
+
 A browser-local, read-only test tool for the [brake-bench firmware](../../../firmware/brake-bench/) and [v1 telemetry protocol](../../brake-protocol.md). It reads two AS5600 channels through the TCA9548A and LilyGO T-Beam Supreme. It does not control the trainer, write to the encoders or connect the levers to the simulator.
 
 Open the [hosted tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/) in a current Chrome or Edge desktop browser on a computer with Bluetooth. Web Bluetooth needs HTTPS or localhost and an explicit click on **Connect Bluetooth**. Select **MTB Brake Bench**. Close another BLE client if it has already connected to the board. [Browser API requirements](https://developer.chrome.com/docs/capabilities/bluetooth).

@@ -1,6 +1,6 @@
 # Brake Bench BLE protocol v1
 
-[Workshop](workshop/) · [Tester](workshop/tester/) · [Firmware](../firmware/brake-bench/)
+[Assembly guide](bluetooth-brakes.md#maneta-v01) · [Tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/) · [Firmware](../firmware/brake-bench/)
 
 This is a project-specific telemetry service for the dual-encoder bench test. It is not a Bluetooth HID, Cycling Power or Fitness Machine service, and the simulator does not yet consume it.
 

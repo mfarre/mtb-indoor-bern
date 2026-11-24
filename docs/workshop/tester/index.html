@@ -8,11 +8,11 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to tester</a>
-  <header class="site-header"><a class="brand" href="../">MTB INDOOR <span>BERN / WORKSHOP</span></a><a class="back-link" href="../#firmware">Assembly &amp; setup guide <span aria-hidden="true">↗</span></a></header>
+  <header class="site-header"><a class="brand" href="https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md#maneta-v01">MTB INDOOR <span>BERN / BRAKE BENCH</span></a><a class="back-link" href="https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md#maneta-v01">Assembly &amp; setup guide <span aria-hidden="true">↗</span></a></header>
   <main id="main">
     <section class="intro"><p class="eyebrow">THE BRAKE BENCH</p><h1>See what your<br>levers are saying.</h1><p class="lede">Check the magnetic field, watch both angles, and set the usable travel. Everything stays in this browser.</p></section>
     <section class="connection panel" aria-labelledby="connection-title">
-      <div><h2 id="connection-title">Connect your bench</h2><p>Flash the <a href="../#firmware">T-Beam Supreme firmware</a>, power the sensors, then choose <strong>MTB Brake Bench</strong>.</p></div>
+      <div><h2 id="connection-title">Connect your bench</h2><p>Flash the <a href="https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md#firmware-and-startup">T-Beam Supreme firmware</a>, power the sensors, then choose <strong>MTB Brake Bench</strong>.</p></div>
       <div class="actions"><button class="primary" id="connect">Connect Bluetooth <span aria-hidden="true">↗</span></button><button id="disconnect" hidden>Disconnect</button><button id="demo">Try the demo</button></div>
       <p id="compatibility" class="subtle">Use Chrome or Edge on a Bluetooth-capable computer, over HTTPS or localhost.</p>
       <div class="connection-line"><span id="connection-indicator" class="indicator"></span><strong id="connection-state">Not connected</strong><span id="device-name">No device selected</span></div>
@@ -27,7 +27,7 @@
     <section class="session panel" aria-labelledby="session-title"><div><h2 id="session-title">Keep the useful bits</h2><p>Save endpoints for this Bluetooth device on this browser, or export the current session. Demo data and calibration stay separate.</p></div><div class="actions"><button id="save" disabled>Remember calibration</button><button id="forget" disabled>Forget saved calibration</button><button id="export" disabled>Export CSV</button></div><p id="storage-status" class="subtle">Calibration is not saved unless you choose to remember it.</p><p id="session-status" class="subtle">A new connection or demo starts a fresh session. Export before switching.</p></section>
     <section class="help"><div><p class="eyebrow">A GOOD FIRST TEST</p><h2>Start with the signal.</h2></div><ol><li><strong>Check both fields.</strong> Healthy means MD = 1, ML = 0 and MH = 0. Correct the magnet alignment and gap before calibrating.</li><li><strong>Set two endpoints.</strong> Let go and capture release. Pull to a comfortable mechanical stop and capture full pull. Repeat for the other lever.</li><li><strong>Pull and release ten times.</strong> Look for a smooth trace and a repeatable return. Unplugging a sensor or losing Bluetooth should show a fault, never a healthy held reading.</li></ol></section>
   </main>
-  <footer><p>MTB Indoor — Bern · Bench tool, not game integration.</p><p>No accounts, analytics or cloud uploads. CSV exports contain the selected device name. <a href="https://github.com/mfarre/mtb-indoor-bern/tree/main/docs/workshop/tester">Source</a> · <a href="../">Workshop guide</a></p></footer>
+  <footer><p>MTB Indoor — Bern · Bench tool, not game integration.</p><p>No accounts, analytics or cloud uploads. CSV exports contain the selected device name. <a href="https://github.com/mfarre/mtb-indoor-bern/tree/main/docs/workshop/tester">Source</a> · <a href="https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md#maneta-v01">Assembly guide</a></p></footer>
   <noscript><p class="notice">Enable JavaScript to use the Bluetooth tester.</p></noscript>
 </body>
 </html>

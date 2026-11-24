@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Simulator | [Setup, controls, courses and architecture](simulator.md) | Working Windows application |
 | Data acquisition | [Recording workflow and hardware](data-acquisition.md) | Track Lab works with FIT and video; additional sensor streams are planned |
-| Bluetooth brakes | [Input devices and hardware](bluetooth-brakes.md) · [Online workshop](https://mfarre.github.io/mtb-indoor-bern/workshop/) | Click button braking works; printable lever, bench firmware and browser tester are available; custom hardware validation is pending |
+| Bluetooth brakes | [Prototype assembly, wiring and current input support](bluetooth-brakes.md) | Click button braking works; printable lever, bench firmware and browser tester are available; custom hardware validation is pending |
 
 ## User guides
 
@@ -17,7 +17,7 @@
 - [Gurten route, visual references and limitations](GURTEN.md)
 - [Eiger Bike Challenge 20 km, summer scenery and starting sectors](EIGER.md)
 - [Track Lab: import, align, annotate and export](track-lab.md)
-- [Brake assembly, wiring and firmware: online workshop](https://mfarre.github.io/mtb-indoor-bern/workshop/)
+- [Maneta v01: assembly, wiring and firmware](bluetooth-brakes.md#maneta-v01)
 - [Bluetooth brake bench tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/)
 
 ## Developer tools and assets
@@ -28,7 +28,7 @@
 - [Downhill capture harness](../tools/downhill/README.md)
 - [Bike profile and calibration UI checks](../tools/calibration-ui/README.md)
 - [Rendering assets and provenance](render-assets.md)
-- [Bluetooth brake concept render provenance](brake-concept-render.md)
+- [Archived Bluetooth brake concept provenance](brake-concept-render.md)
 - [Maneta v01 render from the actual CAD design](brake-v01-render.md)
 - [Reusable brake CAD reference renderer](../tools/brake-render/README.md)
 - [Printable Maneta v01 parts](../hardware/maneta-v01/README.md)
