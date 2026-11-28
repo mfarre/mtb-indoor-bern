@@ -29,47 +29,34 @@ The pilot does not change route coordinates, elevations, bike dynamics, gearing,
 ## View and sound
 
 | Control | Behaviour |
-
 | --- | --- |
-
 | **Focus view** | Reduces the visible ride details while retaining essential telemetry and ride controls. **Show details** restores the full interface. |
-
 | **View & sound** | Opens volume, stable camera and target frame rate settings. |
-
 | **Sound on/off** | Enables or mutes the ride sound. A user gesture is required before audio can start. |
-
 | **Volume** | Saved independently of the bike profile; the default is 35%. |
-
 | **Stable camera** | Reduces cosmetic movement without flattening the route or changing its gradient. Enabled by default. |
-
 | **Target frame rate** | Selects a 30 or 60 fps rendering target. The default is 30; this is a target, not a performance guarantee. |
 
 These preferences persist across application restarts and do not invalidate bike calibration. The view interpolates between host positions for smoother motion and resets its interpolation on a seek or new session. It does not advance the simulation beyond the latest received position.
 
 | Focus view in an offline demo | Saved view and sound preferences |
-
 | --- | --- |
-
 | ![Compact telemetry while exploring the pilot without sensors](images/el-tony-focus-view.png) | ![English view and sound controls with a saved volume of 40 percent](images/view-sound-preferences.png) |
 
 The demo's power and cadence are simulated. Heart rate remains blank without a sensor. The preferences screenshot shows a test value of 40%; a fresh profile defaults to 35%.
 
-The current sound combines earth, gravel, asphalt and leaf rolling textures, speed-dependent wind, braking friction and restrained corner scrub. The freehub buzz and gear-shift clacks from the first pilot were subsequently removed at the rider's request. The published pilot video retains its original soundtrack; the current app and new audio exports omit drivetrain sounds. Sound is **original procedural synthesis, not a recording from the trail**. No music, third-party sound samples, invented landing impacts or wheel-lock measurements are included.
+The current version 3 sound has seven continuous sources: earth, gravel, asphalt and leaf rolling textures, speed-dependent wind, braking friction and restrained corner scrub. It also restores a brief one-shot click when the host confirms a successful gear change. The continuous chain/freehub buzz remains removed. The published El Tony video retains its historical version 1 soundtrack; the later Dentenberg comparison retains version 2 without any drivetrain sounds. Sound is **original procedural synthesis, not a recording from the trail**. No music, third-party sound samples, invented landing impacts or wheel-lock measurements are included.
 
-Accelerated demo travel keeps a natural audio rate; practice follows its simulated speed. Gear changes and coasting do not produce drivetrain noise. Pausing, stopping, hiding the view or losing fresh host updates fades the sound. Audio failure leaves the ride and trainer controls operational. See [audio behaviour and tests](../tools/ride-audio/README.md).
+Accelerated demo travel keeps a natural audio rate; practice follows its simulated speed. Coasting produces no drivetrain layer. A successful shift during continuous riding can produce a short click; a button at the gear limit, a restored profile, seeking or resume does not. Repeated snapshots cannot replay the event. Pausing, stopping, hiding the view or losing fresh host updates fades the sound. Audio failure leaves the ride and trainer controls operational. See [audio behaviour and tests](../tools/ride-audio/README.md).
 
 ## Verification and performance
 
 The comparison tool separates three tasks:
 
 | Mode | What it establishes |
-
 | --- | --- |
-
 | `capture` | Repeatable pictures at fixed route positions. Screenshot export time is not a frame-rate measurement. |
-
 | `benchmark` | Real-time renderer-only frame intervals and CPU submission timings after warm-up, without screenshot work in the measured loop. It excludes the full app UI, Bluetooth and live audio. |
-
 | `audio` | The application's actual Web Audio graph rendered offline along the comparison's coasting trajectory, using the surface metadata under the bike. It is not microphone capture or a recorded training session. |
 
 Measured on 28 November 2026 with an **NVIDIA GeForce GTX 660**, WebView2/D3D11, **1280×720**, pixel ratio **1** and a **30 fps target**. Each run has 5 seconds of stationary warm-up. The Gurten path covers 45 seconds from km 4.97 at 6.2 m/s; the Eiger control covers 30 seconds from km 8.80.

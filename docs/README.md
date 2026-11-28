@@ -13,6 +13,7 @@
 ## User guides
 
 - [Bike setup, physics model and guided calibration](bike-calibration.md)
+- [Activities, estimated calories and manual Strava export](activities-strava.md)
 - [Downhill braking, grip, practice and records](downhill.md)
 - [Gurten route, visual references and limitations](GURTEN.md)
 - [El Tony graphics pilot, focus view and ride sound](el-tony-pilot.md)

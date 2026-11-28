@@ -12,7 +12,9 @@ The simulator interface and documentation are in English. Screenshots illustrate
 
 - 3D courses with SWISSIMAGE aerial imagery, elevation data, buildings, vegetation, shadows, textured roads and a handlebar view.
 - Consistent geographical gradient: the road, motion physics and trainer control start from the same elevation profile. The trainer averages the surrounding 40 m and ramps terrain-driven load changes; the rendered road, gradient display and virtual motion retain the local slope. Gurten's visual jump shapes do not pulse the KICKR load.
-- Live power, cadence, heart rate, speed, distance, altitude and elevation profile.
+- Live power, cadence, heart rate, speed, distance, altitude, elevation profile and estimated exercise calories from measured trainer power.
+- Local recordings of real trainer rides, with pause-aware TCX export and a button opening Strava’s manual file uploader. Demo and practice are excluded. See [activities, calories and Strava](activities-strava.md).
+- Saved volume/mute controls, seven continuous rolling/wind/braking sound layers and a brief click for a host-confirmed successful gear change. Chain/freehub buzz remains removed.
 - Configurable MTB gearing: **10–51, 10–52 and 11–46** presets, a custom cassette, and 20–60-tooth chainrings.
 - Independent left and right Click connections, without BikeControl, plus mouse and keyboard gear controls.
 - Virtual braking with A / Space, corner warnings, grip and runout penalties; downhill practice, timing and persistent personal records.
@@ -107,6 +109,9 @@ The Clicks and heart-rate strap are optional for riding. A Click disconnect rele
 | Start from, on Eiger | Choose the whole route or one of three sectors before riding/demo |
 | F11 | Toggle the maximized window |
 | Aerial view | Change camera |
+| Activities | Pause and review saved real rides |
+| 1 · Save TCX, in Activities | Save the selected workout to a local file |
+| 2 · Open Strava ↗, after export | Open Strava’s uploader; select the file and review it there |
 | Explore in demo | Travel through the course without controlling the trainer |
 | **⏩ Demo ×1** | Cycle demo speed through ×1 → ×2 → ×4 → ×8 |
 | **El Tony ↗**, on Gurten | Open a demo before the jump with the El Tony sign |
@@ -116,6 +121,14 @@ When the elevation profile has focus, arrows seek 100 m, Shift + arrow seeks 1 k
 Mouse shifting applies only to a click on the 3D scene. Buttons, menus, the map, elevation-profile seeking, brake input and bike/calibration dialogs keep their own behavior. Dragging, touch input and clicks with modifier keys do not shift gears.
 
 The left stream ignores mirrored right-side `+`, `A` and `B` events, so a single physical press cannot shift twice through both connections. Right `B` remains available as a one-controller fallback.
+
+## Calories and saved activities
+
+**EST. KCAL** is an estimate from measured power, using a fixed 24% cycling-efficiency assumption. Pauses, rejected/missing data, resting metabolism, demo and practice do not add workout calories. It is separate from the rider/bike weights and trainer-response calibration.
+
+Open **Activities** to review recent local workouts. **1 · Save TCX** writes a file; **2 · Open Strava ↗** opens the browser uploader. Select that file on Strava, mark it as an indoor ride, and review its details and visibility before saving. The simulator does not upload automatically or report that opening the page means publication succeeded.
+
+Recordings contain timestamps, measured power and available cadence/heart rate, with virtual distance and estimated calories. They contain no GPS coordinates or outdoor elevation. Checkpoints and completed rides remain in the private `activities` directory beside the executable, including recovery backups; they are excluded from the public repository. Read the [activity and Strava guide](activities-strava.md) for the formula, recovery behaviour and format limitations.
 
 ## MTB gearing and trainer load
 
@@ -136,6 +149,9 @@ src/MTBIndoorBern/
   Preferences.cs       Persistent local settings
   TrainerControl.cs    FTMS commands and acknowledgements
   RideSession.cs       Physics, gearing and ride state
+  RideActivity.cs      Measured-work estimate and real-ride samples
+  ActivityStore.cs     Private local recordings and recovery
+  ActivityExport.cs    Indoor TCX export for manual upload
   RidePanel.cs         WinForms-to-3D-view bridge
   Scene/               Interface, Three.js renderer and courses
 docs/images/           Application captures
@@ -151,6 +167,8 @@ Tests cover BLE/FTMS packets, gradients across installed courses, uphill starts,
 Previous physical checks used **KICKR CORE**, **right Zwift Click 2** and **Garmin HRM-Dual**. Separate left/right connections and recovery are implemented; a physical session with both Clicks, repeated disconnect/reconnect and live heart-rate recovery is still pending. Other trainers have not been validated. The guided response-calibration milestone used a simulated trainer; a completed physical guided test is not claimed. The project is not a full photogrammetric reconstruction or an official Wahoo, Zwift or Garmin integration.
 
 Run `node tools/ride-input/test.mjs` for the mouse-input regression checks. They cover gear direction, active versus paused modes, control/dialog isolation, modifiers, drag cancellation and loss of focus without connecting hardware.
+
+Activity recording and TCX checks cover measured-work integration, pauses and sensor gaps, demo exclusion, UTC timestamps, missing sensor fields, partial-course starts, atomic storage and backup recovery. A synthetic export passed the official Garmin TCX v2 and ActivityExtension v2 schemas. Those offline tests do not establish successful Strava ingestion or a new physical recording session.
 
 Historical build, physics, interface and rendering evidence is linked from the [development log](../DEVELOPMENT_LOG.md). Performance captures and hardware checks describe the conditions actually tested.
 

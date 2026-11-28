@@ -1,0 +1,65 @@
+{
+  "date": "2026-11-28",
+  "scope": "Estimated calories, local indoor activity recording, manual TCX export and confirmed shift clicks",
+  "builds": {
+    "public-release": "PASS",
+    "personal-release": "PASS"
+  },
+  "selfTests": {
+    "public": "PASS: Uetliberg, Gurten, Eiger Bike Challenge 20 km; real-ride energy/recording, private checkpoints, failed-save recovery and TCX export; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records.",
+    "personal": "PASS: Dentenberg, Uetliberg, Gurten, Eiger Bike Challenge 20 km; real-ride energy/recording, private checkpoints, failed-save recovery and TCX export; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records."
+  },
+  "javascript": {
+    "activityPanel": "12 tests passed",
+    "audio": "PASS",
+    "mouseShifting": "PASS",
+    "brakeKeyboard": "PASS",
+    "presentation": "PASS",
+    "presentationControls": "PASS"
+  },
+  "nativeUi": {
+    "hardwareAutoconnectDisabled": true,
+    "syntheticStoredRide": true,
+    "measuredLiveWorkout": false,
+    "contentWidthsChecked": [
+      1440,
+      1132
+    ],
+    "demoCaloriesUnavailable": true,
+    "shift8To9Confirmed": true,
+    "activitiesPausesDemo": true,
+    "closeRequiresExplicitResume": true,
+    "resumeDemoPassed": true,
+    "cancelPreservesRecording": true,
+    "nativeSaveDialogExport": "PASS",
+    "stravaEnabledOnlyAfterExport": true,
+    "reopenInvalidatesExportAcknowledgement": true,
+    "screenshot": "images/activities-strava.png",
+    "screenshotSha256": "9d2fb0bea6def1caa7ab37da94ec6eed47a20489b640f0e5e604d889ea655a6d"
+  },
+  "nativeExport": {
+    "synthetic": true,
+    "sampleCount": 1201,
+    "activeSeconds": 1200,
+    "distanceMeters": 7440,
+    "averagePowerWatts": 200,
+    "estimatedKcalRounded": 239,
+    "officialGarminTcxV2AndActivityExtensionV2": "PASS",
+    "gpsCoordinatesExported": false,
+    "outdoorElevationExported": false,
+    "sha256": "76cd4376a85243041a416c92fbec992d3d432919f92bf9dfca1ee37910d76a17"
+  },
+  "strava": {
+    "automaticOAuthImplemented": false,
+    "realUploadPerformed": false,
+    "importConfirmed": false,
+    "destination": "https://www.strava.com/upload/select"
+  },
+  "limits": [
+    "Calories use a fixed 24% cycling-efficiency assumption, not a personal metabolic measurement.",
+    "Demo/practice, pauses, rejected/missing data and resting metabolism are excluded.",
+    "The TCX describes an indoor workout with virtual distance, without GPS or altitude.",
+    "Strava may recompute totals; its actual ingestion was not tested.",
+    "No new physical Bluetooth recording or trainer-resistance test was performed."
+  ]
+}

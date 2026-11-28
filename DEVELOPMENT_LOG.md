@@ -4,6 +4,26 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 28 November 2026 · Estimated calories, saved rides and confirmed shift feedback
+
+**The gear-change click is back when a button actually changes gear.** Audio version 3 keeps seven continuous tyre, wind and braking/scrub sources, plus one short click for a host-confirmed successful shift. Continuous chain/freehub buzz remains absent. Cassette-limit presses, restored gear settings, seeking, resume and repeated snapshots do not replay shift clicks. Historical El Tony and Dentenberg comparison videos retain their original version 1 and version 2 soundtracks.
+
+**EST. KCAL now estimates exercise energy from measured trainer power.** The app integrates mechanical work and divides by 4184 J/kcal and an assumed 24% cycling efficiency. For example, 200 W over 30 minutes is about 359 kcal. This is not a measurement of individual metabolism: pauses, rejected/missing-power intervals and resting energy are not included. Demo and practice watts do not add workout calories or generate activity records.
+
+**Real rides are saved locally and can be exported for Strava.** The Activities panel shows duration, virtual distance, measured work, average power and estimated calories. Periodic checkpoints and lifecycle saves retain real power and available cadence/heart rate, with separate tracks across pauses and data gaps. Local files use atomic replacement and previous-checkpoint backups. Personal recordings remain outside the public repository.
+
+![Activities and the two-step TCX-to-Strava flow, using an invented UI fixture](docs/images/activities-strava.png)
+
+*This screenshot uses synthetic test values to demonstrate the interface. It is not a measured training session and does not show a successful Strava publication.*
+
+Choose **1 · Save TCX**, then **2 · Open Strava ↗**. On Strava, select the file, mark the ride as indoor, review its details and visibility, and save it there. The app opens the fixed upload page without sending the file or requesting account credentials. Automatic OAuth publishing is not implemented. TCX includes UTC timestamps and virtual distance but no invented GPS position or outdoor elevation; the exporter checks Strava's documented 25 MB file limit before replacing a chosen destination.
+
+**Offline verification:** recorder/export tests cover measured-work integration, pauses and gaps, demo exclusion, partial-course starts, timestamp ordering, missing sensor values, atomic checkpoints, recovery from damaged files and rejection of truncated or invalid exports. A failed local save keeps its snapshot available for export even after a course change or ride reset; tests cover retrying storage and older write completions without losing newer data. Synthetic TCX fixtures passed the official Garmin Training Center Database v2 and ActivityExtension v2 schemas.
+
+**Native UI verification:** demo calories remain blank, successful shifts update the gear, and opening Activities pauses the demo. A synthetic 20-minute recording was displayed and exported through the Windows save dialog; cancel leaves the Strava button disabled, successful export enables it, and closing/reopening the panel requires another export. The 1134 px layout and explicit demo resume were checked. No personal workout was uploaded to Strava, and neither successful Strava ingestion nor a new physical-sensor recording is claimed by these tests.
+
+[Calories, recordings and Strava workflow](docs/activities-strava.md) · [Current audio behaviour and checks](tools/ride-audio/README.md) · [Simulator controls](docs/simulator.md).
+
 ## 28 November 2026 · Dentenberg autumn woodland and quieter rides
 
 **Dentenberg now has a more detailed autumn forest across its annotated woodland sections.** The existing DJI recording guided pale retained leaves, exposed branches, darker conifer saplings and a narrow worn trail through fallen leaves. Nearby three-dimensional trees use fixed spatial budgets; distant trees remain lightweight. Softer ground margins and less repetitive materials improve the transition into the surrounding imagery. The route, elevation, surface annotations, gearing and KICKR load are unchanged.

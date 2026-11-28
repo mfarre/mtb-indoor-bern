@@ -49,3 +49,9 @@ records.json.tmp
 !src/MTBIndoorBern/Scene/courses/eiger-20/route.json
 !src/MTBIndoorBern/Scene/courses/eiger-20/world.json
 !src/MTBIndoorBern/Scene/courses/eiger-20/aerial.jpg
+
+# Private real-ride recordings and exports
+**/activities/*
+!tools/activities/
+!tools/activities/**
+*.tcx

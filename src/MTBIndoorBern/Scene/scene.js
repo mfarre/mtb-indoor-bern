@@ -9,6 +9,7 @@ import {setupMouseShifting} from './ride-input.js';
 import {PresentationTimeline,FrameMetrics} from './ride-presentation.js';
 import {setupPresentationControls} from './presentation-controls.js';
 import {createRideAudio} from './ride-audio.js';
+import {setupActivities,calorieDisplay} from './activities-ui.js';
 const $=id=>document.getElementById(id),bridge=window.chrome?.webview;
 // Sound is optional. An unavailable audio device must never reach fail(), which
 // deliberately pauses the host for actual scene/renderer failures.
@@ -20,7 +21,7 @@ const audio=Object.fromEntries(['unlock','update','setPreferences','silence','di
 }]));
 const send=(action,extra={})=>{
  if(['start','demo','practice','resume','preview'].includes(action))audio.unlock();
- if(['pause','stop','devices','course','profile-request','error'].includes(action))audio.silence();
+ if(['pause','stop','devices','course','profile-request','activities-open','error'].includes(action))audio.silence();
  return bridge?.postMessage({action,...extra});
 };
 const format=(v,n=0)=>Number(v).toLocaleString('en-GB',{minimumFractionDigits:n,maximumFractionDigits:n});
@@ -33,6 +34,8 @@ const presentation=setupPresentationControls(send,audio,(next,previous)=>{
 function fail(error){const message=String(error?.message??error);errors.push(message);$('loading').style.display='flex';$('loading').querySelector('h2').textContent='Could not load the course';$('loading').querySelector('p').textContent=message;send('error',{message});}
 window.addEventListener('error',e=>fail(e.error??e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
 const clearBrake=setupTrail(send);
+const activities=setupActivities(send,clearBrake);
+bridge?.addEventListener('message',event=>activities.receive(event.data));
 const bikeSettings=setupBikeSettings(send);
 setupMouseShifting($('world'),send,()=>state);
 $('bike-settings').onclick=()=>bikeSettings.open();
@@ -76,6 +79,7 @@ function refreshDevices(){
 function refreshHud(){
  const running=state.mode==='ride'||state.mode==='demo',pausedDemo=state.demo&&state.mode==='paused';document.body.classList.toggle('riding',running||pausedDemo);document.body.classList.toggle('demo',state.demo&&(running||pausedDemo));document.body.classList.toggle('paused',state.mode==='paused'||state.mode==='finished');document.body.classList.toggle('demo-paused',pausedDemo);
  for(const id of['watts','cadence','heart'])$(id).textContent=state[id]==null?'—':format(state[id]);$('speed').textContent=format(state.speed,1);$('distance').textContent=format(state.distance/1000,2);
+ const energy=calorieDisplay(state);$('calories').textContent=energy.text;$('calorie-metric').title=energy.note;
  const hrDevice=state.devices?.find(d=>d.role==='HeartRate');
  $('heart-status').textContent=state.heart!=null?'♥ bpm':hrDevice?.state==='waiting'?'Waiting for pulse':hrDevice?.state==='stale'?'No recent pulse':'♥ bpm';
  $('remaining').textContent=`${format(Math.max(0,(state.length??info?.length??0)-state.distance)/1000,2)} km remaining`;

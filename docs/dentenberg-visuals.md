@@ -55,7 +55,7 @@ This generic material has sparser, brighter leaves than the observed woodland. R
 
 The visual work preserves route coordinates, elevation, configured widths, slope, gearing, braking physics and trainer control. Scenery is illustrative and does not add measured obstacles or change the KICKR load.
 
-Alongside this update, the requested drivetrain-noise removal deletes the freehub buzz and gear-shift clacks from the audio graph. Tyre rolling, wind, braking friction and corner scrub remain at their previous levels. The remaining seven synthesized buffers are unchanged; gear changes and coasting cannot create extra sound sources. Volume/mute controls, pause/hidden/stale-data fades and audio failure isolation remain available. See [audio behaviour and checks](../tools/ride-audio/README.md).
+This woodland milestone originally introduced audio version 2, removing both freehub buzz and gear-shift clacks. Its comparison video retains that soundtrack. The current version 3 restores a brief one-shot click for a host-confirmed successful gear change while keeping continuous chain/freehub noise removed. The seven continuous tyre, wind, braking and corner-scrub sources retain their previous synthesis and levels. Coasting, restored settings, seeking and repeated snapshots do not create shift clicks. Volume/mute controls, pause/hidden/stale-data fades and audio failure isolation remain available. See [audio behaviour and checks](../tools/ride-audio/README.md).
 
 ## Before and after
 
@@ -63,7 +63,7 @@ Alongside this update, the requested drivetrain-noise removal deletes the freehu
 
 [Before still](images/dentenberg-woodland-before.png) · [After still](images/dentenberg-woodland-after.png) · [30-second comparison with the quieter soundtrack](images/dentenberg-woodland-comparison.mp4).
 
-The comparison follows km 4.00–4.19 at the same speed, camera timing and resolution. Its 10 fps export is separate from the real-time measurement below. The silent GIF shows an eight-second excerpt; the video soundtrack uses the current application graph with drivetrain sounds removed.
+The comparison follows km 4.00–4.19 at the same speed, camera timing and resolution. Its 10 fps export is separate from the real-time measurement below. The silent GIF shows an eight-second excerpt; the video soundtrack uses the version 2 application graph captured at that milestone, with drivetrain sounds removed. The current app uses version 3 with confirmed shift feedback restored.
 
 ![English application in an isolated Dentenberg demo, with no hardware connected](images/dentenberg-woodland-in-app.png)
 

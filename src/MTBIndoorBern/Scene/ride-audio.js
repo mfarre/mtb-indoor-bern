@@ -9,7 +9,7 @@ export function createRideAudio({ context = null, watch = true } = {}) {
   let ctx = context, owned = false, graph = null, failed = false, disposed = false;
   let preferences = { ...AUDIO_DEFAULTS }, latest = null, lastAcceptedAt = -Infinity;
   let lastArrival = -Infinity, timer = null;
-  const state = new RideAudioState();
+  const state = new RideAudioState(), activeClicks = new Set();
   const doc = watch && typeof document !== 'undefined' ? document : null;
   const offline = () => !!ctx && typeof ctx.startRendering === 'function';
   const wallNow = () => (globalThis.performance?.now?.() ?? Date.now()) / 1000;
@@ -19,6 +19,8 @@ export function createRideAudio({ context = null, watch = true } = {}) {
   function releaseNodes() {
     if (!graph) return;
     for (const voice of Object.values(graph.voices)) { try { voice.source.stop(); voice.source.disconnect(); voice.filter.disconnect(); voice.gain.disconnect(); } catch {} }
+    for (const click of activeClicks) { try { click.source.stop(); click.source.disconnect(); click.gain.disconnect(); } catch {} }
+    activeClicks.clear();
     try { graph.master.disconnect(); graph.compressor.disconnect(); } catch {}
     graph = null;
   }
@@ -40,7 +42,7 @@ export function createRideAudio({ context = null, watch = true } = {}) {
     compressor.ratio.value = 2.5; compressor.attack.value = .005; compressor.release.value = .2;
     master.connect(compressor); compressor.connect(ctx.destination);
     // Assign early so partial initialization can always be disconnected on error.
-    graph = { master, compressor, voices: {} };
+    graph = { master, compressor, voices: {}, gear: null };
     for (const kind of ['earth', 'gravel', 'asphalt', 'leaves', 'wind', 'brake', 'skid']) {
       const source = ctx.createBufferSource(), gain = ctx.createGain(), filter = ctx.createBiquadFilter();
       graph.voices[kind] = { source, gain, filter };
@@ -50,6 +52,7 @@ export function createRideAudio({ context = null, watch = true } = {}) {
       source.connect(filter); filter.connect(gain); gain.connect(master);
       source.start(atNow());
     }
+    graph.gear = buffer('gear');
   }
   function masterAt(time, active) {
     if (!graph) return;
@@ -59,10 +62,23 @@ export function createRideAudio({ context = null, watch = true } = {}) {
     // A new host packet cancels this future fade before rearming it. Pauses never need a timer.
     if (active) graph.master.gain.setTargetAtTime(0, time + STALE_SECONDS, .05);
   }
+  function clickAt(time) {
+    if (!graph || preferences.muted || preferences.volume <= 0 || doc?.hidden || (!offline() && ctx.state !== 'running')) return;
+    const source = ctx.createBufferSource(), gain = ctx.createGain();
+    const click = { source, gain }; activeClicks.add(click);
+    source.buffer = graph.gear; source.loop = false; gain.gain.value = .09;
+    source.connect(gain); gain.connect(graph.master);
+    source.onended = () => { try { source.disconnect(); gain.disconnect(); } catch {} activeClicks.delete(click); };
+    source.start(time); source.stop(time + graph.gear.duration + .01);
+  }
+  function stopClicks(time) {
+    for (const click of activeClicks) { try { click.source.stop(time); } catch {} }
+  }
   function apply(snapshot, time) {
     const values = state.update(snapshot, time);
     if (!values) return;
     lastAcceptedAt = time;
+    if (values.discontinuity) stopClicks(time);
     for (const kind of ['earth', 'gravel', 'asphalt', 'leaves']) {
       target(graph.voices[kind].gain.gain, values.surface === kind ? values.tire : 0, time, .18);
       target(graph.voices[kind].source.playbackRate, values.rate, time, .2);
@@ -71,10 +87,12 @@ export function createRideAudio({ context = null, watch = true } = {}) {
       target(graph.voices[kind].gain.gain, value, time, .1);
     target(graph.voices.wind.filter.frequency, 350 + values.speed * 15, time, .3);
     masterAt(time, values.running);
+    if (values.gearClick) clickAt(time);
   }
   function silence() {
     safe(() => {
       if (graph) target(graph.master.gain, 0, atNow(), .025);
+      stopClicks(atNow());
       state.reset(); lastAcceptedAt = -Infinity;
     });
   }

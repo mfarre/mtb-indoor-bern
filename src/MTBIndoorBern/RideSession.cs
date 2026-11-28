@@ -62,7 +62,15 @@ internal sealed class RideSession
     private readonly TrainerLoad trainerLoad;
     private bool easierShiftPending;
     private string presentationEpoch = Guid.NewGuid().ToString("N");
-    private long stateSequence;
+    private long stateSequence, shiftSequence;
+    private readonly string activityCourseId, activityCourseName;
+    private RideActivityRecorder? activityRecorder;
+    private double lastActivityCheckpoint;
+    public event Action<RideActivity>? ActivityChanged;
+    public RideActivity? CurrentActivity => activityRecorder?.Snapshot();
+    public double? EstimatedCalories => !IsDemo && !Practice && activityRecorder?.ActiveSeconds > 0 ? activityRecorder.EstimatedCalories : null;
+    public double? WorkKj => !IsDemo && !Practice && activityRecorder?.ActiveSeconds > 0 ? activityRecorder.MechanicalWorkJoules / 1000 : null;
+    public double EnergyMeasuredSeconds => !IsDemo && !Practice ? activityRecorder?.ActiveSeconds ?? 0 : 0;
     private void NewPresentationEpoch() { presentationEpoch = Guid.NewGuid().ToString("N"); stateSequence = 0; }
     public BikeProfile Bike { get; private set; } = new();
     public int GearCount => Bike.Sprockets.Length;
@@ -96,8 +104,10 @@ internal sealed class RideSession
     public void SetControllerBrake(bool pressed) => controllerBrake = pressed;
     public void SetScreenBrake(bool pressed) { screenBrake = pressed; screenBrakeUntil = DateTime.UtcNow.AddSeconds(.75); }
 
-    public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null, string? routeFile=null, PersonalRecords? records=null,CourseSector[]? sectors=null)
+    public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null, string? routeFile=null, PersonalRecords? records=null,CourseSector[]? sectors=null,string? courseId=null,string? courseName=null)
     { this.course = course; this.trainer = trainer; this.heart = heart; this.log = log;this.preferences=preferences;
+      activityCourseId = courseId ?? (routeFile is null ? "indoor" : Path.GetFileName(Path.GetDirectoryName(routeFile)) ?? "indoor");
+      activityCourseName = courseName ?? activityCourseId;
       trainerLoad = new(course);
       CourseCatalog.ValidateSectors(sectors,course.Length);this.sectors=sectors?.ToArray()??[];
       Trail = new(course, routeFile); Descent = new(Trail, records ?? new PersonalRecords(null));
@@ -119,6 +129,7 @@ internal sealed class RideSession
         int previous = Gear;
         Gear = Math.Clamp(Gear + Math.Sign(delta), 1, GearCount);
         if (Gear < previous) easierShiftPending = true;
+        if (Gear != previous) shiftSequence++;
     }
     public void CycleDemoSpeed()
     {
@@ -184,6 +195,12 @@ internal sealed class RideSession
                 await activeControl!.StartAsync(rideToken.Token,true);
             }
             trainerLoad.Reset(); easierShiftPending = false;
+            if (!demo)
+            {
+                if (activityRecorder is null || activityRecorder.IsComplete)
+                    activityRecorder = new(activityCourseId, activityCourseName, DateTimeOffset.UtcNow, Distance);
+                else activityRecorder.Resume(DateTimeOffset.UtcNow, Distance);
+            }
             Mode = demo ? "demo" : "ride";
             NewPresentationEpoch();
             Message = Practice ? "PRACTICE · hold A / Space to brake · no KICKR control or record" : demo ? "DEMO · automatic ride, without KICKR control" : $"MTB 1×{GearCount} · + shifts up · B shifts down";
@@ -203,6 +220,8 @@ internal sealed class RideSession
         try
         {
             Mode = Distance >= course.Length ? "finished" : "paused"; Velocity = 0;
+            activityRecorder?.Pause();
+            if (Mode == "finished") FinishActivity(); else PublishActivity();
             Descent.Invalidate(); screenBrake = controllerBrake = false; Handling.Release();
             Message = reason ?? "Ride paused · resistance released";
             string? failure = await ReleaseControlAsync();
@@ -217,7 +236,21 @@ internal sealed class RideSession
         await PauseAsync("Ride stopped");
         ResetProgress(); Mode = "ready";
     }
-    private void ResetProgress() { NewPresentationEpoch(); Distance = StartDistance; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); if(StartDistance>0)Descent.ResetAt(StartDistance);else Descent.Reset(); screenBrake = controllerBrake = false; }
+    public RideActivity? FinishActivity()
+    {
+        if (activityRecorder is null) return null;
+        if (!activityRecorder.IsComplete) { activityRecorder.Complete(); PublishActivity(); }
+        return activityRecorder.Snapshot();
+    }
+    private void PublishActivity()
+    {
+        if (activityRecorder is null) return;
+        lastActivityCheckpoint = activityRecorder.ActiveSeconds;
+        if (ActivityChanged is null || activityRecorder.Snapshot() is not { } activity) return;
+        foreach (Action<RideActivity> handler in ActivityChanged.GetInvocationList())
+            try { handler(activity); } catch (Exception e) { try { log("Could not save the activity: " + e.Message); } catch { } }
+    }
+    private void ResetProgress() { FinishActivity(); activityRecorder = null; lastActivityCheckpoint = 0; NewPresentationEpoch(); Distance = StartDistance; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); if(StartDistance>0)Descent.ResetAt(StartDistance);else Descent.Reset(); screenBrake = controllerBrake = false; }
     private async Task<string?> ReleaseControlAsync()
     {
         rideToken?.Cancel();
@@ -231,6 +264,7 @@ internal sealed class RideSession
     public void Tick(double dt)
     {
         if (!Running || Busy) return;
+        double measuredInterval = dt;
         dt = Math.Clamp(dt, 0, .25);
         if (Live && (!Fresh || activeControl != trainer.Control || activeControl?.IsControlling != true))
         { _ = PauseAsync("Ride paused: KICKR signal or control was lost"); return; }
@@ -250,6 +284,12 @@ internal sealed class RideSession
                 Climbed += Math.Max(0, course.At(Distance).Alt - before.Alt);
             }
             if (!IsDemo || Practice) Descent.Tick(oldDistance, Distance, step, Live && StartDistance==0, Handling.OffTracks);
+        }
+        if (Live && !IsDemo && !Practice && activityRecorder is not null)
+        {
+            activityRecorder.Record(DateTimeOffset.UtcNow, measuredInterval, Distance, trainer.Power,
+                trainer.Cadence, heart.HeartRateFresh ? heart.HeartRate : null, Fresh);
+            if (activityRecorder.ActiveSeconds - lastActivityCheckpoint >= 30) PublishActivity();
         }
         if (Distance >= course.Length) { _ = PauseAsync("Course complete. Enjoy the ride!"); return; }
         if (Live && !controlBusy && (DateTime.UtcNow - lastControl).TotalSeconds >= (ValidCalibration?.UpdateIntervalSeconds ?? 1))
@@ -287,7 +327,9 @@ internal sealed class RideSession
         bool coasting = IsDemo ? (p.Grade <= -1.3 || BrakePressed) : Fresh && (trainer.Power <= 5 || trainer.Cadence <= 2);
         double audioBrake = IsDemo && !Practice ? (BrakePressed ? 1 : 0) : Handling.Brake;
         return new { type = "state", mode = Mode, message = Message, distance = Distance, speed = Velocity * 3.6, elapsed = Elapsed,
-            presentationEpoch, stateSequence = ++stateSequence, hostTimeMs = Environment.TickCount64,
+            presentationEpoch, stateSequence = ++stateSequence, shiftSequence, hostTimeMs = Environment.TickCount64,
+            calories = EstimatedCalories, workKj = WorkKj, energyMeasuredSeconds = EnergyMeasuredSeconds,
+            activityId = !IsDemo && !Practice && activityRecorder?.ActiveSeconds > 0 ? activityRecorder.Id : null,
             presentation = (preferences?.Data.Presentation ?? new PresentationPreferences()).Snapshot(),
             surface = Trail.SurfaceAt(Distance), audio = new { coasting, brake = audioBrake, synthetic = IsDemo },
             climbed = Climbed, grade = p.Grade, altitude = p.Alt, gear = Gear, weight = RiderKg, difficulty = Difficulty, busy = Busy,
@@ -344,6 +386,13 @@ internal sealed class RideSession
             nextView.GetProperty("hostTimeMs").GetInt64() < initialView.GetProperty("hostTimeMs").GetInt64() ||
             nextView.GetProperty("surface").GetString() != ride.Trail.SurfaceAt(ride.Distance))
             throw new Exception("Presentation snapshot sequence, clock and current surface");
+        if (initialView.GetProperty("calories").ValueKind != JsonValueKind.Null || initialView.GetProperty("activityId").ValueKind != JsonValueKind.Null || ride.CurrentActivity is not null)
+            throw new Exception("No calories or real activity before trainer measurements");
+        long shifts = initialView.GetProperty("shiftSequence").GetInt64();
+        ride.Shift(0);
+        if (JsonSerializer.SerializeToElement(ride.Snapshot()).GetProperty("shiftSequence").GetInt64() != shifts) throw new Exception("Ignored shift must remain silent");
+        ride.Shift(1); ride.Shift(-1);
+        if (JsonSerializer.SerializeToElement(ride.Snapshot()).GetProperty("shiftSequence").GetInt64() != shifts + 2) throw new Exception("Only confirmed actual shifts advance the sound counter");
         ride.SeekDemo(100); if(ride.Distance!=0||ride.CanSeek)throw new Exception("Seeking before demo");
         ride.CycleDemoSpeed(); if(ride.DemoSpeed != 1) throw new Exception("Demo speed outside demo");
         ride.StartAsync(false).GetAwaiter().GetResult();
@@ -355,6 +404,8 @@ internal sealed class RideSession
             !demoView.GetProperty("audio").GetProperty("synthetic").GetBoolean()) throw new Exception("Demo must start a new presentation epoch with explicit synthetic audio semantics");
         for(int i=0;i<100;i++) ride.Tick(.1);
         if (Math.Abs(ride.Distance - 62) > .01 || trainer.Control is not null) throw new Exception("Demo must advance without controlling trainer");
+        if (ride.CurrentActivity is not null || ride.EstimatedCalories is not null || ride.WorkKj is not null || ride.EnergyMeasuredSeconds != 0)
+            throw new Exception("Synthetic demo watts must not create calories or a Strava activity");
         foreach(int multiplier in new[]{2,4,8,1})
         {
             double previous=ride.Distance, elapsed=ride.Elapsed;
@@ -388,6 +439,26 @@ internal sealed class RideSession
         for(int i=0;i<30;i++) ride.Shift(1); if(ride.Gear != 12) throw new Exception("Gear upper bound");
         for(int i=0;i<30;i++) ride.Shift(-1); if(ride.Gear != 1) throw new Exception("Gear lower bound");
         ride.ResetAsync().GetAwaiter().GetResult(); if(ride.Distance != 0 || ride.Elapsed != 0 || ride.DemoSpeed!=1) throw new Exception("Route reset");
+
+        // Exercise archive lifecycle with a synthetic in-memory recorder, without
+        // starting a trainer or bypassing the real ride start guard.
+        var archiveRide = new RideSession(course, trainer, heart, _ => { });
+        var activityStart = new DateTimeOffset(2026, 1, 2, 12, 0, 0, TimeSpan.Zero);
+        archiveRide.activityRecorder = new("test", "Synthetic archive fixture", activityStart, 0);
+        archiveRide.activityRecorder.Record(activityStart.AddSeconds(1), 1, 6, 200, 80, null, true);
+        var saved = new List<RideActivity>();
+        archiveRide.ActivityChanged += _ => throw new IOException("Synthetic persistence failure");
+        archiveRide.ActivityChanged += saved.Add;
+        archiveRide.ResetAsync().GetAwaiter().GetResult();
+        archiveRide.FinishActivity();
+        if (saved.Count(s => s.IsComplete) != 1 || saved[^1].MechanicalWorkJoules != 200 || archiveRide.CurrentActivity is not null || archiveRide.EstimatedCalories is not null)
+            throw new Exception("Reset archives measured work before clearing and isolates persistence errors");
+        archiveRide.activityRecorder = new("test", "Synthetic finish fixture", activityStart, 0);
+        archiveRide.activityRecorder.Record(activityStart.AddSeconds(1), 1, 6, 200, 80, null, true);
+        archiveRide.Distance = course.Length;
+        archiveRide.PauseAsync().GetAwaiter().GetResult();
+        if (archiveRide.CurrentActivity?.IsComplete != true || archiveRide.EstimatedCalories is null)
+            throw new Exception("Course finish retains the completed calorie summary");
 
         var profileStore = new PreferencesStore(Path.Combine(Path.GetTempPath(), "MtbRideProfile-" + Guid.NewGuid().ToString("N") + ".json"), false);
         profileStore.Data.RiderKg = 83; profileStore.Data.Difficulty = .6; profileStore.Data.Chainring = 28;

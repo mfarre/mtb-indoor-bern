@@ -2,11 +2,19 @@
 
 Run `node tools/ride-audio/test.mjs`. The test imports the actual browser modules and needs no packages, audio device or Bluetooth connection.
 
-The audio uses original, deterministic procedural buffers, version 2. These are synthesized textures, **not recordings from Gurtentrail**. No external samples are bundled. Four rolling layers (earth, gravel, asphalt and leaves), wind, brake friction and corner scrub are persistent sources; speed and surface change their gains and playback rate smoothly. Version 2 removes the freehub buzz and gear-shift clacks at the rider's request. There is no drivetrain source or shift-event trigger, and changing gears or coasting cannot add one. The remaining sounds retain their previous levels and synthesis. There are no invented jump landings or wheel-lock telemetry.
+The audio uses original, deterministic procedural buffers, version 3. These are synthesized textures, **not recordings from Gurtentrail**. No external samples are bundled. Four rolling layers (earth, gravel, asphalt and leaves), wind, brake friction and corner scrub are persistent sources; speed and surface change their gains and playback rate smoothly. Version 3 restores a brief gear-change click only for a confirmed successful shift. The freehub and chain buzz remain removed: there is no continuous drivetrain source or freehub synthesis. The seven environmental/friction buffers retain their previous levels and synthesis. There are no invented jump landings or wheel-lock telemetry.
 
 `RideSession` publishes the surface under the bike rather than the next corner's surface. Sound uses speed, surface and braking information; cadence, power and coasting do not produce a drivetrain layer. Accelerated preview travel is divided by its demo multiplier for sound. Practice uses its simulated speed. Presentation never feeds values back into physics, trainer load, Bluetooth or calibration.
 
 The graph starts only after `unlock()` in a user gesture. Call it without awaiting before the ride action. Audio errors and rejected resume promises are contained. A paused, stopped or hidden view fades out; every fresh host snapshot also schedules a fade on the audio timeline after 0.9 seconds, so a blocked rendering thread cannot leave sound running indefinitely. Seek/start/reset epochs reject retired snapshots. Defaults are 35% volume and sound enabled after the gesture; mute and volume are saved separately from bike calibration.
+
+## Confirmed shift feedback
+
+The host publishes a monotonic `shiftSequence` counter, incremented only when `RideSession.Shift` actually changes the clamped gear. Pressing a button at the cassette limit does not increment it. Profile restoration, seeking and resume do not generate shift events. Audio never treats a pointer press or a changed displayed gear number as proof of a shift.
+
+A greater counter in a fresh, ordered snapshot during continuous riding produces one 95 ms synthesized clack. If several successful shifts occur between host snapshots, their packet produces one click rather than a delayed burst. Repeated packets, old counters and retired session epochs cannot replay the sound. The first packet, a new session, seeking, resume and recovery from a stale host stream establish a silent baseline. Muted, zero-volume, hidden or suspended playback consumes confirmed events without queuing them for later.
+
+The one-shot source is stopped and disconnected after playback, and active clicks are stopped on lifecycle discontinuities. Its errors stay inside the optional audio subsystem. Tests cover host-confirmed shifts, cassette-limit and profile changes, repeated and malformed counters, lifecycle/mute behaviour and the continued absence of a freehub loop.
 
 ## Rendering the real graph offline
 

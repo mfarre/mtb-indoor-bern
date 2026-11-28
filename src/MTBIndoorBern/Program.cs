@@ -35,10 +35,10 @@ internal static class Program
         {
             try
             {
-                Packets.Verify(); PreferencesStore.Verify(); PresentationPreferences.Verify(); BluetoothReliabilityTests.Verify(); BikeProfileTests.Verify(); TrainerLoadTests.Verify(); ProfileSettings.Verify(); CalibrationTests.Verify();CourseCatalog.Verify();
+                Packets.Verify(); RideActivityTests.Verify(); ActivityExportTests.Verify(); ActivityRecoveryTests.Verify(); PreferencesStore.Verify(); PresentationPreferences.Verify(); BluetoothReliabilityTests.Verify(); BikeProfileTests.Verify(); TrainerLoadTests.Verify(); ProfileSettings.Verify(); CalibrationTests.Verify();CourseCatalog.Verify();
                 var courses=CourseCatalog.Load();
                 foreach(var course in courses) { RideSession.Verify(CourseCatalog.RouteFile(course)); TrailTests.Verify(CourseCatalog.RouteFile(course));SectorStartTests.Verify(course); if(course.Id=="gurten")TrainerLoadTests.VerifyGurten(Course.Load(CourseCatalog.RouteFile(course))); }
-                File.WriteAllText(args[1], "PASS: " + string.Join(", ",courses.Select(c=>c.Name)) + "; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records.");
+                File.WriteAllText(args[1], "PASS: " + string.Join(", ",courses.Select(c=>c.Name)) + "; real-ride energy/recording, private checkpoints, failed-save recovery and TCX export; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records.");
             }
             catch (Exception e) { File.WriteAllText(args[1], e.ToString()); Environment.ExitCode = 1; }
             return;

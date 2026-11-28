@@ -9,11 +9,11 @@ const runtimeUrl = moduleUrl((await readFile(new URL('ride-audio.js', root), 'ut
 const { audioTargets, audioPreferences, RideAudioState, STALE_SECONDS } = await import(stateUrl);
 const { synthesizeRideBuffer } = await import(synthesisUrl);
 const { createRideAudio } = await import(runtimeUrl);
-const ride = { mode: 'ride', speed: 24, watts: 160, cadence: 75, surface: 'gravel', gear: 5, gearCount: 12, presentationEpoch: 'one', distance: 100 };
+const ride = { mode: 'ride', speed: 24, watts: 160, cadence: 75, surface: 'gravel', gear: 5, gearCount: 12, presentationEpoch: 'one', stateSequence: 1, shiftSequence: 0, distance: 100 };
 
 assert.ok(audioTargets(ride).tire > 0 && audioTargets(ride).wind > 0, 'drivetrain removal does not mute tyres or wind');
 assert.ok(audioTargets({ ...ride, brakePressure: 1, slip: .8 }).brake > 0 && audioTargets({ ...ride, slip: .8 }).skid > 0, 'braking and corner scrub remain');
-assert.deepEqual(audioTargets({ ...ride, watts: 0, cadence: 0, gear: 1, audio: { coasting: true } }), audioTargets(ride), 'coasting and shifting cannot add drivetrain noise');
+assert.deepEqual(audioTargets({ ...ride, watts: 0, cadence: 0, gear: 1, audio: { coasting: true } }), audioTargets(ride), 'coasting and gear numbers cannot add a continuous drivetrain layer');
 assert.deepEqual(audioTargets({ ...ride, watts: null, cadence: null }), audioTargets(ride), 'power/cadence changes do not affect remaining sounds');
 assert.ok(!('freehub' in audioTargets(ride)) && !('hubRate' in audioTargets(ride)), 'no drivetrain audio targets');
 assert.equal(audioTargets({ ...ride, surface: 'earth', corner: { surface: 'asphalt' } }).surface, 'earth', 'under-wheel surface wins over upcoming corner');
@@ -35,19 +35,41 @@ assert.deepEqual(audioPreferences({ volume: 6, muted: true }), { volume: 1, mute
 
 {
   const model = new RideAudioState();
-  assert.deepEqual(model.update({ ...ride, stateSequence: 1 }, 0), audioTargets(ride));
-  assert.deepEqual(model.update({ ...ride, stateSequence: 2, gear: 6 }, .1), audioTargets(ride), 'confirmed gear changes create no events');
-  assert.equal(model.update({ ...ride, stateSequence: 2, gear: 7 }, .15), null, 'duplicate snapshots are ignored');
-  assert.equal(model.update({ ...ride, stateSequence: 1, gear: 7 }, .16), null, 'out-of-order snapshots are ignored');
-  assert.equal(model.update({ ...ride, stateSequence: 3, gear: 6 }, .2).gearClick, undefined);
-  assert.equal(model.update({ ...ride, stateSequence: 4, gear: 7 }, 2).gearClick, undefined, 'stale reconnect never replays a gear event');
-  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 1, gear: 8, distance: 2000 }, 2.1).gearClick, undefined);
-  assert.equal(model.update({ ...ride, presentationEpoch: 'one', stateSequence: 5 }, 2.15), null, 'retired epoch is rejected');
-  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 2, mode: 'paused', gear: 9 }, 2.2).gearClick, undefined);
-  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 3, gear: 10 }, 2.3).gearClick, undefined, 'resume never clicks');
+  assert.equal(model.update({ ...ride, shiftSequence: 7 }, 0).gearClick, false, 'initial counter establishes a baseline');
+  assert.equal(model.update({ ...ride, stateSequence: 2, shiftSequence: 8, gear: 6 }, .1).gearClick, true, 'successful host shift produces one click');
+  assert.equal(model.update({ ...ride, stateSequence: 2, shiftSequence: 8 }, .15), null, 'duplicate snapshots are ignored');
+  assert.equal(model.update({ ...ride, stateSequence: 1, shiftSequence: 99 }, .16), null, 'out-of-order snapshot cannot inject an event');
+  assert.equal(model.update({ ...ride, stateSequence: 3, shiftSequence: 8, gear: 1 }, .2).gearClick, false, 'profile or gear-number change without a host event stays silent');
+  assert.equal(model.update({ ...ride, stateSequence: 4, shiftSequence: 8, gear: 1 }, .3).gearClick, false, 'button at gear limit has no counter increment');
+  assert.equal(model.update({ ...ride, stateSequence: 5, shiftSequence: 10, gear: 1 }, .4).gearClick, true, 'several confirmed shifts coalesced into one packet produce one click even when net gear is unchanged');
+  assert.equal(model.update({ ...ride, stateSequence: 6, shiftSequence: 9 }, .5).gearClick, false, 'regressed event counter stays silent');
+  assert.equal(model.update({ ...ride, stateSequence: 7, shiftSequence: 10 }, .6).gearClick, false, 'counter regression does not replay an old event');
+  assert.equal(model.update({ ...ride, stateSequence: 8, shiftSequence: 11 }, .7).gearClick, true);
+  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 1, shiftSequence: 12, distance: 2000 }, .8).gearClick, false, 'seek starts a new baseline');
+  assert.equal(model.update({ ...ride, presentationEpoch: 'one', stateSequence: 9, shiftSequence: 13 }, .85), null, 'retired epoch is rejected');
+  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 2, shiftSequence: 13, mode: 'paused' }, .9).gearClick, false);
+  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 3, shiftSequence: 14 }, 1).gearClick, false, 'resume never replays paused events');
+  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 4, shiftSequence: 15 }, 2).gearClick, false, 'stale reconnect never replays an event');
+  assert.equal(model.update({ ...ride, presentationEpoch: 'seek', stateSequence: 5, shiftSequence: 16 }, 2.1).gearClick, true);
 }
-for (const removed of ['hub', 'gear']) assert.throws(() => synthesizeRideBuffer(removed), /Invalid ride buffer/, 'removed drivetrain buffers cannot be generated');
-for (const kind of ['earth', 'gravel', 'asphalt', 'leaves', 'wind', 'brake', 'skid']) {
+for (const invalid of [undefined, null, -1, 1.5, NaN, Infinity, '3', Number.MAX_SAFE_INTEGER + 1]) {
+  const model = new RideAudioState(); model.update(ride, 0);
+  assert.equal(model.update({ ...ride, stateSequence: 2, shiftSequence: invalid }, .1).gearClick, false, 'invalid event counter stays silent');
+  assert.equal(model.update({ ...ride, stateSequence: 3, shiftSequence: 4 }, .2).gearClick, false, 'valid data returning after invalid counter is a fresh baseline');
+}
+for (const incomplete of [{ presentationEpoch: undefined }, { stateSequence: undefined }]) {
+  const model = new RideAudioState(); model.update({ ...ride, ...incomplete }, 0);
+  assert.equal(model.update({ ...ride, stateSequence: 2, shiftSequence: 1, ...incomplete }, .1).gearClick, false, 'no event without ordered session identity');
+}
+{
+  const model = new RideAudioState(); model.update({ ...ride, shiftSequence: 8 }, 0);
+  model.update({ ...ride, stateSequence: 2, shiftSequence: null }, .1);
+  assert.equal(model.update({ ...ride, stateSequence: 3, shiftSequence: 4 }, .2).gearClick, false);
+  assert.equal(model.update({ ...ride, stateSequence: 4, shiftSequence: 8 }, .3).gearClick, false, 'malformed data cannot erase the event watermark and replay a shift');
+}
+assert.throws(() => synthesizeRideBuffer('hub'), /Invalid ride buffer/, 'freehub buffer stays removed');
+assert.ok(synthesizeRideBuffer('gear', 12000).length / 12000 < .1, 'shift feedback is shorter than 100ms');
+for (const kind of ['earth', 'gravel', 'asphalt', 'leaves', 'wind', 'brake', 'skid', 'gear']) {
   const data = synthesizeRideBuffer(kind, 12000); let energy = 0, peak = 0, mean = 0;
   for (const sample of data) { assert.ok(Number.isFinite(sample)); energy += sample * sample; peak = Math.max(peak, Math.abs(sample)); mean += sample; }
   assert.ok(peak < 1 && peak > .1, `${kind} has headroom and audible material`);
@@ -79,19 +101,25 @@ class Context {
   engine.update(ride); assert.equal(ctx.sources.length, 0, 'no graph before gesture');
   assert.equal(engine.status(), 'locked'); await engine.unlock(); assert.equal(engine.status(), 'ready');
   assert.equal(ctx.sources.length, 7, 'seven environmental/friction loops, no freehub source');
-  ctx.currentTime = .1; engine.update({ ...ride, gear: 6 });
-  assert.equal(ctx.sources.length, 7, 'confirmed shifting adds no one-shot source');
-  for (let i = 2; i < 20; i++) { ctx.currentTime = i / 10; engine.update({ ...ride, gear: 1 + i % 12, watts: 0, cadence: 0, audio: { coasting: true } }); }
-  assert.equal(ctx.sources.length, 7, 'repeated shifts and coasting reuse only environmental/friction loops');
+  ctx.currentTime = .1; engine.update({ ...ride, stateSequence: 2, shiftSequence: 1, gear: 6 });
+  assert.equal(ctx.sources.length, 8, 'confirmed shift creates one one-shot');
+  assert.equal(ctx.sources[7].loop, false, 'shift source never loops');
+  assert.ok(ctx.sources[7].stopped - ctx.sources[7].started < .11, 'shift source is explicitly short lived');
+  engine.update({ ...ride, stateSequence: 2, shiftSequence: 1, gear: 6 });
+  assert.equal(ctx.sources.length, 8, 'same packet never plays twice');
+  for (let i = 2; i < 20; i++) { ctx.currentTime = i / 10; engine.update({ ...ride, stateSequence: i + 1, shiftSequence: 1, gear: 1 + i % 12, watts: 0, cadence: 0, audio: { coasting: true } }); }
+  assert.equal(ctx.sources.length, 8, 'gear numbers and coasting add no sound without successful host shifts');
   const master = ctx.gains[0].gain;
   assert.ok(master.events.some(e => e.value === .35) && ctx.gains[2].gain.events.some(e => e.value > 0), 'default master and gravel source remain audible');
   assert.ok(master.events.some(e => Math.abs(e.time - (1.9 + STALE_SECONDS)) < .00001 && e.value === 0), 'audio timeline fades when host packets stop');
   ctx.currentTime = 2; engine.setPreferences({ muted: true }); assert.equal(engine.status(), 'muted');
   assert.equal(master.events.find(e => e.time === 2).value, 0);
-  engine.setPreferences({ muted: false }); ctx.currentTime = 2.1; engine.update({ ...ride, mode: 'paused' });
+  engine.update({ ...ride, stateSequence: 21, shiftSequence: 2 });
+  assert.equal(ctx.sources.length, 8, 'muted shifts do not allocate one-shots');
+  engine.setPreferences({ muted: false }); ctx.currentTime = 2.1; engine.update({ ...ride, stateSequence: 22, shiftSequence: 2, mode: 'paused' });
   assert.equal(master.events.find(e => e.time === 2.1).value, 0, 'pause silences without awaiting a timer');
-  engine.silence(); ctx.currentTime = 2.2; engine.update({ ...ride, gear: 9 });
-  assert.equal(ctx.sources.length, 7, 'silencing/resume never adds gear sources');
+  engine.silence(); ctx.currentTime = 2.2; engine.update({ ...ride, stateSequence: 23, shiftSequence: 3, gear: 9 });
+  assert.equal(ctx.sources.length, 8, 'silencing/resume never replays gear events');
   engine.dispose(); engine.dispose(); assert.equal(engine.status(), 'unavailable');
   assert.ok(ctx.sources.every(s => s.stopped !== undefined), 'dispose stops all sources');
 }
@@ -108,9 +136,45 @@ class Context {
   assert.equal(await engine.unlock(), false, 'blocked autoplay is a contained promise'); engine.dispose();
 }
 {
+  const ctx = new Context(), engine = createRideAudio({ context: ctx, watch: false });
+  await engine.unlock(); engine.update(ride);
+  engine.setPreferences({ volume: 0 }); ctx.currentTime = .1;
+  engine.update({ ...ride, stateSequence: 2, shiftSequence: 1 });
+  assert.equal(ctx.sources.length, 7, 'zero volume consumes the event silently');
+  engine.setPreferences({ volume: .35 }); ctx.currentTime = .2;
+  engine.update({ ...ride, stateSequence: 3, shiftSequence: 1 });
+  assert.equal(ctx.sources.length, 7, 'raising volume cannot replay a consumed event');
+  ctx.state = 'suspended'; ctx.currentTime = .3;
+  engine.update({ ...ride, stateSequence: 4, shiftSequence: 2 });
+  assert.equal(ctx.sources.length, 7, 'suspended context must not queue a click for later');
+  await engine.unlock(); assert.equal(ctx.sources.length, 7, 'unlock never replays historical shifts');
+  ctx.createBufferSource = () => { throw new Error('one-shot device failure'); }; ctx.currentTime = .4;
+  assert.doesNotThrow(() => engine.update({ ...ride, stateSequence: 5, shiftSequence: 3 }));
+  assert.equal(engine.status(), 'unavailable', 'one-shot creation errors are contained within audio');
+  engine.dispose();
+}
+{
   const ctx = new Context(); ctx.createBufferSource = () => { throw new Error('audio unavailable'); };
   const engine = createRideAudio({ context: ctx, watch: false });
   assert.equal(await engine.unlock(), false); assert.equal(engine.status(), 'unavailable');
   assert.doesNotThrow(() => { engine.update(ride); engine.setPreferences({ volume: .7 }); engine.silence(); engine.dispose(); });
 }
-console.log('Ride audio checks passed: drivetrain sources and triggers removed, terrain/wind/braking preserved, mode/seek/stale handling, persistent graph, fades, settings and isolated failures.');
+{
+  const previousDocument = globalThis.document, listeners = new Map();
+  const doc = { hidden: false, addEventListener: (name, fn) => listeners.set(name, fn), removeEventListener: name => listeners.delete(name) };
+  globalThis.document = doc;
+  const ctx = new Context(), engine = createRideAudio({ context: ctx, watch: true });
+  try {
+    await engine.unlock(); engine.update(ride); ctx.currentTime = .1;
+    engine.update({ ...ride, stateSequence: 2, shiftSequence: 1 });
+    assert.equal(ctx.sources.length, 8);
+    doc.hidden = true; ctx.currentTime = .12; listeners.get('visibilitychange')();
+    assert.equal(ctx.sources[7].stopped, .12, 'hiding stops an active click');
+    ctx.currentTime = .2; engine.update({ ...ride, stateSequence: 3, shiftSequence: 2 });
+    assert.equal(ctx.sources.length, 8, 'hidden events stay silent');
+    doc.hidden = false; ctx.currentTime = .3; engine.update({ ...ride, stateSequence: 4, shiftSequence: 2 });
+    assert.equal(ctx.sources.length, 8, 'returning to view does not replay a hidden event');
+  } finally { engine.dispose(); if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument; }
+  assert.equal(listeners.size, 0, 'dispose removes visibility listener');
+}
+console.log('Ride audio checks passed: host-confirmed one-shot shifts, no freehub/chain loop, duplicate/limit/profile/seek/resume/stale suppression, persistent environmental sound, fades and isolated failures.');

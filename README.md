@@ -30,7 +30,7 @@ A Windows MTB simulator with real elevation data, aerial imagery, direct Bluetoo
 
 [![Dentenberg autumn woodland: previous and current renderer](docs/images/dentenberg-woodland-comparison.gif)](docs/dentenberg-visuals.md)
 
-*Dentenberg: a more open autumn canopy, young conifers and a worn leaf-covered trail. Drivetrain noise has been removed. [Comparison, sources and measured performance](docs/dentenberg-visuals.md).*
+*Dentenberg: a more open autumn canopy, young conifers and a worn leaf-covered trail. Continuous chain/freehub noise remains removed; the current app restores short confirmed gear-change clicks. [Comparison, sources and measured performance](docs/dentenberg-visuals.md).*
 
 On Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) installed:
 
@@ -41,11 +41,17 @@ On Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/1
 
 Select a course and choose **Explore in demo**. Pause, click the elevation profile to seek, resume, or accelerate up to ×8. On Gurten, **El Tony ↗** jumps directly to the featured section. Demo does not control the trainer.
 
-**Focus view** keeps the key riding numbers visible while folding away the map and profile. **View & sound** saves volume, stable-camera and frame-rate preferences independently of bike calibration. Ride audio includes the ground under your tyres, wind, coasting and gear changes. [Visual and audio pilot](docs/el-tony-pilot.md).
+**Focus view** keeps the key riding numbers visible while folding away the map and profile. **View & sound** saves volume, stable-camera and frame-rate preferences independently of bike calibration. Ride audio includes the ground under your tyres, wind, braking and brief host-confirmed gear-change clicks. There is no continuous chain/freehub buzz. [Visual and audio pilot](docs/el-tony-pilot.md).
 
 On **Eiger Bike Challenge 20 km**, choose the whole course or start from any of its three sectors before riding or exploring in demo. [Eiger route and sector guide](docs/EIGER.md).
 
 Left and right Zwift Clicks have separate pairing and status indicators. A lost Click no longer pauses the ride: click the 3D trail with the **left mouse button to shift up** or the **right mouse button to shift down**. Keyboard and on-screen braking remain available. Heart-rate status distinguishes a connected sensor from one that is actually sending pulse readings. [Connection and controls guide](docs/simulator.md#first-connection).
+
+**EST. KCAL** shows a power-based exercise-energy estimate during real trainer rides. **Activities** keeps local recordings: choose **1 · Save TCX**, then **2 · Open Strava ↗** and select the file on Strava. Review it as an indoor ride before saving. This is manual file upload, without automatic account linking or OAuth. Demo and practice do not create workouts. [Calories, activity storage and Strava guide](docs/activities-strava.md).
+
+[![Activities and manual Strava export, shown with a synthetic UI fixture](docs/images/activities-strava.png)](docs/activities-strava.md)
+
+*UI preview with invented test data, not a real workout or a completed Strava upload.*
 
 [Full setup and controls](docs/simulator.md) · [Bike profile and calibration](docs/bike-calibration.md) · [Downhill braking and records](docs/downhill.md)
 

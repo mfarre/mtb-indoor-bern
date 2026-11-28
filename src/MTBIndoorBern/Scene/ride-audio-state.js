@@ -1,5 +1,5 @@
 // Pure presentation adapter. None of these values control the trainer or the simulation.
-export const AUDIO_VERSION = 2;
+export const AUDIO_VERSION = 3;
 export const STALE_SECONDS = .9;
 export const AUDIO_DEFAULTS = Object.freeze({ volume: .35, muted: false });
 const finite = (v, fallback = 0) => typeof v === 'number' && Number.isFinite(v) ? v : fallback;
@@ -21,8 +21,8 @@ export function audioTargets(state = {}) {
   const brake = clamp(state.audio?.brake ?? state.brakePressure ?? (state.brake ? 1 : 0), 0, 1);
   // Slip is the game's corner-grip model, not a wheel-lock measurement; use a restrained scrub texture.
   const slip = state.demo && !state.practice ? 0 : clamp(finite(state.slip) - .12, 0, 1);
-  // Drivetrain sounds are intentionally absent: cadence, coasting and gear changes
-  // must not reintroduce the freehub buzz or shift clacks removed at rider request.
+  // Continuous drivetrain sound remains absent. Confirmed shifts are handled
+  // separately as short events; cadence and coasting never introduce a buzz.
   return { running, speed, surface: audioSurface(state.surface),
     tire: moving * (.19 + .27 * Math.sqrt(intensity)), wind: moving * .16 * intensity ** 1.45,
     brake: moving * brake * .105,
@@ -32,7 +32,7 @@ export function audioTargets(state = {}) {
 export class RideAudioState {
   constructor() { this.reset(); }
   reset() { this.previous = null; this.retiredEpochs = new Set(); }
-  update(state = {}) {
+  update(state = {}, at = 0) {
     const targets = audioTargets(state), epoch = String(state.presentationEpoch ?? ''), previous = this.previous;
     const sequence = Number.isSafeInteger(state.stateSequence) ? state.stateSequence : null;
     if (this.retiredEpochs.has(epoch) || (previous && epoch === previous.epoch && sequence !== null && previous.sequence !== null && sequence <= previous.sequence)) return null;
@@ -41,7 +41,18 @@ export class RideAudioState {
       this.retiredEpochs.add(previous.epoch);
       if (this.retiredEpochs.size > 16) this.retiredEpochs.delete(this.retiredEpochs.values().next().value);
     }
-    this.previous = { epoch, sequence };
-    return targets;
+    const shiftSequence = Number.isSafeInteger(state.shiftSequence) && state.shiftSequence >= 0 ? state.shiftSequence : null;
+    const time = finite(at), sameEpoch = !!previous && epoch !== '' && epoch === previous.epoch;
+    const continuous = sameEpoch && sequence !== null && previous.sequence !== null &&
+      time >= previous.time && time - previous.time < STALE_SECONDS &&
+      previous.running && targets.running && previous.mode === state.mode;
+    // This counter is emitted only by successful host-side Shift calls. A changed
+    // gear number alone can come from a restored profile and is not an audio event.
+    // Coalesce several shifts in one host packet to one click rather than a burst.
+    const gearClick = !!(continuous && shiftSequence !== null && previous.counterValid && previous.shiftSequence !== null && shiftSequence > previous.shiftSequence);
+    // A regressed counter must not lower the watermark and replay an old shift.
+    const watermark = sameEpoch && previous.shiftSequence !== null ? Math.max(shiftSequence ?? 0, previous.shiftSequence) : shiftSequence;
+    this.previous = { epoch, sequence, shiftSequence: watermark, counterValid: shiftSequence !== null, time, running: targets.running, mode: state.mode };
+    return { ...targets, gearClick, discontinuity: !continuous };
   }
 }
