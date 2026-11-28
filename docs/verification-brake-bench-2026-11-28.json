@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-28",
+  "scope": "First live BLE observation and simplified per-lever browser calibration",
+  "realHardwareObservation": {
+    "source": "Hosted tester in desktop Chrome, before the interface update",
+    "screenshot": "images/brake-bench-first-live.jpg",
+    "simulated": false,
+    "bothChannelsReceivingTelemetry": true,
+    "motionReportedByBuilder": true,
+    "leftMagneticStatus": { "MD": 1, "ML": 1, "MH": 0, "AGC": 128 },
+    "rightMagneticStatus": { "MD": 1, "ML": 1, "MH": 0, "AGC": 128 },
+    "magneticQualityValidated": false,
+    "fullStrokeRepeatabilityValidated": false,
+    "updatedCalibrationPhysicallyValidated": false
+  },
+  "software": {
+    "testsPassed": 26,
+    "testsFailed": 0,
+    "protocolChanged": false,
+    "firmwareReflashRequired": false,
+    "completedEndpointsSavedPerDeviceAndProtocol": true,
+    "manualRawEndpointsSupported": true,
+    "clearRemovesSelectedChannelCalibration": true,
+    "demoCalibrationMemoryOnly": true,
+    "weakOrStrongDetectedFieldRemainsWarning": true,
+    "hardFaultsAndStaleTelemetryRemainUnavailable": true,
+    "historyPlotRemoved": true,
+    "csvSessionRecorderRemoved": true
+  },
+  "browserChecks": {
+    "source": "Explicitly simulated demo data in the revised interface",
+    "screenshot": "images/brake-bench-calibration.jpg",
+    "weakFieldStableCapture": {
+      "releasedRaw": 4050,
+      "pulledRaw": 204,
+      "displayedFullPullPercent": 100,
+      "warningRemainedVisible": true
+    },
+    "oppositeDirectionManualCalibration": {
+      "releasedRaw": 1200,
+      "pulledRaw": 950,
+      "displayedMidpointPercent": 50
+    },
+    "staleTelemetryBlanksBothLevers": true,
+    "missingLeftMagnetBlanksLeftOnly": true,
+    "rightRemainsAvailableDuringLeftMagnetFault": true,
+    "viewportWidthsChecked": [490, 1280],
+    "horizontalOverflowObserved": false,
+    "consoleErrorsObserved": false
+  },
+  "limits": [
+    "Live BLE acquisition and a weak magnetic field were observed; calibrated hardware accuracy is not established.",
+    "The updated capture, manual entry and fault-display browser checks used demo samples.",
+    "Endpoint mapping does not repair magnetic field strength or alignment.",
+    "Full physical repeatability, latency and final mechanical acceptance remain outstanding.",
+    "Custom proportional lever input is not yet integrated into the riding simulator."
+  ]
+}

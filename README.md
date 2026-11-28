@@ -62,15 +62,21 @@ Left and right Zwift Clicks have separate pairing and status indicators. A lost 
 | [![Track Lab aligns the ride video and FIT route](docs/images/track-lab.png)](docs/data-acquisition.md) | [![Maneta v01 prototype rendered directly from its printable STL parts](docs/images/bluetooth-brake-v01-cad.png)](docs/bluetooth-brakes.md#maneta-v01) |
 | [Camera/FIT alignment, annotations and hardware links](docs/data-acquisition.md) | [Prototype assembly, wiring, firmware and hardware references](docs/bluetooth-brakes.md#maneta-v01) |
 
-The brake view above uses the printable Maneta v01 meshes. It illustrates the prototype geometry; physical validation remains pending.
+The brake view above uses the printable Maneta v01 meshes. It illustrates the prototype geometry. Both built levers have now sent live Bluetooth readings to the bench; magnetic quality and full mechanical validation remain pending.
 
 [![Maneta v01 brake lever pulling and returning, rendered from the supplied STL design](docs/images/bluetooth-brake-v01-motion.gif)](docs/bluetooth-brakes.md#maneta-v01)
 
-**Maneta v01: the actual mechanical design in motion.** A looping Blender render of the lever pulling and returning, based on the supplied STL files and assembly drawings. [Animation, original still and CAD reference](docs/brake-v01-render.md). Physical electronics testing and proportional simulator integration are still pending.
+**Maneta v01: the actual mechanical design in motion.** A looping Blender render of the lever pulling and returning, based on the supplied STL files and assembly drawings. [Animation, original still and CAD reference](docs/brake-v01-render.md). This render is separate from the first live electronics observation; proportional simulator integration is still pending.
 
 **[Read the Maneta v01 assembly guide →](docs/bluetooth-brakes.md#maneta-v01)**
 
-The illustrated guide is part of the Bluetooth brakes document, directly below **Maneta v01**. It covers assembly, wiring, firmware installation and Bluetooth diagnostics in GitHub Markdown. Download the [printable parts](hardware/maneta-v01/), build the [T-Beam Supreme firmware](firmware/brake-bench/), and open the **[Bluetooth bench tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/)** in desktop Chrome or Edge. The tester includes a clearly labelled demo, raw angle and magnetic-health readings, endpoint calibration and local CSV export. Physical electronics verification and proportional-brake integration with the simulator remain separate steps.
+The illustrated guide is part of the Bluetooth brakes document, directly below **Maneta v01**. It covers assembly, wiring, firmware installation and Bluetooth diagnostics in GitHub Markdown. Download the [printable parts](hardware/maneta-v01/), build the [T-Beam Supreme firmware](firmware/brake-bench/), and open the **[Bluetooth bench tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/)** in desktop Chrome or Edge.
+
+[![Simplified brake bench with per-lever calibration, demonstrated with simulated readings](docs/images/brake-bench-calibration.jpg)](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/)
+
+*Updated interface in demo mode. Each lever has stable endpoint capture, optional manual raw values and automatic local saving for the selected Bluetooth device. Weak/strong-field warnings allow provisional setup without being labelled healthy. The combined plot and CSV session section have been removed.*
+
+**First live BLE observation:** both prototype levers are communicating, but both sensors reported a weak field at maximum AGC. That confirms acquisition and transport, not magnetic accuracy or repeatability. [Original live capture](docs/images/brake-bench-first-live.jpg) · [Calibration and magnetic checks](docs/workshop/tester/README.md) · [Verification record](docs/verification-brake-bench-2026-11-28.json). Custom proportional braking is not yet integrated into the simulator.
 
 The simulator, Track Lab, documentation and current screenshots are in English.
 

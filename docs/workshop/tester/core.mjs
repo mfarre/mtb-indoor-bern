@@ -16,16 +16,23 @@ export function decodeFrame(input) {
 }
 
 export function channelState(frame, channel) {
-  if (!frame) return { healthy: false, text: 'Waiting for a sample', kind: 'idle' };
-  const value = frame.channels[channel];
-  if (!(frame.flags & 1)) return { healthy: false, text: 'Multiplexer not responding', kind: 'fault' };
-  if (!(frame.flags & (2 << channel)) || value.raw > 4095 || value.status === 255 || value.agc > 128)
-    return { healthy: false, text: 'Encoder read failed', kind: 'fault' };
-  if (!(value.status & 0x20)) return { healthy: false, text: 'Magnet not detected', kind: 'fault' };
-  if ((value.status & 0x18) === 0x18) return { healthy: false, text: 'Invalid magnetic status', kind: 'fault' };
-  if (value.status & 0x10) return { healthy: false, text: 'Magnetic field too weak', kind: 'warn' };
-  if (value.status & 0x08) return { healthy: false, text: 'Magnetic field too strong', kind: 'warn' };
-  return { healthy: true, text: 'Magnetic field healthy', kind: 'good' };
+  const fault = text => ({ healthy: false, usable: false, text, kind: 'fault' });
+  if (!frame) return { healthy: false, usable: false, text: 'Waiting for a sample', kind: 'idle' };
+  const value = frame.channels?.[channel];
+  if (![0, 1].includes(channel) || !value || !Number.isInteger(frame.flags) || frame.flags < 0 || frame.flags > 7)
+    return fault('Invalid telemetry');
+  if (!(frame.flags & 1)) return fault('Multiplexer not responding');
+  if (!(frame.flags & (2 << channel)) || !validRaw(value.raw) || value.status === 255 ||
+      !Number.isInteger(value.agc) || value.agc < 0 || value.agc > 128)
+    return fault('Encoder read failed');
+  if (!Number.isInteger(value.status) || value.status < 0 || value.status > 255 || (value.status & ~0x38) || (value.status & 0x18) === 0x18)
+    return fault('Invalid magnetic status');
+  if (!(value.status & 0x20)) return fault('Magnet not detected');
+  // A detected magnet with ML or MH still supplies an angle for provisional
+  // bench calibration. Keep the warning distinct from a healthy magnetic setup.
+  if (value.status & 0x10) return { healthy: false, usable: true, text: 'Magnetic field too weak · provisional', kind: 'warn' };
+  if (value.status & 0x08) return { healthy: false, usable: true, text: 'Magnetic field too strong · provisional', kind: 'warn' };
+  return { healthy: true, usable: true, text: 'Magnetic field healthy', kind: 'good' };
 }
 
 export const wrapDelta = (value, origin) => ((value - origin + 6144) % COUNTS) - 2048;
@@ -51,10 +58,16 @@ export function normalize(raw, calibration) {
 }
 
 export function stableCapture(samples, now) {
+  if (!Array.isArray(samples) || !Number.isFinite(now) || samples.some((s, i) =>
+    !s || !Number.isFinite(s.time) || s.time < 0 || s.time > now || (i > 0 && s.time <= samples[i - 1].time)))
+    throw new Error('Invalid sample timing. Wait for fresh telemetry and try again.');
   const recent = samples.filter(s => now - s.time <= 650);
   if (recent.length < 10 || now - recent.at(-1).time > 150 || recent.at(-1).time - recent[0].time < 450)
-    throw new Error('Hold this lever still with healthy readings for at least half a second.');
-  if (recent.some(s => !s.healthy || !validRaw(s.raw))) throw new Error('Healthy magnetic readings are required before calibration.');
+    throw new Error('Hold this lever still with usable readings for at least half a second.');
+  // Legacy healthy-only callers remain supported. Explicit usable:false always
+  // wins; a missing or truthy non-boolean flag cannot bypass the sensor checks.
+  if (recent.some(s => !(s.usable === true || (s.usable === undefined && s.healthy === true)) || !validRaw(s.raw)))
+    throw new Error('Valid sensor readings with a detected magnet are required before calibration.');
   const origin = recent[0].raw;
   const deltas = recent.map(s => wrapDelta(s.raw, origin));
   if (Math.max(...deltas) - Math.min(...deltas) > 12) throw new Error('The lever is still moving. Hold it steady and try again.');
@@ -66,7 +79,13 @@ export function parseCalibration(text, deviceId) {
   const value = JSON.parse(text);
   if (value.version !== PROTOCOL_VERSION || value.deviceId !== deviceId || !Array.isArray(value.channels) || value.channels.length !== 2)
     throw new Error('Saved calibration is for a different device or protocol.');
-  return value.channels.map(c => c === null ? null : buildCalibration(c.released, c.pulled));
+  return value.channels.map(c => {
+    if (c === null) return null;
+    const calibration = buildCalibration(c.released, c.pulled);
+    if (c.provisional === undefined) return calibration;
+    if (typeof c.provisional !== 'boolean') throw new Error('Saved calibration has an invalid provisional flag.');
+    return { ...calibration, provisional: c.provisional };
+  });
 }
 
 export class FrameClock {

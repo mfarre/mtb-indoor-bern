@@ -4,7 +4,7 @@
 
 This document covers the **Maneta v01 magnetic brake-lever prototype**, its assembly, electronics and Bluetooth bench test. The simulator's existing right Zwift Click 2 A-button input is described under [Working today](#working-today).
 
-**Status:** printable geometry, build-checked T-Beam Supreme firmware and a browser tester are available. Physical operation needs validation on the completed assembly. The custom lever's proportional BLE signal is not yet integrated into the riding simulator.
+**Status:** printable geometry, build-checked T-Beam Supreme firmware and a browser tester are available. Both assembled levers were observed sending live BLE readings on **28 November 2026**. The sensors still reported weak magnetic fields; magnetic quality, repeatability and complete assembly acceptance need validation. The custom lever's proportional BLE signal is not yet integrated into the riding simulator.
 
 - [Parts and tools](#parts-and-tools)
 - [Mechanical assembly](#mechanical-assembly) and [sensor mounting](#sensor-mounting)
@@ -78,11 +78,13 @@ Use the mechanism's intended travel limits; the sensor must never become a mecha
 
 *The PCB's back attaches to the inner cover roof. The chip faces away from the cover and towards the magnet. The cover's two mounting holes attach to the guide/base; v01 has no separate posts for the PCB's four holes.*
 
-![Section diagram: stationary cover and sensor chip above a magnet rotating with the lever, with an initial 1–2 mm face-to-package gap](workshop/assets/sensor-stack.svg)
+![Section diagram: stationary cover and sensor chip above a magnet rotating with the lever, with clearance between them](workshop/assets/sensor-stack.svg)
+
+*Spacing in the diagram is illustrative. Set the actual gap from the chosen magnet, mechanical clearance and live magnetic diagnostics.*
 
 1. **Retain a centred diametric magnet.** Measure the recess and disc. v01 expects a Ø6 × 2.5 mm magnet, with its face level with the collar top. If the chosen magnet needs an insert or shim, make it nonmagnetic and measured so the magnet remains centred on the pivot axis. Keep the separate underside pivot bore free for its pin.
 2. **Fix the PCB to the cover.** Start with thin insulating double-sided tape on the PCB's back. Centre the **AS5600 chip**, rather than the board outline, on the pivot axis. The small cover hole is an alignment reference, not a screw fixing through the sensor. Use a reversible, insulated mount while checking fit.
-3. **Set the initial air gap.** Begin around **1–2 mm between the magnet face and the facing chip-package surface**, not the PCB surface. The manufacturer's typical 0.5–3 mm range depends on the magnet. Verify magnetic health throughout the full lever stroke before choosing final spacing.
+3. **Adjust the air gap using the signal.** Measure between the magnet face and the facing **chip-package surface**, not the PCB surface. Maintain clearance throughout the stroke, then adjust spacing while monitoring MD/ML/MH and AGC. A weak field calls for checking centring and cautiously reducing the gap; an excessive field calls for more separation. There is no universal spacer thickness. Verify healthy status throughout travel before fixing the final spacing.
 4. **Adjust spacing without tilt.** Equal spacers under both cover feet raise the cover; a stable insulating PCB pad can lower the sensor. Recheck parallelism, screw engagement and clearance from every solder joint and moving part.
 5. **Route and secure the wires.** Solder the four leads or fit a low-profile connection that clears the cover. Provide strain relief on the stationary structure. No wire, connector or solder joint may touch the lever, spring or magnet.
 6. **Test before permanent adhesive.** Temporarily retain the magnet and board without allowing either to slip. Run the electrical test below, then secure the magnet, allow the adhesive to cure and repeat the test with the cover tightened.
@@ -189,15 +191,17 @@ Keep USB power connected for the Bluetooth bench test. The board resumes adverti
 **[Open the Bluetooth bench tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/)** in desktop Chrome or Edge on a computer with Bluetooth enabled. Open it directly, rather than inside an embedded preview. Web Bluetooth requires HTTPS or a localhost server; a `file://` page or ordinary LAN HTTP URL is unsuitable.
 
 1. **Connect from the miniapp.** Power the controller, press **Connect Bluetooth**, select **MTB Brake Bench** in the browser chooser and allow access. Use this page's chooser rather than pairing it as an operating-system game controller. Keep only one BLE client connected.
-2. **Check magnetic health.** Both channels must have fresh readings and remain **MD = 1, ML = 0, MH = 0** throughout travel. These are the magnet-detected, field-too-low and field-too-high flags in AS5600 STATUS register `0x0B`. Successful I2C reads alone do not prove a valid magnetic measurement.
+2. **Check magnetic health.** A healthy channel has fresh readings and **MD = 1, ML = 0, MH = 0** throughout travel. These are the magnet-detected, field-too-low and field-too-high flags in AS5600 STATUS register `0x0B`. With MD=1 and a weak/strong-field warning, the bench still shows the angle and permits provisional calibration; it keeps the amber warning. Missing magnets, failed reads and stale data remain faults. Successful I2C reads or visible motion alone do not prove magnetic accuracy.
 3. **Inspect the raw angle.** The 12-bit raw reading spans 0–4095. A 22° stroke corresponds to roughly 250 counts; the usable assembled stroke can be smaller. Crossing 4095/0 is normal, and the tester accounts for the wrap and direction when calibrating.
 4. **Capture release.** Release one lever, hold it still for at least **0.5 seconds**, then press **Set released** for that channel.
 5. **Capture full pull.** Hold a comfortable full pull steadily for at least 0.5 seconds and press **Set full pull**. Repeat both captures for the second lever. The percentage means calibrated lever travel, not force or hydraulic pressure.
-6. **Save if wanted.** Choose **Remember calibration** to retain endpoints for this device and protocol in this browser. This does not write calibration into the controller. Use **Forget saved calibration** when rebuilding or changing the geometry.
-7. **Repeat and record.** Pull and release each lever ten times. Check smooth movement, stable release and independent channels. Inspect the graph and use **Export CSV** to record readings, magnetic status and endpoints. Exported data explicitly identifies Bluetooth or demo samples.
+6. **Keep the endpoints.** Each completed pair is saved automatically for this selected Bluetooth device and protocol in the browser; check the save message on its card. Alternatively, enter already measured released/full-pull raw counts and choose **Save endpoints**. **Clear** removes that lever's saved calibration. This does not write settings into the controller, and a saved mapping does not fix a weak field.
+7. **Repeat and inspect.** Pull and release each lever ten times. Watch its percentage and raw angle for smooth movement, repeatable release and independent channels. The tester now uses just the two lever cards: the shared history plot and CSV session recorder have been removed. Record your hardware revision, endpoints and observations in a bench note or screenshot.
 8. **Repeat after final assembly.** Cure the magnet adhesive, secure the PCB, tighten the cover and check again. Test disconnection and reconnection: invalid or stale readings must not look like a live lever position.
 
-[Try the tester in demo mode](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/?demo=1) to explore the interface without hardware. Demo signals do not validate sensors, wiring or Bluetooth. The tester keeps calibration in the browser and exports files locally; demo calibration is kept separate from the physical device.
+[Try the tester in demo mode](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/?demo=1) to explore the interface without hardware. Demo signals do not validate sensors, wiring or Bluetooth. Demo calibration stays in memory and never loads or overwrites a physical device's saved endpoints.
+
+**Why an angle can move while the field is weak:** MD indicates detection, while ML reports that automatic gain has reached its upper limit. In this 3.3 V setup, AGC ranges from 0 to 128; **128 is maximum gain**. The [AS5600 datasheet](https://cdn-learn.adafruit.com/assets/assets/000/138/130/original/Magnetic_Rotary_Position_Sensor_AS5600_Datasheet.pdf) recommends adjusting the magnet-to-chip gap towards the middle of the gain range. Centre the diametric magnet over the chip and check the whole stroke. The displayed angle can be useful for provisional setup while its accuracy remains unvalidated.
 
 ### Troubleshooting
 
@@ -206,6 +210,8 @@ Keep USB power connected for the Bluetooth bench test. The board resumes adverti
 | Board missing from Bluetooth chooser | Check USB power and serial startup. Use a supported browser with Bluetooth permission; close another BLE app/tab connected to the board. Confirm the correct firmware is advertising as **MTB Brake Bench**, then reset and retry. Cancelling the chooser is not a sensor fault. |
 | Mux or encoder missing | Power down and inspect VCC/GND/SDA/SCL, address straps, RESET pull-up, solder joints and fitted bus pull-ups. Confirm separate channels and that SD/SDA is not swapped with SC/SCL. Serial diagnostics identify the affected channel. |
 | Weak, strong or missing magnetic field | Confirm a centred diametric magnet, air gap and alignment. Move it closer for weak field or farther away for excessive field, then check the whole stroke. Endpoint calibration cannot repair bad magnetic alignment. |
+| Angle moves but calibration used to be blocked | Update/reload the tester. A detected, readable magnet with a weak/strong-field warning can now be calibrated provisionally; the warning stays visible. Use stable captures or enter measured raw endpoints. Missing magnets, invalid reads and stale data still block live capture. |
+| Endpoints do not survive reconnecting | Check the per-lever save message. Browser storage must be available, and the same browser profile, site and Bluetooth device must be used. A different device or demo cannot reuse the saved profile. |
 | Angle stays fixed, jumps or changes when pressing the cover | The magnet must rotate with the lever while the PCB stays fixed. Check for a sliding magnet, loose PCB, moving cable or contact with the chip. A single 4095/0 raw-angle wrap is normal. |
 | Lever does not return consistently | Check pivot/guide binding, trapped spring eyes, rubber-stop stiffness and wires in the mechanism. Do not tighten the cover to force misaligned parts together. |
 | Stale or disconnected status | Readings no longer represent live position. Reconnect and confirm fresh, healthy values on both channels. The tester clears stale/invalid values instead of retaining them as a live reading. |
@@ -220,9 +226,11 @@ Use this checklist for the completed assembly and record the results with the ac
 - [ ] Both sensors remain magnetically healthy throughout the full stroke.
 - [ ] Released and comfortable full-pull endpoints are captured for both channels.
 - [ ] Ten pulls and releases show stable return and independent channels.
-- [ ] Final assembly, disconnect/reconnect and recorded CSV are checked.
+- [ ] Final assembly, disconnect/reconnect and saved endpoint restoration are checked.
 
-The firmware build and automated software tests do not validate physical fit, the magnetic gap or radio operation. A dated bench report is the next evidence needed before marking the custom assembly as verified. This accessory is an **indoor simulator input**; it does not modify the bicycle's real braking system.
+**First live observation, 28 November 2026:** the hosted Chrome tester received both channels with **MD=1, ML=1, MH=0 and AGC=128**. The builder reported changing raw angles when pulling the levers, in opposite directions; endpoint mapping supports either direction. Measure each assembly's own released/full-pull values. Live transport and changing raw readings are established; healthy field, repeatability, latency and final mechanical acceptance are not yet established by that observation.
+
+The firmware build and automated software tests do not validate physical fit or the magnetic gap. Complete and record the remaining bench checks before marking the assembly as verified. This accessory is an **indoor simulator input**; it does not modify the bicycle's real braking system.
 
 ## Working today
 

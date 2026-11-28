@@ -34,11 +34,13 @@ The raw reading, status and AGC are read during the same sampling cycle, but the
 
 ## Validity and client behavior
 
-Read flags describe communication, not magnetic health. A sensor is usable only when the mux flag and its read flag are set, raw angle is in 0–4095, AGC is in 0–128 for this 3.3 V wiring, and `(status & 0x38) == 0x20`: MD bit 5 set, ML bit 4 and MH bit 3 clear. MD=0 means no valid magnet detection; ML/MH flag insufficient/excessive magnetic field.
+Read flags describe communication, not magnetic health. A magnetically **healthy** reading requires the mux and channel-read flags, raw angle in 0–4095, AGC in 0–128 for this 3.3 V wiring, and `(status & 0x38) == 0x20`: MD bit 5 set, ML bit 4 and MH bit 3 clear. MD=0 means no valid magnet detection; ML/MH flag insufficient/excessive field. The firmware passes these diagnostic bits through unchanged.
+
+The bench distinguishes a readable warning from a hard fault. With valid communication, MD=1 and exactly one of ML/MH set, it may display angle and **provisional** travel and capture stable endpoints while retaining the amber warning. This is a client-side diagnostic choice, not a declaration that the sensor meets its magnetic specification. Missing MD, failed communication, invalid sentinels or simultaneous ML+MH remain faults. At 3.3 V, AGC 128 with ML set indicates maximum-gain overflow; apparent motion does not cancel that warning. [Manufacturer STATUS/AGC reference](https://cdn-learn.adafruit.com/assets/assets/000/138/130/original/Magnetic_Rotary_Position_Sensor_AS5600_Datasheet.pdf).
 
 Clients must also check freshness: receiving an old packet is not evidence of a live measurement. Invalidate on disconnect and when no new valid-version frame arrives within the tester's stale timeout. Reset per-connection sequence/freshness state on reconnect or detected reboot. Treat sequence wrap normally; firmware time wraps independently.
 
-There are no commands, calibration writes or OTP writes in this service. Endpoint calibration is client-side and must account for the raw 4095/0 wrap. The device does not report force or hydraulic pressure.
+There are no commands, calibration writes or OTP writes in this service. Endpoint calibration is client-side and must account for the raw 4095/0 wrap and either direction of travel. The tester saves completed endpoints locally by selected Bluetooth device and protocol; manual endpoint entry does not change the BLE payload. The device does not report force or hydraulic pressure.
 
 ## Golden fixture
 

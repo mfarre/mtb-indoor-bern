@@ -4,7 +4,7 @@
 
 An ESP32-S3 application for a **LilyGO T-Beam Supreme** and two AS5600 angle encoders behind a TCA9548A. It sends raw angle and diagnostic readings to the browser tester over Bluetooth LE. The firmware does not drive brakes, control a trainer, implement a Bluetooth gamepad or connect these levers to the MTB simulator yet.
 
-The code is build-checked, with host tests for acquisition failures and packet encoding. A successful build is not a physical hardware test. Check the board revision and complete the assembly guide’s bench test before treating a built device as working.
+The code is build-checked, with host tests for acquisition failures and packet encoding. On 28 November 2026, both assembled levers were observed sending live BLE readings to the hosted Chrome tester. Both still reported weak magnetic fields, so magnetic quality and full bench acceptance remain unverified. Check the board revision and complete the assembly guide's bench test for each build.
 
 ## Board profile and electrical connection
 
@@ -62,9 +62,15 @@ These are example messages, not a recorded measurement. `left=1/right=1` mean re
 
 Open the [online Bluetooth tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/) in desktop Chrome or Edge on a computer with Bluetooth enabled. Click **Connect Bluetooth**, select **MTB Brake Bench**, and allow the browser connection. Select it from the webpage's chooser rather than pairing it as an operating-system game controller.
 
-Keep only one BLE client connected. The tester displays raw angles, magnetic diagnostics and connection freshness, and provides client-side endpoint capture and CSV export. Calibrations live in the tester; the firmware stores no calibration or permanent AS5600 settings. The firmware resumes advertising after a client disconnects. If a device remains busy, close other BLE apps/tabs or reset the board.
+Keep only one BLE client connected. The tester displays raw angles, magnetic diagnostics, connection freshness and calibrated travel in two lever cards. Capture stable release/full-pull positions, or enter measured raw endpoints and choose **Save endpoints**. Completed calibrations are saved automatically for that Bluetooth device and protocol in the browser; **Clear** removes one lever's saved endpoints. Demo calibration stays in memory. The combined plot, session recorder and CSV export have been removed.
+
+The firmware stores no calibration or permanent AS5600 settings. It continues to publish readable raw angles and diagnostic flags even when a detected magnet has a weak/strong-field warning. The tester labels that travel provisional and retains the warning; missing magnets, failed reads and stale telemetry remain unavailable. No firmware reflash is required for this tester calibration change. The firmware resumes advertising after a client disconnects. If a device remains busy, close other BLE apps/tabs or reset the board.
 
 The online app requires HTTPS; a local copy can use `http://localhost`. A local `file://` page or ordinary LAN HTTP URL is not a suitable Web Bluetooth origin. Browser support and the detailed bench procedure are explained in the [assembly guide](https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md#bluetooth-bench-test).
+
+## Power off
+
+Hold the board's **PWR** button for about **6 seconds** (the default hardware setting). **RESET** restarts the controller; **BOOT** is for firmware download. With USB-only power and no battery, disconnecting the cable also removes power. See [LILYGO's T-Beam Supreme hardware guide](https://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series/blob/master/docs/en/t_beam_supreme/t_beam_supreme_hw.md).
 
 ## Firmware behavior
 

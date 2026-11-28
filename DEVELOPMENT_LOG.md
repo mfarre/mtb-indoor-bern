@@ -4,6 +4,24 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 28 November 2026 · First live brake-lever readings and simpler calibration
+
+**Both assembled Maneta v01 levers are sending real Bluetooth readings to the bench tester.** The original Chrome capture shows the two encoder channels connected, with **MD=1, ML=1, MH=0 and AGC=128** on both. The builder reports that pulling each lever changes its raw angle. The weak-field warning is real: this establishes acquisition and transport, but does not validate magnetic accuracy, full-stroke repeatability or the final mechanical assembly.
+
+| Original live Bluetooth connection | Updated interface in demo mode |
+| --- | --- |
+| [![First live BLE capture: both encoders report a detected magnet with a weak field](docs/images/brake-bench-first-live.jpg)](docs/images/brake-bench-first-live.jpg) | [![New per-lever calibration interface using simulated readings](docs/images/brake-bench-calibration.jpg)](docs/images/brake-bench-calibration.jpg) |
+
+*The left image records real hardware before the interface update. The right image demonstrates the revised software with explicitly simulated data; it is not proof of calibrated physical levers.*
+
+**Calibration no longer disappears behind a weak-field warning.** A detected, readable magnet can show its angle and provisional travel while keeping an amber warning. Stable release/full-pull captures require at least half a second at rest; measured raw endpoints can also be entered manually. Completed endpoints save automatically for the selected Bluetooth device and protocol, and each lever's **Clear** removes its saved configuration. Demo calibration stays in memory. Missing magnets, failed reads, invalid status and stale telemetry still make live values unavailable. Saving endpoints changes travel mapping, not magnetic health.
+
+**The bench now focuses on the two lever cards.** The shared history plot and the “Keep the useful bits” session/CSV section have been removed. Assembly, firmware and protocol guides explain the revised flow, centring the magnet over the chip and adjusting the gap from live diagnostics. The firmware protocol is unchanged; this update does not require reflashing.
+
+**Verified:** all 26 software tests passed. Browser checks exercised weak-field stable capture across the raw-angle wrap (4050 → 204, reaching 100%), opposite-direction manual endpoints (1200 → 950, displaying 50% at the midpoint), stale telemetry blanking both levers, and a missing left magnet leaving the healthy right channel available. The 490 px and 1280 px layouts showed no horizontal overflow, and the inspected browser console had no errors. These interface checks used demo data. A complete physical repeatability test and integration of proportional lever input into the riding simulator remain outstanding.
+
+[Open the bench](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/) · [Calibration guide](docs/workshop/tester/README.md) · [Assembly and hardware](docs/bluetooth-brakes.md#maneta-v01) · [Verification record](docs/verification-brake-bench-2026-11-28.json).
+
 ## 28 November 2026 · Estimated calories, saved rides and confirmed shift feedback
 
 **The gear-change click is back when a button actually changes gear.** Audio version 3 keeps seven continuous tyre, wind and braking/scrub sources, plus one short click for a host-confirmed successful shift. Continuous chain/freehub buzz remains absent. Cassette-limit presses, restored gear settings, seeking, resume and repeated snapshots do not replay shift clicks. Historical El Tony and Dentenberg comparison videos retain their original version 1 and version 2 soundtracks.
