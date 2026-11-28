@@ -19,9 +19,11 @@ internal sealed class SensorHealth(SensorRole role)
         if (!connected) return "disconnected";
         if (role == SensorRole.Trainer) return "connected";
         if (!LastMeasurement.HasValue) return "waiting";
+        if (role == SensorRole.Brakes && (now - LastMeasurement.Value).TotalMilliseconds is not (>= 0 and < BrakeProtocol.StaleMilliseconds)) return "stale";
         // Controllers are event driven. An idle controller is not a failed sensor.
         return role == SensorRole.HeartRate && !IsFresh(LastMeasurement, now) ? "stale" : "connected";
     }
-    public bool NeedsRefresh(bool connected, DateTime now) => role == SensorRole.HeartRate && connected &&
-        (LastMeasurement ?? ConnectedAt) is { } last && (now - last).TotalSeconds >= 20;
+    public bool NeedsRefresh(bool connected, DateTime now) => connected &&
+        (LastMeasurement ?? ConnectedAt) is { } last &&
+        (role == SensorRole.HeartRate && (now - last).TotalSeconds >= 20 || role == SensorRole.Brakes && (now - last).TotalSeconds >= 2);
 }

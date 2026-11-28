@@ -1,5 +1,5 @@
 // Pure presentation adapter. None of these values control the trainer or the simulation.
-export const AUDIO_VERSION = 3;
+export const AUDIO_VERSION = 4;
 export const STALE_SECONDS = .9;
 export const AUDIO_DEFAULTS = Object.freeze({ volume: .35, muted: false });
 const finite = (v, fallback = 0) => typeof v === 'number' && Number.isFinite(v) ? v : fallback;
@@ -16,17 +16,23 @@ export function audioTargets(state = {}) {
   const running = (state.mode === 'ride' || state.mode === 'demo') && state.busy !== true;
   // Fast preview changes travel time, not the imaginary wheel's timbre. Practice uses real simulated speed.
   const previewMultiplier = state.demo && !state.practice ? clamp(finite(state.demoSpeed, 1), 1, 8) : 1;
-  const speed = running ? clamp(finite(state.speed) / previewMultiplier, 0, 80) : 0;
+  const speed = running ? clamp(finite(state.physicalSpeedKmh, finite(state.speed) / previewMultiplier), 0, 80) : 0;
   const moving = clamp((speed - .3) / 4, 0, 1), intensity = clamp(speed / 35, 0, 1.8);
-  const brake = clamp(state.audio?.brake ?? state.brakePressure ?? (state.brake ? 1 : 0), 0, 1);
-  // Slip is the game's corner-grip model, not a wheel-lock measurement; use a restrained scrub texture.
-  const slip = state.demo && !state.practice ? 0 : clamp(finite(state.slip) - .12, 0, 1);
+  const frontBrake = clamp(state.frontBrake, 0, 1), rearBrake = clamp(state.rearBrake, 0, 1);
+  const brake = Math.max(frontBrake, rearBrake, clamp(state.audio?.brake ?? state.brakePressure ?? (state.brake ? 1 : 0), 0, 1));
+  // Wheel slip is calculated by the host. Pressure by itself does not invent a
+  // wheel lock; ordinary corner scrub keeps its quieter existing contribution.
+  const cornerSlip = state.demo && !state.practice ? 0 : clamp(finite(state.slip) - .12, 0, 1);
+  const frontSlip = clamp(state.frontSlip, 0, 1), rearSlip = clamp(state.rearSlip, 0, 1);
+  const wheelSlip = Math.max(frontSlip * .9, rearSlip);
   // Continuous drivetrain sound remains absent. Confirmed shifts are handled
   // separately as short events; cadence and coasting never introduce a buzz.
   return { running, speed, surface: audioSurface(state.surface),
     tire: moving * (.19 + .27 * Math.sqrt(intensity)), wind: moving * .16 * intensity ** 1.45,
     brake: moving * brake * .105,
-    skid: moving * slip * .14, rate: clamp(.6 + speed / 42, .6, 2) };
+    skid: moving * Math.max(cornerSlip * .14, wheelSlip * .30),
+    skidTone: 1700 + Math.max(wheelSlip, cornerSlip) * 1900,
+    rate: clamp(.6 + speed / 42, .6, 2) };
 }
 
 export class RideAudioState {

@@ -14,9 +14,23 @@ Entering slightly too fast causes a skid, visible lateral movement and loss of s
 
 Climbs emphasise **gradient percentage**; descents show **speed**, gradient and whether you are braking or coasting. The grip indicator warns of a skid before control is lost.
 
+## Two proportional levers
+
+Pair and calibrate the board in **Brake setup**, after disconnecting the browser tester. Native and browser endpoint calibration are separate. The default mapping is left/front and right/rear, and can be swapped. The encoders measure lever travel, not finger force. Apply either lever gently for proportional slowing. Strong braking while moving produces wheel slip and a tyre-on-dirt skid sound. The rear brake gives less stopping power and can slide; a sustained near-full front pull at speed can cause a front-lock fall. [Pairing and calibration steps](bluetooth-brakes.md#simulator-setup).
+
+The current rear-skid rule begins above **70% rear travel at 7.2 km/h or more**. Once braking has ramped in, at least **92% front travel for 0.25 seconds while moving at 14.4 km/h or more** can trigger a front-lock fall. These are game thresholds, not sensor force readings or measured tyre limits.
+
+During a front-lock fall the camera tips and drops towards the ground, virtual progress stops for **three seconds**, and the ride/descent timers continue. Release the front lever before it can trigger another fall. Pausing, seeking or restarting clears the presentation effect. These thresholds are gameplay tuning, not a model of real bicycle stability or outdoor braking advice.
+
+![Front-lock camera fall on Gurten, demonstrated with synthetic host telemetry](images/brake-simulator-front-lock.jpg)
+
+*Renderer/HUD check using synthetic host telemetry, not a physical lever test. [Rear-skid example](images/brake-simulator-rear-skid.jpg).*
+
+The balanced Click/Space/on-screen brake stays available and cannot cause a front-lock fall by itself. Invalid Bluetooth lever input, or 750 ms without advancing telemetry, releases the affected brake; it never pauses the ride. Each channel needs at least 200 ms of fresh readings at or below 5% travel before re-arming. The chain/freehub buzz remains absent, and the short confirmed gear-change click remains enabled.
+
 ## Practice and personal records
 
-**Practise the descent · Dentenberg · forest descent** on the welcome screen places you 55 m before the sector starts. It needs no sensors and does not control the KICKR. It uses the same braking and grip as a real ride, with automatic propulsion on flat sections and rises so you can complete it using only the controls. **Explore in demo** remains available at ×1, ×2, ×4 and ×8; this automatic tour neither scores a time nor applies runouts.
+**Practise the descent · Dentenberg · forest descent** on the welcome screen places you 55 m before the sector starts. It needs no sensors and does not control the KICKR. It uses the same braking and grip as a real ride, with automatic propulsion on flat sections and rises so you can complete it using only the controls. **Explore in demo** remains available at ×1, ×2, ×4 and ×8; this automatic tour does not score a time. Proportional brake skids and front-lock falls can be explored in demo, with risk based on normal riding speed rather than the accelerated tour multiplier.
 
 The timed **Dentenberg · forest descent** sector covers **km 4.480–6.980 of the existing Al Dente course**. It is not a second imported track. `handling.json` defines the sector boundaries and can define sectors for other courses.
 

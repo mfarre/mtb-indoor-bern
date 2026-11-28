@@ -4,6 +4,26 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 28 November 2026 · Proportional front and rear brakes in the simulator
+
+**The Windows simulator now reads both Maneta v01 lever channels directly over Bluetooth.** **Brake setup** pairs the board, captures or accepts released/full-pull endpoints and saves calibration for that board and protocol. Left controls the front brake and right the rear by default; the mapping can be swapped. Browser bench calibration remains separate, and the browser must disconnect before the simulator connects. No firmware reflash is needed. The AS5600 measures lever travel, not finger force.
+
+**Braking now has different front and rear consequences.** Rear travel above 70% can start a skid from 7.2 km/h, with tyre-on-dirt sound and reduced rear stopping power. A sustained near-full front pull can lock the front wheel: after braking ramps in, at least 92% travel for 0.25 seconds at 14.4 km/h or more triggers a camera fall and a three-second stop. The ride and descent timers keep running during recovery. The HUD shows each brake and warns about slip; the stable-camera option softens the fall movement. These thresholds tune gameplay and do not describe real tyre grip. The balanced Click, keyboard and on-screen brake remains available without causing a front-lock fall by itself.
+
+| Rear skid feedback | Front-lock fall and recovery |
+| --- | --- |
+| [![Gurten rear-skid warning using synthetic host telemetry](docs/images/brake-simulator-rear-skid.jpg)](docs/images/brake-simulator-rear-skid.jpg) | [![Gurten front-lock camera fall using synthetic host telemetry](docs/images/brake-simulator-front-lock.jpg)](docs/images/brake-simulator-front-lock.jpg) |
+
+*These screenshots use synthetic host telemetry to verify the Gurten renderer and HUD. They do not show a physical lever test.*
+
+**Input failures release braking without pausing the ride.** A bad channel releases its own input; a mux or connection fault releases both. At 750 ms without advancing telemetry, the input expires. Re-arming requires fresh, advancing samples at no more than 5% travel for at least 200 ms. Weak/strong detected fields remain explicitly provisional, even when travel mapping works. Camera and sound follow host state; pause, seek, restart and stale presentation data cannot replay an old crash. Continuous chain/freehub noise stays absent; confirmed gear shifts retain their short click.
+
+**Verification:** both public and personal Windows builds and self-test suites passed, including the personal Dentenberg course, protocol/calibration persistence, physics, brake presentation and audio checks. Browser checks with synthetic host telemetry showed the rear-skid warning, the near-ground tilted front-lock camera and recovery countdown; stopping the stream cleared brake pressure and the fall banner without console errors. An [isolated native Brake setup check](docs/images/brake-setup-native.jpg), also using synthetic readings without Bluetooth, confirmed independent travel displays, rejection of an out-of-range endpoint, successful valid saves and zero braking until release re-armed the inputs. The local installation was updated while preserving settings, records, private course data and activities. [Verification record](docs/verification-brakes-simulator-2026-11-28.json).
+
+The final on-bike test of native pairing, saved calibration, independent braking and reconnect recovery remains pending. The earlier real bench observation established live BLE transport with **MD=1, ML=1, MH=0 and AGC=128** on both sensors; it did not establish healthy magnetic fields or full-stroke repeatability. Those mechanical and magnetic checks remain necessary.
+
+[Native setup](docs/bluetooth-brakes.md#simulator-setup) · [Braking and recovery rules](docs/downhill.md#two-proportional-levers) · [Telemetry and release arming](docs/brake-protocol.md#native-simulator-adapter).
+
 ## 28 November 2026 · First live brake-lever readings and simpler calibration
 
 **Both assembled Maneta v01 levers are sending real Bluetooth readings to the bench tester.** The original Chrome capture shows the two encoder channels connected, with **MD=1, ML=1, MH=0 and AGC=128** on both. The builder reports that pulling each lever changes its raw angle. The weak-field warning is real: this establishes acquisition and transport, but does not validate magnetic accuracy, full-stroke repeatability or the final mechanical assembly.

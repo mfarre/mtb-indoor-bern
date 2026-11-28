@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Simulator | [Setup, controls, courses and architecture](simulator.md) | Working Windows application |
 | Data acquisition | [Recording workflow and hardware](data-acquisition.md) | Track Lab works with FIT and video; additional sensor streams are planned |
-| Bluetooth brakes | [Prototype assembly, wiring and current input support](bluetooth-brakes.md) | Click button braking works; printable lever, bench firmware and browser tester are available; custom hardware validation is pending |
+| Bluetooth brakes | [Prototype assembly, wiring and current input support](bluetooth-brakes.md) | Independent proportional levers, skid sound and front-lock falls are implemented; physical validation of the new integration is pending |
 
 ## User guides
 

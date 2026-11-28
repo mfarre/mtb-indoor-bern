@@ -3,7 +3,7 @@ namespace MTBIndoorBern;
 internal sealed class Equipment : IDisposable
 {
     public static readonly SensorRole[] ControllerRoles = [SensorRole.Controller,SensorRole.LeftController];
-    public static readonly SensorRole[] Roles = [SensorRole.Trainer,SensorRole.Controller,SensorRole.LeftController,SensorRole.HeartRate];
+    public static readonly SensorRole[] Roles = [SensorRole.Trainer,SensorRole.Controller,SensorRole.LeftController,SensorRole.HeartRate,SensorRole.Brakes];
     private readonly PreferencesStore preferences;
     private readonly CancellationToken token;
     private readonly Dictionary<SensorRole, bool> busy = Roles.ToDictionary(r=>r,_=>false);
@@ -17,6 +17,40 @@ internal sealed class Equipment : IDisposable
     public event Action? Changed;
     public event Action<int>? Shift;
     public bool ControllerBrakePressed => ControllerRoles.Any(r=>Connections[r].Connected&&Connections[r].BrakePressed);
+    private ulong BrakeAddress
+    {
+        get { ulong address = Connections[SensorRole.Brakes].DeviceAddress; return address > 0 ? address : Saved(SensorRole.Brakes)?.Address ?? 0; }
+    }
+    public BrakeDeviceCalibration? BrakeCalibration => preferences.Data.BrakeCalibrations.FirstOrDefault(c => c.Address == BrakeAddress && c.ProtocolVersion == BrakeProtocol.Version)?.Normalize();
+    public BrakeInputSnapshot BrakeInput
+    {
+        get
+        {
+            var connection = Connections[SensorRole.Brakes];
+            return connection.GetBrakeInput(BrakeCalibration, BrakeAddress, connection.DeviceAddress > 0 ? connection.DeviceName : Saved(SensorRole.Brakes)?.Name ?? "MTB Brake Bench");
+        }
+    }
+    public BrakeEndpointCapture CaptureBrakeEndpoint(bool left) => Connections[SensorRole.Brakes].CaptureBrakeEndpoint(left);
+    public void SaveBrakeCalibration(BrakeEndpoints? left, BrakeEndpoints? right, bool leftIsFront)
+    {
+        if (Busy(SensorRole.Brakes)) throw new InvalidOperationException("Wait for the brake connection to finish before saving calibration.");
+        ulong address = BrakeAddress;
+        if (address == 0 || address > 0xFFFFFFFFFFFF) throw new InvalidOperationException("Select and connect the brake board before saving its calibration.");
+        if (left is not null) left = BrakeEndpoints.Create(left.Released, left.Pulled, left.Provisional);
+        if (right is not null) right = BrakeEndpoints.Create(right.Released, right.Pulled, right.Provisional);
+        var saved = new BrakeDeviceCalibration { Address = address, Left = left, Right = right, LeftIsFront = leftIsFront };
+        var previous = preferences.Data.BrakeCalibrations;
+        preferences.Data.BrakeCalibrations = [..previous.Where(c => c.Address != address), saved];
+        preferences.Save();
+        Connections[SensorRole.Brakes].ResetBrakeArming();
+        if (preferences.Warning is { } warning)
+        {
+            preferences.Data.BrakeCalibrations = previous;
+            throw new IOException(warning);
+        }
+        Changed?.Invoke();
+    }
+    public void ClearBrakeCalibration() => SaveBrakeCalibration(null, null, BrakeCalibration?.LeftIsFront ?? true);
     public bool ShouldSearch => Roles.Any(r=>!Paused(r)&&!Busy(r)&&(!Connections[r].Connected||Connections[r].NeedsRefresh));
     public Func<Task>? BeforeTrainerChange;
     public Equipment(PreferencesStore preferences, CancellationToken token, Action<string> log)
@@ -81,7 +115,8 @@ internal sealed class Equipment : IDisposable
             if(role==SensorRole.Trainer&&BeforeTrainerChange is not null)await BeforeTrainerChange();
             if(Connections[role].HasSession)await Connections[role].DisconnectAsync();
             await Connections[role].ConnectAsync(device,token);
-            preferences.Remember(role,device); log($"{device.DisplayName} connected and saved.");
+            preferences.Remember(role,device);
+            log(preferences.Warning is { } warning ? $"{device.DisplayName} connected, but could not be remembered. {warning}" : $"{device.DisplayName} connected and saved.");
         }
         catch(OperationCanceledException) { }
         catch(Exception e){log($"{device.DisplayName}: {e.Message}");}
@@ -103,6 +138,19 @@ internal sealed class Equipment : IDisposable
     public object[] Snapshot()=>Roles.Select(role=>
     {
         var c=Connections[role];var saved=Saved(role);
+        if (role == SensorRole.Brakes)
+        {
+            var input = BrakeInput;
+            string brakeState = c.Connected ? input.State : busy[role] ? "connecting" : paused.Contains(role) ? "paused" : saved is not null ? "searching" : "unpaired";
+            string brakeStatus = brakeState switch
+            {
+                "connecting" => "Connecting…", "paused" => "Search paused · select Connect to resume",
+                "searching" => "Searching for saved board · every 5 s", "unpaired" => "Select the brake board to save it", _ => input.Status
+            };
+            return (object)new { role = role.ToString(), label = "Brakes", state = brakeState, status = brakeStatus,
+                detail = c.Connected ? input.Status : brakeStatus, name = c.Connected ? c.DeviceName : saved?.Name ?? "",
+                battery = c.Battery, inputConfirmed = c.Connected && input.Armed, front = input.Front, rear = input.Rear };
+        }
         string state=c.Connected?c.DataState:busy[role]?"connecting":paused.Contains(role)?"paused":saved is not null?"searching":"unpaired";
         string label=role switch{SensorRole.Trainer=>"KICKR",SensorRole.Controller=>"Right Click",SensorRole.LeftController=>"Left Click",_=>"Heart rate"};
         string status=state switch

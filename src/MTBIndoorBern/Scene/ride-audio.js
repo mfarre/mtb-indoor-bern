@@ -86,6 +86,7 @@ export function createRideAudio({ context = null, watch = true } = {}) {
     for (const [kind, value] of [['wind', values.wind], ['brake', values.brake], ['skid', values.skid]])
       target(graph.voices[kind].gain.gain, value, time, .1);
     target(graph.voices.wind.filter.frequency, 350 + values.speed * 15, time, .3);
+    target(graph.voices.skid.filter.frequency, values.skidTone, time, .1);
     masterAt(time, values.running);
     if (values.gearClick) clickAt(time);
   }

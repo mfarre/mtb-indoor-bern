@@ -1,5 +1,6 @@
-// Original deterministic procedural sound design, v3. These are not field recordings.
-// Version 3 restores only a brief confirmed-shift click. Freehub/chain buzz stays absent.
+// Original deterministic procedural sound design. These are not field recordings.
+// The v4 graph uses the existing skid buffer for host-reported wheel slip.
+// Confirmed-shift clicks remain brief; freehub/chain buzz stays absent.
 // Buffers are generated once; persistent looping voices are crossfaded by ride-audio.js.
 export function synthesizeRideBuffer(kind, sampleRate = 48000) {
   const durations = { earth: 7.13, gravel: 6.71, asphalt: 5.83, leaves: 7.79, wind: 8.37, brake: 4.53, skid: 5.37, gear: .095 };

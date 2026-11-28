@@ -81,11 +81,11 @@ Keep the `Scene` folder beside the executable. Imagery, terrain and Three.js are
 
 The public repository starts with no paired sensors. Once connected, devices are remembered in `settings.json` beside the executable; this file is excluded from Git. **Disconnect** pauses reconnection until **Connect** is pressed or the app is reopened. **Forget this device** removes the saved pairing.
 
-The main screen shows all four devices. **Waiting for data** means Bluetooth is connected but no usable button or pulse reading has arrived yet; press a Click button to confirm input. **No recent data** on the heart-rate sensor means its last pulse sample is stale. A battery or connection update alone does not count as a pulse reading. Missing or stale heart rate is shown as a dash with a waiting/no-recent-pulse label instead of retaining an old number.
+The main screen shows the KICKR, both Clicks, heart rate and optional Bluetooth brakes. **Waiting for data** means Bluetooth is connected but no usable button or pulse reading has arrived yet; press a Click button to confirm input. **No recent data** on the heart-rate sensor means its last pulse sample is stale. A battery or connection update alone does not count as a pulse reading. Missing or stale heart rate is shown as a dash with a waiting/no-recent-pulse label instead of retaining an old number.
 
 Heart-rate readings become stale after eight seconds; a connection without fresh pulse data is retried after 20 seconds through the normal search loop. A Click stays confirmed during ordinary idle periods. If a Click reports **Zwift activation requested**, it has not yet confirmed usable input: activation through Zwift is not implemented by this app. Use the backup controls until it is activated and sending button events.
 
-The Clicks and heart-rate strap are optional for riding. A Click disconnect releases that controller's held brake input and starts reconnection without pausing the route or changing the gear. The other controller, mouse, keyboard and on-screen controls remain usable. Loss of fresh trainer telemetry or an interrupted 3D view still pauses the ride and releases trainer load.
+The Clicks, heart-rate strap and proportional brake board are optional for riding. Open **Brake setup** to pair the board, calibrate both levers and choose their front/rear mapping. See the [lever setup guide](bluetooth-brakes.md#simulator-setup). A Click disconnect releases that controller's held brake input and starts reconnection without pausing the route or changing the gear. The other controller, mouse, keyboard and on-screen controls remain usable. Loss of fresh trainer telemetry or an interrupted 3D view still pauses the ride and releases trainer load.
 
 ![Separate KICKR, right Click, left Click and heart-rate configuration cards](images/devices-four-slots-2026-11-28.png)
 
@@ -100,7 +100,9 @@ The Clicks and heart-rate strap are optional for riding. A Click disconnect rele
 | Left Click `−` | Shift down |
 | Left mouse click on the 3D trail | Shift up during a ride or moving demo |
 | Right mouse click on the 3D trail | Shift down during a ride or moving demo |
-| Right Click `A` / keyboard `A` or Space / brake button | Hold to brake; release to coast |
+| Right Click `A` / keyboard `A` or Space / brake button | Hold the balanced backup brake; release to coast |
+| Calibrated Bluetooth levers | Independent proportional front/rear braking; strong pulls can skid, and sustained excessive front braking at speed can cause a fall |
+| Brake setup | Pair the board, save endpoint calibration and choose left/right mapping |
 | Practise the descent · … | Start before the selected course's downhill section, without trainer control or a record |
 | Escape / Pause | Pause and release trainer control |
 | Resume demo | Continue a paused demo from the same position |
@@ -138,7 +140,7 @@ Trainer gradient is averaged across 40 m of the route, using its actual horizont
 
 The optional guided test refines response transitions without changing measured watts or certifying their accuracy. Read the [bike and calibration guide](bike-calibration.md) for equations, thresholds and model limitations.
 
-The existing Click button controls virtual braking. The separate [Bluetooth brake hardware section](bluetooth-brakes.md) documents the developing physical controller concept and its status.
+The Click button provides balanced backup braking alongside the two proportional Bluetooth levers. The [Bluetooth brake guide](bluetooth-brakes.md) documents assembly, native pairing and calibration, and the remaining physical validation.
 
 ## Repository structure
 

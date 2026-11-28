@@ -28,4 +28,4 @@ Nominal magnet is a diametrically magnetized Ø6 × 2.5 mm disc. The top seat is
 
 The ten STL files are unchanged from the original v01 design. Only comments in the OpenSCAD source have been translated; its executable geometry is unchanged. [File hashes and source manifest](source-manifest.json).
 
-The shared controller and BLE bench firmware are in [firmware/brake-bench](../../firmware/brake-bench/). The browser tester is a diagnostics tool; it does not yet integrate these proportional levers with the simulator.
+The shared controller and BLE bench firmware are in [firmware/brake-bench](../../firmware/brake-bench/). The browser tester provides diagnostics and local endpoint calibration. The Windows simulator reads the same telemetry directly after separate pairing and calibration in **Brake setup**; disconnect the browser before connecting the simulator. [Native setup and current validation status](../../docs/bluetooth-brakes.md#simulator-setup).

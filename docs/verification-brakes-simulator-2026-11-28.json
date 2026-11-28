@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-28",
+  "scope": "Native dual-lever Bluetooth braking, calibration, skid sound and front-lock fall",
+  "bench_predecessor_commit": "16c01509c98e61fc085fa3013f21a2907fe144ab",
+  "builds": {
+    "public_windows_x64_self_contained": "PASS",
+    "personal_windows_x64_self_contained": "PASS",
+    "public_self_test_courses": ["Uetliberg", "Gurten", "Eiger Bike Challenge 20 km"],
+    "personal_self_test_courses": ["Dentenberg", "Uetliberg", "Gurten", "Eiger Bike Challenge 20 km"]
+  },
+  "automated_checks": {
+    "BrakeProtocolTests.Verify": "PASS: packet validation, magnetic states, counter wrap/reboot/order, independent faults, 750 ms stale release, fresh release arming and stable capture",
+    "BrakePersistenceTests.Verify": "PASS: settings migration, exact board/protocol binding, endpoint persistence, mapping, forget, failed-save rollback and no trainer side effects",
+    "BrakeHandlingTests.Verify": "PASS: independent proportional inputs, rear skid, front-lock thresholds, one-shot held lever, recovery, invalid inputs, balanced fallback and measured work while stationary",
+    "RideSession.Verify": "PASS for every listed course: release arming on start/resume/seek/reset, stopped recovery with elapsed time, accelerated demo physical-speed cap, no demo workout calories",
+    "existing_self_test_suite": "PASS: trainer calibration/load filtering, independent Clicks, activity recording/export/recovery, course/sector behavior and preferences",
+    "tools/ride-audio/test.mjs": "PASS: host slip sound, physical-speed scaling, stale fades, confirmed shift click and no continuous drivetrain loop",
+    "tools/ride-presentation/brake-test.mjs": "PASS: confirmed crash camera, ground clearance, recovery, stable-camera mode, ordering, lifecycle/stale suppression and pressure HUD",
+    "tools/ride-input/test.mjs": "PASS: backup mouse shifting and UI input guards",
+    "bench_core_and_app_tests": "26 PASS in the preceding bench publication"
+  },
+  "visual_checks": {
+    "gurten": "Production Scene modules with an isolated synthetic host fixture: rear skid warning at 95% rear input, ground-facing tilted front-lock camera and recovery banner, stale stream clears live pressure and fall banner; no browser console errors",
+    "native_setup": "Isolated Windows QA copy with no Bluetooth discovery: independent raw/travel displays, manual endpoint 4096 rejected, valid endpoints saved, applied braking remains zero until fresh release re-arms",
+    "screenshots": ["images/brake-simulator-rear-skid.jpg", "images/brake-simulator-front-lock.jpg", "images/brake-setup-native.jpg"],
+    "synthetic_data_labelled": true
+  },
+  "installation": {
+    "app_files_updated": 10,
+    "source_files_updated": 24,
+    "protected_settings_records_and_private_course_files_unchanged": 15,
+    "private_activities_preserved": true
+  },
+  "physical_validation": {
+    "new_native_adapter_tested_on_bike": false,
+    "earlier_browser_observation": "Both real AS5600 channels delivered BLE readings; both reported MD=1, ML=1, MH=0, AGC=128",
+    "pending": ["Native physical pairing and reconnect", "Saved endpoints against the actual mounted levers", "Full-stroke magnetic quality and repeatability", "On-bike skid/fall feel"]
+  },
+  "trainer": "Braking and crashes affect virtual motion only. No new trainer-control commands or firmware writes are introduced."
+}

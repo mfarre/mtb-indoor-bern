@@ -63,7 +63,10 @@ internal static class BluetoothReliabilityTests
             Check(equipment.FindAutomaticDevice(SensorRole.Controller,[left]) is null, "Saved right must not reconnect to left");
             using var snapshot = JsonDocument.Parse(JsonSerializer.Serialize(equipment.Snapshot()));
             var devices = snapshot.RootElement.EnumerateArray().ToArray();
-            Check(devices.Length == 4, "Both Click slots must appear on the ride screen");
+            Check(devices.Length == 5 && devices.Count(d => d.GetProperty("role").GetString() is "Controller" or "LeftController") == 2, "Both Click slots and optional brakes must appear on the ride screen");
+            var brakes = devices.Single(d => d.GetProperty("role").GetString() == "Brakes");
+            Check(brakes.GetProperty("state").GetString() == "unpaired" && !brakes.GetProperty("inputConfirmed").GetBoolean() &&
+                brakes.GetProperty("front").GetDouble() == 0 && brakes.GetProperty("rear").GetDouble() == 0, "Unpaired optional brakes must stay released");
             Check(devices[1].GetProperty("state").GetString()=="searching" && devices[1].GetProperty("status").GetString()!.Contains("every 5 s"), "Searching chips must not retain a stale Connected label");
         }
         finally

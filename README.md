@@ -14,7 +14,7 @@ A Windows MTB simulator with real elevation data, aerial imagery, direct Bluetoo
 
 | [01 · Simulator](docs/simulator.md) | [02 · Data acquisition](docs/data-acquisition.md) | [03 · Bluetooth brakes](docs/bluetooth-brakes.md) |
 | --- | --- | --- |
-| **The main application.** Ride local trails with a KICKR, MTB gears, heart rate and downhill braking. Explore without sensors in demo mode. | **Track Lab and import tools.** Align action-camera footage with FIT data, annotate trail surfaces and extract reference frames. | **Printable levers and a Bluetooth bench.** Assemble AS5600 controls, wire a TCA9548A and T-Beam Supreme, then inspect both sensors in a browser. Click button braking remains the implemented simulator input. |
+| **The main application.** Ride local trails with a KICKR, MTB gears, heart rate and downhill braking. Explore without sensors in demo mode. | **Track Lab and import tools.** Align action-camera footage with FIT data, annotate trail surfaces and extract reference frames. | **Printable levers and a Bluetooth bench.** Assemble AS5600 controls, wire a TCA9548A and T-Beam Supreme, then inspect both sensors in a browser. The simulator supports independent proportional front/rear braking, skid sound and front-lock falls. |
 | [Setup and controls →](docs/simulator.md#build-and-run) | [Workflow and hardware →](docs/data-acquisition.md) | [Current support and hardware →](docs/bluetooth-brakes.md) |
 
 ## Ride now
@@ -66,7 +66,7 @@ The brake view above uses the printable Maneta v01 meshes. It illustrates the pr
 
 [![Maneta v01 brake lever pulling and returning, rendered from the supplied STL design](docs/images/bluetooth-brake-v01-motion.gif)](docs/bluetooth-brakes.md#maneta-v01)
 
-**Maneta v01: the actual mechanical design in motion.** A looping Blender render of the lever pulling and returning, based on the supplied STL files and assembly drawings. [Animation, original still and CAD reference](docs/brake-v01-render.md). This render is separate from the first live electronics observation; proportional simulator integration is still pending.
+**Maneta v01: the actual mechanical design in motion.** A looping Blender render of the lever pulling and returning, based on the supplied STL files and assembly drawings. [Animation, original still and CAD reference](docs/brake-v01-render.md). This render is separate from the first live electronics observation; the simulator now consumes both lever channels after native calibration.
 
 **[Read the Maneta v01 assembly guide →](docs/bluetooth-brakes.md#maneta-v01)**
 
@@ -76,7 +76,7 @@ The illustrated guide is part of the Bluetooth brakes document, directly below *
 
 *Updated interface in demo mode. Each lever has stable endpoint capture, optional manual raw values and automatic local saving for the selected Bluetooth device. Weak/strong-field warnings allow provisional setup without being labelled healthy. The combined plot and CSV session section have been removed.*
 
-**First live BLE observation:** both prototype levers are communicating, but both sensors reported a weak field at maximum AGC. That confirms acquisition and transport, not magnetic accuracy or repeatability. [Original live capture](docs/images/brake-bench-first-live.jpg) · [Calibration and magnetic checks](docs/workshop/tester/README.md) · [Verification record](docs/verification-brake-bench-2026-11-28.json). Custom proportional braking is not yet integrated into the simulator.
+**First live BLE observation:** both prototype levers are communicating, but both sensors reported a weak field at maximum AGC. That confirms acquisition and transport, not magnetic accuracy or repeatability. [Original live capture](docs/images/brake-bench-first-live.jpg) · [Calibration and magnetic checks](docs/workshop/tester/README.md) · [Verification record](docs/verification-brake-bench-2026-11-28.json). Custom proportional braking is implemented in the simulator; final on-bike verification of the new integration is pending.
 
 The simulator, Track Lab, documentation and current screenshots are in English.
 

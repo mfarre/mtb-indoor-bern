@@ -77,27 +77,96 @@ internal sealed class TrailPlan
 internal sealed class TrailHandling
 {
     public double Brake { get; private set; }
+    public double FrontBrake { get; private set; }
+    public double RearBrake { get; private set; }
+    public double FrontSlip { get; private set; }
+    public double RearSlip { get; private set; }
     public double Slip { get; private set; }
     public double Recovery { get; private set; }
+    public long CrashSequence { get; private set; }
+    public string? CrashKind { get; private set; }
     public int OffTracks { get; private set; }
     public int Side { get; private set; } = 1;
     private double ignoreUntil = -1;
-    public void Reset() { Brake = Slip = Recovery = 0; OffTracks = 0; ignoreUntil = -1; }
-    public void Release() { Brake = 0; }
-    public double Step(double speed, double watts, double grade, double weight, bool pressed, TrailCorner? corner, double distance, double dt, BikeProfile? bike=null, string surface="gravel")
+    private double frontLockSeconds;
+    private bool frontCrashLatched;
+    // Gameplay thresholds, not measured tyre grip or real-world braking advice.
+    internal const double FrontLockThreshold = .92, FrontLockMinimumSpeed = 4, FrontLockDuration = .25, RecoverySeconds = 3;
+    internal static double Pressure(double value) => double.IsFinite(value) ? Math.Clamp(value, 0, 1) : 0;
+    private static double Approach(double value, double target, double dt, double rise = 5, double fall = 9)
+        => target > value ? Math.Min(target, value + rise * dt) : Math.Max(target, value - fall * dt);
+    public void Reset() { Release(); OffTracks = 0; ignoreUntil = -1; Side = 1; }
+    public void Release()
     {
-        Brake = Math.Clamp(Brake + (pressed ? dt * 5 : -dt * 9), 0, 1);
-        if (Recovery > 0) { Recovery = Math.Max(0, Recovery - dt); Slip = 0; return 0; }
-        speed = Math.Max(0, BikeDynamics.Speed(speed, watts, grade, weight, dt,bike??new(),surface) - Brake * 5.5 * dt);
+        Brake = FrontBrake = RearBrake = FrontSlip = RearSlip = Slip = Recovery = frontLockSeconds = 0;
+        frontCrashLatched = false; CrashKind = null;
+        // Keep the event sequence monotonic; presentation epochs suppress replay.
+    }
+    private void UpdatePressure(bool pressed, double front, double rear, double dt)
+    {
+        FrontBrake = Approach(FrontBrake, Math.Max(pressed ? 1 : 0, front), dt);
+        RearBrake = Approach(RearBrake, Math.Max(pressed ? 1 : 0, rear), dt);
+        Brake = Math.Max(FrontBrake, RearBrake);
+        if (front <= .1) frontCrashLatched = false;
+    }
+    private bool Recover(double dt)
+    {
+        if (Recovery <= 0) return false;
+        Recovery = Math.Max(0, Recovery - dt);
+        Slip = FrontSlip = RearSlip = frontLockSeconds = 0;
+        if (Recovery == 0) CrashKind = null;
+        return true;
+    }
+    private void Crash(string kind)
+    {
+        Recovery = RecoverySeconds; OffTracks++; CrashSequence++; CrashKind = kind;
+        frontLockSeconds = 0;
+    }
+    private double ApplyBrakes(double speed, double front, double rear, double dt)
+    {
+        // Only proportional lever input can lock a wheel. Click/Space is the
+        // assisted balanced fallback and retains the previous 5.5 m/s² stop.
+        double rearTarget = speed >= 2 ? Math.Clamp((rear - .70) / .30, 0, 1) * Math.Clamp((speed - 1) / 3, 0, 1) : 0;
+        RearSlip = Approach(RearSlip, rearTarget, dt, 4, 6);
+        bool frontLocked = !frontCrashLatched && front >= FrontLockThreshold && FrontBrake >= .9 && speed >= FrontLockMinimumSpeed;
+        frontLockSeconds = frontLocked ? frontLockSeconds + dt : 0;
+        FrontSlip = frontLocked ? Math.Clamp(frontLockSeconds / FrontLockDuration, 0, 1) : Approach(FrontSlip, 0, dt, 5, 8);
+        if (frontLockSeconds + 1e-9 >= FrontLockDuration)
+        {
+            frontCrashLatched = true; FrontSlip = 1; Crash("front-lock"); return 0;
+        }
+        return Math.Max(0, speed - (3.85 * FrontBrake + 1.65 * RearBrake * (1 - .30 * RearSlip)) * dt);
+    }
+    public double Step(double speed, double watts, double grade, double weight, bool pressed, TrailCorner? corner, double distance, double dt, BikeProfile? bike=null, string surface="gravel", double frontBrake=0, double rearBrake=0)
+    {
+        dt = double.IsFinite(dt) ? Math.Clamp(dt, 0, .25) : 0;
+        frontBrake = Pressure(frontBrake); rearBrake = Pressure(rearBrake);
+        UpdatePressure(pressed, frontBrake, rearBrake, dt);
+        if (Recover(dt)) return 0;
+        speed = ApplyBrakes(BikeDynamics.Speed(speed, watts, grade, weight, dt,bike??new(),surface), frontBrake, rearBrake, dt);
+        if (Recovery > 0) return 0;
         double excess = corner is not null && distance > ignoreUntil ? Math.Max(0, Math.Pow(speed / corner.Limit, 2) - 1.08) : 0;
+        if (corner is not null && distance > ignoreUntil) excess += RearSlip * .35;
         Slip = Math.Clamp(Slip + (excess > 0 ? excess * 1.6 : -1.8) * dt, 0, 1);
         if (excess > 0)
         {
             Side = corner!.Direction == 0 ? 1 : -corner.Direction;
             speed = Math.Max(0, speed - Math.Min(2, excess * .7) * dt);
-            if (Slip >= 1) { Recovery = 3; OffTracks++; ignoreUntil = corner.End + 3; return 0; }
+            if (Slip >= 1) { Crash("corner"); ignoreUntil = corner.End + 3; return 0; }
         }
         return speed;
+    }
+    public double StepDemo(double speed, bool pressed, double frontBrake, double rearBrake, double dt)
+    {
+        dt = double.IsFinite(dt) ? Math.Clamp(dt, 0, .25) : 0;
+        frontBrake = Pressure(frontBrake); rearBrake = Pressure(rearBrake);
+        UpdatePressure(pressed, frontBrake, rearBrake, dt);
+        if (Recover(dt)) return 0;
+        Slip = 0;
+        // Exploration acceleration changes distance only. Wheel-lock thresholds
+        // and audio always use this capped physical speed, never demo ×8 speed.
+        speed = Brake == 0 ? 6.2 : double.IsFinite(speed) ? Math.Clamp(speed, 0, 6.2) : 0;
+        return ApplyBrakes(speed, frontBrake, rearBrake, dt);
     }
 }
 

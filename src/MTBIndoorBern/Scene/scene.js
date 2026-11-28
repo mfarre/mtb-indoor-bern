@@ -10,6 +10,7 @@ import {PresentationTimeline,FrameMetrics} from './ride-presentation.js';
 import {setupPresentationControls} from './presentation-controls.js';
 import {createRideAudio} from './ride-audio.js';
 import {setupActivities,calorieDisplay} from './activities-ui.js';
+import {BrakePresentation,brakeHud,BRAKE_VISUAL_STALE_MS} from './brake-presentation.js';
 const $=id=>document.getElementById(id),bridge=window.chrome?.webview;
 // Sound is optional. An unavailable audio device must never reach fail(), which
 // deliberately pauses the host for actual scene/renderer failures.
@@ -21,12 +22,13 @@ const audio=Object.fromEntries(['unlock','update','setPreferences','silence','di
 }]));
 const send=(action,extra={})=>{
  if(['start','demo','practice','resume','preview'].includes(action))audio.unlock();
- if(['pause','stop','devices','course','profile-request','activities-open','error'].includes(action))audio.silence();
+ if(['pause','stop','devices','course','profile-request','activities-open','error'].includes(action)){audio.silence();brakePresentation.reset();}
  return bridge?.postMessage({action,...extra});
 };
 const format=(v,n=0)=>Number(v).toLocaleString('en-GB',{minimumFractionDigits:n,maximumFractionDigits:n});
 let state={mode:'ready',distance:0,speed:0,elapsed:0,climbed:0,gear:8,demo:false},course,world,info,engine,overview=false,lastFrame=0,nextFrameAt=0,lastStats=performance.now(),totalFrames=0,errors=[],devicesKey='',lastDetailDraw=-Infinity,lastVisualDistance=0,lastFrameMetrics={};
 const timeline=new PresentationTimeline(),frameMetrics=new FrameMetrics();
+const brakePresentation=new BrakePresentation();let lastHostStateAt=-Infinity,lastBrakeHudAt=-Infinity;
 const presentation=setupPresentationControls(send,audio,(next,previous)=>{
  if(next.targetFps!==previous.targetFps){frameMetrics.reset();lastFrame=0;nextFrameAt=0;lastStats=performance.now();}
  if(next.immersive!==previous.immersive){lastDetailDraw=-Infinity;if(course)refreshHud();}
@@ -45,7 +47,7 @@ bridge?.addEventListener('message',event=>{
  if(event.data?.type==='state'){
   if(!timeline.push(event.data,performance.now()))return;
   const wasRunning=state.mode==='ride'||state.mode==='demo';state=event.data;
-  presentation.receive(state.presentation);audio.update({...state,presentation:presentation.value});
+  lastHostStateAt=performance.now();presentation.receive(state.presentation);audio.update({...state,presentation:presentation.value});brakePresentation.update({...state,presentation:presentation.value},lastHostStateAt);
   if(wasRunning&&state.mode!=='ride'&&state.mode!=='demo')clearBrake();refreshHud();
  }else if(event.data?.type==='presentation-settings')presentation.receive(event.data.preferences);
  else if(event.data?.type==='catalog'){for(const option of [...$('course-choice').options])if(!event.data.ids.includes(option.value))option.remove();}
@@ -60,16 +62,16 @@ $('view').onclick=()=>{overview=!overview;$('view').textContent=overview?'First-
 window.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||document.querySelector('dialog[open]'))return;if(e.key==='Escape'){send('pause');e.preventDefault();}if(e.key==='+'||e.key==='='){send('gear',{delta:1});e.preventDefault();}if(e.key==='-'||e.key==='b'||e.key==='B'){send('gear',{delta:-1});e.preventDefault();}});
 $('world').addEventListener('webglcontextlost',e=>{e.preventDefault();fail('The graphics engine stopped. Restart MTB Indoor - Bern.');});
 setInterval(()=>send('heartbeat'),1000);
-document.addEventListener('visibilitychange',()=>{frameMetrics.reset();timeline.clear();lastFrame=0;nextFrameAt=0;lastStats=performance.now();if(document.hidden)audio.silence();});
+document.addEventListener('visibilitychange',()=>{frameMetrics.reset();timeline.clear();brakePresentation.reset();lastFrame=0;nextFrameAt=0;lastStats=performance.now();if(document.hidden)audio.silence();});
 window.addEventListener('pagehide',()=>audio.dispose());
 window.mtbPresentationDiagnostics=()=>({...lastFrameMetrics,...engine?.stats(),totalFrames,distance:state.distance,visualDistance:lastVisualDistance,presentation:presentation.value,audio:audio.status()});
 function refreshDevices(){
  const snapshot=state.devices??['KICKR','Right Click','Left Click','Heart rate'].map(label=>({label,state:'searching'})),key=JSON.stringify(snapshot);
  if(key===devicesKey)return;devicesKey=key;$('equipment').replaceChildren();
- const labels={connected:'Connected',connecting:'Connecting',searching:'Searching · every 5 s',paused:'Paused',unpaired:'Not paired',waiting:'Waiting for data',stale:'No recent data'};
+ const labels={connected:'Connected',connecting:'Connecting',searching:'Searching · every 5 s',paused:'Paused',unpaired:'Not paired',waiting:'Waiting for data',stale:'No recent data',warning:'Check sensor alignment',arming:'Release both levers',uncalibrated:'Calibration required',fault:'Sensor unavailable'};
  for(const d of snapshot){
   const b=document.createElement('button');b.className='device-chip '+d.state;
-  const icon=document.createElement('i');icon.className='connection-icon';icon.textContent=d.state==='connected'?'✓':d.state==='paused'?'Ⅱ':d.state==='waiting'||d.state==='stale'?'!':'';
+  const icon=document.createElement('i');icon.className='connection-icon';icon.textContent=d.state==='connected'?'✓':d.state==='paused'?'Ⅱ':['waiting','stale','warning','arming','uncalibrated','fault'].includes(d.state)?'!':'';
   const label=document.createElement('span'),strong=document.createElement('b'),small=document.createElement('small');
   strong.textContent=d.label;small.textContent=d.status??labels[d.state]??'Checking';
   b.title=[d.name||d.label,small.textContent].join(' · ');
@@ -96,9 +98,21 @@ function refreshHud(){
  demoSpeed.textContent=`⏩ Demo ×${rate}`;demoSpeed.title=`Speed ×${rate}. Click to switch to ×${nextRate}`;
  demoSpeed.setAttribute('aria-label',`Demo speed ×${rate}. Switch to ×${nextRate}`);
  $('bike-summary').textContent=`${state.bikeName??'My MTB'} · ${format(state.weight??75)} + ${format(state.bikeKg??14)} kg · ${state.gearCount??12} gears`;
- $('course-choice').disabled=running||state.busy;$('course-highlight').disabled=running||state.busy;refreshDevices();updateTrail(state);updateCourseSectors(info,state);updateProfileSeek($('profile'),state);presentation.refreshAudio();
+ $('course-choice').disabled=running||state.busy;$('course-highlight').disabled=running||state.busy;refreshDevices();updateTrail(state);refreshBrakeHud();updateCourseSectors(info,state);updateProfileSeek($('profile'),state);presentation.refreshAudio();
  const detailsVisible=!(presentation.value.immersive&&(running||pausedDemo)),now=performance.now();
  if(course&&detailsVisible&&(!running||now-lastDetailDraw>=250)){drawMap();drawProfile();lastDetailDraw=now;}
+}
+function refreshBrakeHud(){
+ lastBrakeHudAt=performance.now();
+ const running=state.mode==='ride'||state.mode==='demo',fresh=performance.now()-lastHostStateAt<=BRAKE_VISUAL_STALE_MS,brakes=brakeHud(state,fresh);
+ $('lever-brakes').hidden=!running&&!brakes.device;
+ for(const side of['front','rear']){const pressure=brakes[side];$('lever-'+side).textContent=brakes.available?`${Math.round(pressure*100)}%`:'—';$('lever-'+side+'-fill').style.width=`${pressure*100}%`;}
+ $('lever-brake-signal').textContent=brakes.notice;$('lever-brakes').dataset.kind=brakes.kind;
+ const frontLock=running&&fresh&&state.crashKind==='front-lock'&&(state.recovery??0)>0;
+ $('runout-title').textContent=frontLock?'FRONT WHEEL LOCK':'OFF LINE';$('runout-help').textContent=frontLock?'Ease the front brake · recovering balance':'Brake before entering the corner';
+ if(frontLock){$('runout').hidden=false;$('runout-time').textContent=`${Number(state.recovery).toFixed(1)} s`;}
+ else if(!fresh)$('runout').hidden=true;
+ document.body.classList.toggle('front-lock',frontLock);document.body.classList.toggle('wheel-skid',fresh&&Math.max(brakes.frontSlip,brakes.rearSlip)>.2);
 }
 function pointAt(d){
  const ps=course.points;d=THREE.MathUtils.clamp(d,0,course.length);let l=0,r=ps.length-1;while(r-l>1){const m=(l+r)>>1;if(ps[m].d<=d)l=m;else r=m;}const a=ps[l],b=ps[r],t=(d-a.d)/(b.d-a.d);return new THREE.Vector3(THREE.MathUtils.lerp(a.x,b.x,t),THREE.MathUtils.lerp(a.y,b.y,t),THREE.MathUtils.lerp(a.z,b.z,t));
@@ -126,7 +140,8 @@ function animate(now){
  if(!nextFrameAt)nextFrameAt=now;
  nextFrameAt+=interval;if(nextFrameAt<now-.4)nextFrameAt=now+interval;
  const dt=lastFrame?Math.min(.12,(now-lastFrame)/1000):1/targetFps;lastFrame=now;
- const visual=timeline.sample(now)??{...state,presentationInterpolated:true};visual.presentation=presentation.value;lastVisualDistance=visual.distance;
+ const visual=timeline.sample(now)??{...state,presentationInterpolated:true};visual.presentation=presentation.value;visual.frontLockCamera=brakePresentation.sample(now);lastVisualDistance=visual.distance;
+ if(now-lastBrakeHudAt>=100)refreshBrakeHud();
  const started=performance.now();
  engine.render(visual.distance,dt,visual.mode==='ready'&&visual.startSector?'paused':visual.mode,overview,visual);
  frameMetrics.record(now,performance.now()-started);totalFrames++;

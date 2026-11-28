@@ -100,9 +100,29 @@ internal sealed class RideSession
     public DescentTimer Descent { get; }
     private bool controllerBrake, screenBrake;
     private DateTime screenBrakeUntil;
-    public bool BrakePressed => controllerBrake || (screenBrake && DateTime.UtcNow < screenBrakeUntil);
+    private double leverFront, leverRear, demoPhysicalVelocity;
+    private bool leverFrontArmed, leverRearArmed;
+    private bool FallbackBrakePressed => controllerBrake || (screenBrake && DateTime.UtcNow < screenBrakeUntil);
+    private double FrontLeverPressure => leverFrontArmed ? leverFront : 0;
+    private double RearLeverPressure => leverRearArmed ? leverRear : 0;
+    public bool BrakePressed => FallbackBrakePressed || FrontLeverPressure > .01 || RearLeverPressure > .01;
     public void SetControllerBrake(bool pressed) => controllerBrake = pressed;
     public void SetScreenBrake(bool pressed) { screenBrake = pressed; screenBrakeUntil = DateTime.UtcNow.AddSeconds(.75); }
+    public void SetLeverBrakes(double front, double rear)
+    {
+        static void Set(double value, ref double pressure, ref bool armed)
+        {
+            if (!double.IsFinite(value)) { pressure = 0; armed = false; return; }
+            pressure = TrailHandling.Pressure(value);
+            if (pressure <= .05) { pressure = 0; armed = true; }
+        }
+        Set(front, ref leverFront, ref leverFrontArmed); Set(rear, ref leverRear, ref leverRearArmed);
+    }
+    private void ResetBrakeInputs()
+    {
+        screenBrake = controllerBrake = false; leverFront = leverRear = demoPhysicalVelocity = 0;
+        leverFrontArmed = leverRearArmed = false; Handling.Release();
+    }
 
     public RideSession(Course course, SensorConnection trainer, SensorConnection heart, Action<string> log,PreferencesStore? preferences=null, string? routeFile=null, PersonalRecords? records=null,CourseSector[]? sectors=null,string? courseId=null,string? courseName=null)
     { this.course = course; this.trainer = trainer; this.heart = heart; this.log = log;this.preferences=preferences;
@@ -148,7 +168,7 @@ internal sealed class RideSession
         NewPresentationEpoch();
         bool wasFinished = Mode == "finished";
         Distance = Math.Clamp(distance, 0, course.Length); Velocity = 0;
-        Handling.Reset(); Descent.ResetAt(Distance); screenBrake = controllerBrake = false;
+        Handling.Reset(); Descent.ResetAt(Distance); ResetBrakeInputs();
         if (Distance >= course.Length) { Mode = "finished"; Message = "Demo finished · click the profile to return to another point"; }
         else if (wasFinished) { Mode = "paused"; Message = "Demo paused · select Resume to continue from here"; }
         else Message = Mode == "paused" ? "Demo paused · position changed using the profile" : Practice ? "PRACTICE · new position · no record" : "DEMO · position changed using the profile";
@@ -203,6 +223,7 @@ internal sealed class RideSession
             }
             Mode = demo ? "demo" : "ride";
             NewPresentationEpoch();
+            ResetBrakeInputs();
             Message = Practice ? "PRACTICE · hold A / Space to brake · no KICKR control or record" : demo ? "DEMO · automatic ride, without KICKR control" : $"MTB 1×{GearCount} · + shifts up · B shifts down";
             pedalled = demo || pedalled; lastControl = DateTime.MinValue; lastConfirmation = DateTime.UtcNow;
             log(demo ? "3D demo started. KICKR control is inactive." : "Ride started. KICKR control confirmed.");
@@ -222,7 +243,7 @@ internal sealed class RideSession
             Mode = Distance >= course.Length ? "finished" : "paused"; Velocity = 0;
             activityRecorder?.Pause();
             if (Mode == "finished") FinishActivity(); else PublishActivity();
-            Descent.Invalidate(); screenBrake = controllerBrake = false; Handling.Release();
+            Descent.Invalidate(); ResetBrakeInputs();
             Message = reason ?? "Ride paused · resistance released";
             string? failure = await ReleaseControlAsync();
             if (failure is not null) Message += " · " + failure;
@@ -250,7 +271,7 @@ internal sealed class RideSession
         foreach (Action<RideActivity> handler in ActivityChanged.GetInvocationList())
             try { handler(activity); } catch (Exception e) { try { log("Could not save the activity: " + e.Message); } catch { } }
     }
-    private void ResetProgress() { FinishActivity(); activityRecorder = null; lastActivityCheckpoint = 0; NewPresentationEpoch(); Distance = StartDistance; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); if(StartDistance>0)Descent.ResetAt(StartDistance);else Descent.Reset(); screenBrake = controllerBrake = false; }
+    private void ResetProgress() { FinishActivity(); activityRecorder = null; lastActivityCheckpoint = 0; NewPresentationEpoch(); Distance = StartDistance; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); if(StartDistance>0)Descent.ResetAt(StartDistance);else Descent.Reset(); ResetBrakeInputs(); }
     private async Task<string?> ReleaseControlAsync()
     {
         rideToken?.Cancel();
@@ -277,8 +298,12 @@ internal sealed class RideSession
             if (watts > 10 || before.Grade < -1.1) pedalled = true;
             if (pedalled)
             {
-                Velocity = IsDemo && !Practice ? (BrakePressed ? Math.Max(0, Velocity - 5.5 * step) : 6.2 * DemoSpeed)
-                    : Handling.Step(Velocity, watts, before.Grade, RiderKg, BrakePressed, Trail.At(Distance), Distance, step, Bike, Trail.SurfaceAt(Distance));
+                if (IsDemo && !Practice)
+                {
+                    demoPhysicalVelocity = Handling.StepDemo(demoPhysicalVelocity, FallbackBrakePressed, FrontLeverPressure, RearLeverPressure, step);
+                    Velocity = demoPhysicalVelocity * DemoSpeed;
+                }
+                else Velocity = Handling.Step(Velocity, watts, before.Grade, RiderKg, FallbackBrakePressed, Trail.At(Distance), Distance, step, Bike, Trail.SurfaceAt(Distance), FrontLeverPressure, RearLeverPressure);
                 Distance = Math.Min(course.Length, Distance + Velocity * step);
                 Elapsed += step;
                 Climbed += Math.Max(0, course.At(Distance).Alt - before.Alt);
@@ -325,7 +350,7 @@ internal sealed class RideSession
         // Demo cadence/power are display values, not drivetrain telemetry. Supply explicit
         // presentation semantics without feeding the sound adapter back into ride physics.
         bool coasting = IsDemo ? (p.Grade <= -1.3 || BrakePressed) : Fresh && (trainer.Power <= 5 || trainer.Cadence <= 2);
-        double audioBrake = IsDemo && !Practice ? (BrakePressed ? 1 : 0) : Handling.Brake;
+        double audioBrake = Handling.Brake;
         return new { type = "state", mode = Mode, message = Message, distance = Distance, speed = Velocity * 3.6, elapsed = Elapsed,
             presentationEpoch, stateSequence = ++stateSequence, shiftSequence, hostTimeMs = Environment.TickCount64,
             calories = EstimatedCalories, workKj = WorkKj, energyMeasuredSeconds = EnergyMeasuredSeconds,
@@ -343,6 +368,9 @@ internal sealed class RideSession
             length = course.Length, demo = IsDemo, demoSpeed = DemoSpeed, practice = Practice, canSeek = CanSeek,
             startSector=StartSector,startDistance=StartDistance,canSelectStart=CanSelectStart,riddenDistance=Math.Max(0,Distance-StartDistance),sector=SectorSnapshot(),
             brake = BrakePressed, brakePressure = Handling.Brake, slip = Handling.Slip, recovery = Handling.Recovery, skidSide = Handling.Side,
+            frontBrake = Handling.FrontBrake, rearBrake = Handling.RearBrake, frontSlip = Handling.FrontSlip, rearSlip = Handling.RearSlip,
+            crashSequence = Handling.CrashSequence, crashKind = Handling.CrashKind,
+            physicalSpeedKmh = (IsDemo && !Practice ? demoPhysicalVelocity : Velocity) * 3.6,
             corner = CornerSnapshot(), descent = Descent.Snapshot(Distance, Handling.OffTracks) };
     }
     private object? SectorSnapshot()
@@ -357,6 +385,43 @@ internal sealed class RideSession
         var c = Trail.Next(Distance); if (c is null) return null;
         return new { distance = Math.Max(0, c.Start - Distance), limit = c.Limit * 3.6, direction = c.Direction, surface = c.Surface,
             urgent = Velocity > c.Limit * 1.04 && c.Start - Distance < Math.Max(25, (Velocity * Velocity - c.Limit * c.Limit) / 7 + Velocity * 1.4) };
+    }
+
+    private static void VerifyBrakeLifecycle(Course course, SensorConnection trainer, SensorConnection heart)
+    {
+        static void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
+        var ride = new RideSession(course, trainer, heart, _ => { });
+        ride.SetLeverBrakes(1, 1); ride.StartAsync(true).GetAwaiter().GetResult();
+        for (int i = 0; i < 10; i++) { ride.SetLeverBrakes(1, 1); ride.Tick(.1); }
+        Check(ride.Handling.Brake == 0 && ride.Handling.CrashSequence == 0, "A lever held before start must be released before it can brake");
+        ride.SetLeverBrakes(1, 0); ride.Tick(.1); ride.SetLeverBrakes(1, 1); ride.Tick(.1);
+        Check(ride.Handling.RearBrake > 0 && ride.Handling.FrontBrake == 0, "Session release-arming is independent for front and rear levers");
+        ride.PauseAsync().GetAwaiter().GetResult();
+        Check(ride.Handling.Brake == 0 && ride.Handling.RearSlip == 0 && !ride.BrakePressed, "Pause clears both lever pressures and slip effects");
+        ride.ResumeAsync().GetAwaiter().GetResult();
+        for (int i = 0; i < 5; i++) { ride.SetLeverBrakes(1, 1); ride.Tick(.1); }
+        Check(ride.Handling.Brake == 0, "Resume requires released levers before accepting held hardware input");
+        ride.SetLeverBrakes(0, 0); ride.Tick(.1); ride.SetLeverBrakes(1, 0);
+        for (int i = 0; i < 10 && ride.Handling.Recovery == 0; i++) ride.Tick(.1);
+        Check(ride.Handling.CrashKind == "front-lock" && ride.Handling.CrashSequence == 1 && ride.Running, "A front lock is a virtual recovery, not a session pause");
+        double stoppedAt = ride.Distance, elapsedAt = ride.Elapsed;
+        for (int i = 0; i < 20; i++) ride.Tick(.1);
+        Check(ride.Distance == stoppedAt && Math.Abs(ride.Elapsed - elapsedAt - 2) < 1e-8 && ride.Running, "Recovery costs elapsed time without moving the avatar or stopping the session");
+        for (int i = 0; i < 50; i++) ride.Tick(.1);
+        Check(ride.Handling.CrashSequence == 1 && ride.Handling.Recovery == 0, "A continuously held front lever cannot replay a fall after recovery");
+        Check(ride.CurrentActivity is null && ride.EstimatedCalories is null && trainer.Control is null, "Brake exploration still creates neither trainer commands nor synthetic workout calories");
+
+        ride.SeekDemo(0); ride.SetLeverBrakes(1, 1); ride.Tick(.1);
+        Check(ride.Handling.Brake == 0 && ride.Handling.Recovery == 0 && ride.Handling.CrashKind is null, "Seeking clears crash effects and rearms held lever input");
+        for (int i = 0; i < 3; i++) { ride.CycleDemoSpeed(); ride.Tick(.1); }
+        var state = JsonSerializer.SerializeToElement(ride.Snapshot());
+        Check(ride.DemoSpeed == 8 && Math.Abs(state.GetProperty("physicalSpeedKmh").GetDouble() - 6.2 * 3.6) < 1e-8 && Math.Abs(ride.Velocity - 6.2 * 8) < 1e-8,
+            "Demo acceleration changes route speed while snapshot physical speed stays capped");
+        ride.SetLeverBrakes(0, 0); ride.Tick(.1); ride.SetLeverBrakes(double.NaN, double.PositiveInfinity); ride.Tick(.1);
+        Check(ride.Handling.Brake == 0, "Invalid hardware pressures clear and disarm both channels");
+        ride.ResetAsync().GetAwaiter().GetResult(); ride.StartAsync(true).GetAwaiter().GetResult(); ride.SetLeverBrakes(1, 1); ride.Tick(.1);
+        Check(ride.Handling.OffTracks == 0 && ride.Handling.Brake == 0 && ride.Handling.Recovery == 0, "Restart clears penalties and requires a fresh release before braking");
+        ride.PauseAsync().GetAwaiter().GetResult();
     }
 
     public static void Verify(string routeFile)
@@ -496,5 +561,6 @@ internal sealed class RideSession
             throw new Exception("Reset must preserve the selected bike without acquiring trainer control");
         customRide.StartAsync(false).GetAwaiter().GetResult();
         if(customRide.Running || trainer.Control is not null)throw new Exception("Custom profile must not bypass the real-trainer start guard");
+        VerifyBrakeLifecycle(course, trainer, heart);
     }
 }

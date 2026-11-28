@@ -45,6 +45,8 @@ internal sealed partial class RidePanel : Panel
             // Controllers are optional: losing one releases its brake input but keeps the ride running.
             // Keyboard and on-screen brake input remain independent inside RideSession.
             Ride.SetControllerBrake(equipment.ControllerBrakePressed);
+            var leverInput = equipment.BrakeInput;
+            Ride.SetLeverBrakes(leverInput.Front, leverInput.Rear);
             double dt=now-lastTick;lastTick=now;
             calibration.Tick(dt);
             if(!calibration.Active)Ride.Tick(dt);

@@ -44,10 +44,10 @@ internal sealed class SensorCard : Panel
         connect=Theme.Button("Connect",true);disconnect=Theme.Button("Disconnect");disconnect.Font=Theme.Font(9);connect.Margin=new Padding(0,0,6,0);
         buttons.Controls.Add(connect);buttons.Controls.Add(disconnect);grid.Controls.Add(buttons,0,3);
         status=Theme.Label("Searching for saved devices…",11,Theme.Muted);grid.Controls.Add(status,0,4);
-        metrics=Theme.Label("—",29,Theme.Accent,FontStyle.Bold);grid.Controls.Add(metrics,0,5);
+        metrics=Theme.Label("—",role==SensorRole.Brakes?21:29,Theme.Accent,FontStyle.Bold);grid.Controls.Add(metrics,0,5);
         details=Theme.Label("",10,Theme.Muted);grid.Controls.Add(details,0,6);
         forget=Theme.Button("Forget this device");forget.Font=Theme.Font(9);grid.Controls.Add(forget,0,7);
-        grid.Controls.Add(Theme.Label(role==SensorRole.Controller?"+ shifts up, B shifts down. Hold A to brake.":role==SensorRole.LeftController?"− shifts down. Some firmware needs activation in Zwift; close Zwift before reconnecting here.":role==SensorRole.Trainer?"Reconnects automatically. Load control starts only when you begin a ride.":"Wear the strap to transmit heart rate. It is saved and reconnects automatically.",10,Theme.Muted),0,8);
+        grid.Controls.Add(Theme.Label(role==SensorRole.Brakes?"Calibrate each lever after connecting. Weak/strong field warnings remain provisional. Disconnecting releases the brakes; it never pauses a ride.":role==SensorRole.Controller?"+ shifts up, B shifts down. Hold A to brake.":role==SensorRole.LeftController?"− shifts down. Some firmware needs activation in Zwift; close Zwift before reconnecting here.":role==SensorRole.Trainer?"Reconnects automatically. Load control starts only when you begin a ride.":"Wear the strap to transmit heart rate. It is saved and reconnects automatically.",10,Theme.Muted),0,8);
         Controls.Add(grid);
         connect.Click+=async(_,_)=>{if(devices.SelectedItem is NearbyDevice d)await equipment.ConnectAsync(role,d);else{equipment.ResumeSearch(role);await equipment.ScanAsync();}};
         disconnect.Click+=async(_,_)=>await equipment.DisconnectAsync(role);
@@ -70,6 +70,15 @@ internal sealed class SensorCard : Panel
         bool fresh=c.Connected&&c.LastPacket.HasValue&&(DateTime.UtcNow-c.LastPacket.Value).TotalSeconds<8;
         status.ForeColor=c.Connected&&c.DataState=="connected"?Theme.Accent:Theme.Muted;
         status.Text=busy?"Connecting…":c.Connected?c.ActivationRequired&&!c.InputConfirmed?"◌ Zwift activation requested":c.DataState=="waiting"?role.IsController()?"◌ Connected · press a button":"◌ Connected · waiting for bpm":c.DataState=="stale"?"◌ No recent bpm · reconnecting":"● Connected · data confirmed":equipment.Paused(role)?"Connection paused. Select Connect to resume.":saved is not null?"◌ Searching for saved device · every 5 s":"Select a device to save it.";
+        if(role==SensorRole.Brakes)
+        {
+            var input=equipment.BrakeInput;
+            if(c.Connected||busy)status.Text=busy?"Connecting…":input.Status;
+            status.ForeColor=input.State=="connected"?Theme.Accent:input.Fresh?Color.FromArgb(239,191,108):Theme.Muted;
+            metrics.Text=$"F {input.Front*100:0}% · R {input.Rear*100:0}%";
+            details.Text=input.Calibrated?"Saved travel · release to arm\nAngle measures travel, not force.":"Set both endpoints below.\nOne board supplies both levers.";
+            return;
+        }
         if(role==SensorRole.Trainer){metrics.Text=fresh&&c.Power.HasValue?$"{c.Power} W":"— W";details.Text=(fresh&&c.Cadence.HasValue?$"{c.Cadence:0} rpm":"— rpm")+"\n"+(c.Control?.SupportsPower==true?"MTB load control available":c.ControlInfo);}
         else if(role==SensorRole.HeartRate){metrics.Text=c.HeartRateFresh?$"{c.HeartRate} bpm":"— bpm";details.Text=(c.Battery.HasValue?$"Battery {c.Battery}%\n":"")+(c.HeartRateFresh?"Live heart rate":c.Connected?"Wear/moisten strap · retrying data":"Wear the strap to wake it.");}
         else{metrics.Text=$"{gear} / {gearCount}";details.Text=c.InputConfirmed?role==SensorRole.LeftController?"Left input confirmed · −":"Right input confirmed · + / B / A":c.Connected?"Bluetooth connected; input unconfirmed.":"Press a button to wake the Click.";}
@@ -111,12 +120,18 @@ internal sealed class MainForm : Form
         var rideButton=Theme.Button("Ride",true);rideButton.Dock=DockStyle.None;rideButton.Size=new Size(150,38);
         var devicesButton=Theme.Button("Devices");devicesButton.Dock=DockStyle.None;devicesButton.Size=new Size(150,38);devicesButton.Margin=new Padding(10,0,0,0);nav.Controls.Add(rideButton);nav.Controls.Add(devicesButton);shell.Controls.Add(nav,0,0);
         var bikeButton=Theme.Button("Bike and calibration");bikeButton.Dock=DockStyle.None;bikeButton.Size=new Size(230,38);bikeButton.Margin=new Padding(10,0,0,0);nav.Controls.Add(bikeButton);
+        var brakeButton=Theme.Button("Brake setup");brakeButton.Dock=DockStyle.None;brakeButton.Size=new Size(160,38);brakeButton.Margin=new Padding(10,0,0,0);nav.Controls.Add(brakeButton);
         var content=new Panel{Dock=DockStyle.Fill,Margin=Padding.Empty};content.Controls.Add(root);
         circuit=new RidePanel(equipment,preferences,()=>{circuit!.Visible=false;root.Visible=true;root.BringToFront();},AddLog,smokeFile,smokeDemo);
         content.Controls.Add(circuit);circuit.BringToFront();root.Visible=false;shell.Controls.Add(content,0,1);Controls.Add(shell);
         rideButton.Click+=(_,_)=>{root.Visible=false;circuit.Visible=true;circuit.BringToFront();};
         devicesButton.Click+=async(_,_)=>{await circuit.PauseAllAsync("Ride paused to configure devices");circuit.Visible=false;root.Visible=true;root.BringToFront();};
         bikeButton.Click+=(_,_)=>{root.Visible=false;circuit.Visible=true;circuit.BringToFront();circuit.OpenProfile();};
+        brakeButton.Click+=async(_,_)=>
+        {
+            await circuit.PauseAllAsync("Ride paused to configure brake levers");
+            using var setup=new BrakeSetupForm(equipment);setup.ShowDialog(this);
+        };
         equipment.BeforeTrainerChange=async()=>{await circuit.PauseAllAsync("Ride paused to reconnect the KICKR");};
         equipment.Shift+=d=>Ui(()=>{if(!circuit.CalibrationActive)circuit.Ride.Shift(d);});
         equipment.Changed+=()=>Ui(RefreshEquipment);

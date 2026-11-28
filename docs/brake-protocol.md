@@ -2,7 +2,7 @@
 
 [Assembly guide](bluetooth-brakes.md#maneta-v01) · [Tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/) · [Firmware](../firmware/brake-bench/)
 
-This is a project-specific telemetry service for the dual-encoder bench test. It is not a Bluetooth HID, Cycling Power or Fitness Machine service, and the simulator does not yet consume it.
+This is a project-specific telemetry service for the dual-encoder bench test. It is not a Bluetooth HID, Cycling Power or Fitness Machine service, and is consumed by both the browser bench and the Windows simulator. The simulator applies its own per-board endpoint calibration and never writes calibration or braking commands to the board.
 
 | Field | Value |
 | --- | --- |
@@ -41,6 +41,12 @@ The bench distinguishes a readable warning from a hard fault. With valid communi
 Clients must also check freshness: receiving an old packet is not evidence of a live measurement. Invalidate on disconnect and when no new valid-version frame arrives within the tester's stale timeout. Reset per-connection sequence/freshness state on reconnect or detected reboot. Treat sequence wrap normally; firmware time wraps independently.
 
 There are no commands, calibration writes or OTP writes in this service. Endpoint calibration is client-side and must account for the raw 4095/0 wrap and either direction of travel. The tester saves completed endpoints locally by selected Bluetooth device and protocol; manual endpoint entry does not change the BLE payload. The device does not report force or hydraulic pressure.
+
+## Native simulator adapter
+
+The Windows adapter applies a **750 ms freshness limit**, rejects duplicate and out-of-order packets without renewing freshness, and handles counter wrap and controller reboot. Calibration is bound to the exact saved board address and protocol version; a matching advertised name cannot transfer endpoints to another board. Each channel must show **at most 5% travel for at least 200 ms on fresh, advancing frames** before it is armed after connecting, a fault or a calibration change. An invalid channel releases only that brake; mux/transport faults release both. The game continues with backup controls available.
+
+Like the diagnostic bench, the native adapter can use detected weak/strong-field readings provisionally while keeping the warning visible. The adapter never labels these readings magnetically healthy. Its normalised 0–1 values describe lever travel, not measured force. The ride host handles braking, wheel slip and falls; the presentation layer only displays and plays those results.
 
 ## Golden fixture
 

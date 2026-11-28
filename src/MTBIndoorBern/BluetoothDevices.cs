@@ -7,7 +7,7 @@ using Windows.Storage.Streams;
 namespace MTBIndoorBern;
 
 // Keep Controller's serialized value for existing saved right-hand controllers.
-internal enum SensorRole { Trainer, HeartRate, Controller, LeftController }
+internal enum SensorRole { Trainer, HeartRate, Controller, LeftController, Brakes }
 
 internal static class SensorRoles
 {
@@ -24,6 +24,7 @@ internal sealed record NearbyDevice(ulong Address, string Name, short Rssi, Guid
         SensorRole.Trainer => Services.Contains(BleIds.Ftms) || Services.Contains(BleIds.Power) || Name.Contains("KICKR", StringComparison.OrdinalIgnoreCase),
         SensorRole.HeartRate => Services.Contains(BleIds.HeartRate) || Name.Contains("HRM", StringComparison.OrdinalIgnoreCase) || Name.Contains("TICKR", StringComparison.OrdinalIgnoreCase) || Name.Contains("Polar", StringComparison.OrdinalIgnoreCase),
         SensorRole.LeftController => ZwiftType == 11,
+        SensorRole.Brakes => Services.Contains(BleIds.BrakeBench) || Name.Equals("MTB Brake Bench", StringComparison.OrdinalIgnoreCase),
         _ => ZwiftType != 11 && (IsZwift || Services.Contains(BleIds.OpenBikeControl) || Name.Contains("Click", StringComparison.OrdinalIgnoreCase) || Name.Contains("BikeControl", StringComparison.OrdinalIgnoreCase))
     };
 }
@@ -32,6 +33,7 @@ internal static class BleIds
 {
     public static Guid Standard(int id) => new($"0000{id:x4}-0000-1000-8000-00805f9b34fb");
     public static readonly Guid Ftms = Standard(0x1826), Power = Standard(0x1818), HeartRate = Standard(0x180d);
+    public static readonly Guid BrakeBench = BrakeProtocol.Service, BrakeTelemetry = BrakeProtocol.Telemetry;
     public static readonly Guid OpenBikeControl = new("d273f680-d548-419d-b9d1-fa0472345229");
     public static readonly Guid Buttons = new("d273f681-d548-419d-b9d1-fa0472345229");
     public static readonly Guid Zwift = new("00000001-19ca-4651-86e5-fa29dcdd09d1");
@@ -91,6 +93,7 @@ internal sealed class SensorConnection : IDisposable
     private readonly object inputLock = new();
     private readonly Dictionary<byte, byte> buttonStates = [];
     private readonly SensorHealth health;
+    private readonly BrakeInputState brakeInput = new();
     private CancellationTokenSource? controllerLifetime;
     private int generation;
     private bool linkLost;
@@ -103,6 +106,7 @@ internal sealed class SensorConnection : IDisposable
     public SensorRole Role { get; }
     public string Status { get; private set; } = "Disconnected";
     public string DeviceName { get; private set; } = "";
+    public ulong DeviceAddress { get; private set; }
     public bool Connected => health.IsConnected(device?.ConnectionStatus == BluetoothConnectionStatus.Connected);
     public bool InputConfirmed => Connected && LastPacket.HasValue;
     public bool ActivationRequired { get; private set; }
@@ -125,6 +129,20 @@ internal sealed class SensorConnection : IDisposable
     public string ControlInfo { get; private set; } = "";
 
     public SensorConnection(SensorRole role) { Role = role; health = new(role); }
+
+    public BrakeInputSnapshot GetBrakeInput(BrakeDeviceCalibration? calibration, ulong address, string name)
+    {
+        lock (inputLock) return brakeInput.Snapshot(Role == SensorRole.Brakes && Connected, address, name, calibration, Environment.TickCount64);
+    }
+    public BrakeEndpointCapture CaptureBrakeEndpoint(bool left)
+    {
+        lock (inputLock)
+        {
+            if (Role != SensorRole.Brakes || !Connected) throw new InvalidOperationException("Connect the brake board before capturing an endpoint.");
+            return brakeInput.Capture(left, Environment.TickCount64);
+        }
+    }
+    public void ResetBrakeArming() { lock (inputLock) brakeInput.ResetArming(Environment.TickCount64); }
 
     public async Task<object[]> InspectTrainerAsync()
     {
@@ -156,7 +174,7 @@ internal sealed class SensorConnection : IDisposable
             DisconnectCore();
             linkLost = false;
             Status = "Connecting…";
-            DeviceName = selected.DisplayName;
+            DeviceName = selected.DisplayName; DeviceAddress = selected.Address;
             zwiftType = selected.ZwiftType;
             Changed?.Invoke();
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -236,7 +254,9 @@ internal sealed class SensorConnection : IDisposable
             services.AddRange(result.Services);
             SupportsFtms = services.Any(s => s.Uuid == BleIds.Ftms);
             bool subscribed;
-            if (Role == SensorRole.HeartRate)
+            if (Role == SensorRole.Brakes)
+                subscribed = await SubscribeAsync(BleIds.BrakeBench, BleIds.BrakeTelemetry, token);
+            else if (Role == SensorRole.HeartRate)
                 subscribed = await SubscribeAsync(BleIds.HeartRate, BleIds.Standard(0x2a37), token);
             else if (Role.IsController())
                 subscribed = await SubscribeAsync(BleIds.OpenBikeControl, BleIds.Buttons, token) || await SubscribeZwiftClickAsync(token);
@@ -358,7 +378,11 @@ internal sealed class SensorConnection : IDisposable
             // WinRT may deliver a queued notification after we retired its session.
             if (linkLost || !subscriptions.Contains(sender)) return;
             var bytes = Bytes(args.CharacteristicValue);
-            if (sender.Uuid == BleIds.Standard(0x2a37))
+            if (sender.Uuid == BleIds.BrakeTelemetry && Role == SensorRole.Brakes)
+            {
+                if (!brakeInput.Accept(bytes, Environment.TickCount64)) return;
+            }
+            else if (sender.Uuid == BleIds.Standard(0x2a37))
             {
                 int bpm = Packets.ReadHeartRate(bytes);
                 if (bpm <= 0) return; // A battery read or zero bpm is not a heart-rate sample.
@@ -465,7 +489,7 @@ internal sealed class SensorConnection : IDisposable
     private void ClearData()
     {
         Power = null; Cadence = null; HeartRate = null; LastPacket = LastPowerPacket = LastCadencePacket = LastHeartRatePacket = null;
-        crankRevolutions = null; crankTime = null; buttonStates.Clear(); BrakePressed = false;
+        crankRevolutions = null; crankTime = null; buttonStates.Clear(); BrakePressed = false; brakeInput.Reset();
     }
 
     private void DisconnectCore()
@@ -488,7 +512,7 @@ internal sealed class SensorConnection : IDisposable
         foreach (var service in services) { try { service.Dispose(); } catch (Exception) { } }
         services.Clear();
         try { device?.Dispose(); } catch (Exception) { }
-        device = null;
+        device = null; DeviceAddress = 0;
         ClearData(); Battery = null; SupportsFtms = false; Model = ""; Firmware = ""; ActivationRequired = false;
         }
     }

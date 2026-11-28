@@ -2,7 +2,7 @@
 
 [Assembly and wiring guide](https://github.com/mfarre/mtb-indoor-bern/blob/main/docs/bluetooth-brakes.md#maneta-v01) · [Bluetooth tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/) · [Wire protocol](../../docs/brake-protocol.md)
 
-An ESP32-S3 application for a **LilyGO T-Beam Supreme** and two AS5600 angle encoders behind a TCA9548A. It sends raw angle and diagnostic readings to the browser tester over Bluetooth LE. The firmware does not drive brakes, control a trainer, implement a Bluetooth gamepad or connect these levers to the MTB simulator yet.
+An ESP32-S3 application for a **LilyGO T-Beam Supreme** and two AS5600 angle encoders behind a TCA9548A. It sends raw angle and diagnostic readings to the browser tester over Bluetooth LE. The Windows simulator now consumes this telemetry directly after pairing and calibration in **Brake setup**. This firmware still only reads encoders and sends telemetry; it does not actuate brakes, control a trainer or implement a Bluetooth gamepad. No firmware reflash is needed for the simulator integration.
 
 The code is build-checked, with host tests for acquisition failures and packet encoding. On 28 November 2026, both assembled levers were observed sending live BLE readings to the hosted Chrome tester. Both still reported weak magnetic fields, so magnetic quality and full bench acceptance remain unverified. Check the board revision and complete the assembly guide's bench test for each build.
 

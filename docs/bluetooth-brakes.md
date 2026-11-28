@@ -4,7 +4,7 @@
 
 This document covers the **Maneta v01 magnetic brake-lever prototype**, its assembly, electronics and Bluetooth bench test. The simulator's existing right Zwift Click 2 A-button input is described under [Working today](#working-today).
 
-**Status:** printable geometry, build-checked T-Beam Supreme firmware and a browser tester are available. Both assembled levers were observed sending live BLE readings on **28 November 2026**. The sensors still reported weak magnetic fields; magnetic quality, repeatability and complete assembly acceptance need validation. The custom lever's proportional BLE signal is not yet integrated into the riding simulator.
+**Status:** printable geometry, build-checked T-Beam Supreme firmware and a browser tester are available. Both assembled levers were observed sending live BLE readings on **28 November 2026**. The sensors still reported weak magnetic fields; magnetic quality, repeatability and complete assembly acceptance need validation. The simulator now accepts both proportional lever channels, with per-board calibration, independent front/rear braking, skid sound and a front-lock camera fall. The new native integration has offline tests; its final on-bike hardware test is still pending.
 
 - [Parts and tools](#parts-and-tools)
 - [Mechanical assembly](#mechanical-assembly) and [sensor mounting](#sensor-mounting)
@@ -215,7 +215,7 @@ Keep USB power connected for the Bluetooth bench test. The board resumes adverti
 | Angle stays fixed, jumps or changes when pressing the cover | The magnet must rotate with the lever while the PCB stays fixed. Check for a sliding magnet, loose PCB, moving cable or contact with the chip. A single 4095/0 raw-angle wrap is normal. |
 | Lever does not return consistently | Check pivot/guide binding, trapped spring eyes, rubber-stop stiffness and wires in the mechanism. Do not tighten the cover to force misaligned parts together. |
 | Stale or disconnected status | Readings no longer represent live position. Reconnect and confirm fresh, healthy values on both channels. The tester clears stale/invalid values instead of retaining them as a live reading. |
-| Tester works but the simulator does not brake | Custom proportional BLE input still needs a simulator adapter. The existing right Click A-button braking is a separate, supported input. |
+| Tester works but the simulator does not brake | Disconnect the browser tester, open **Brake setup** in MTB Indoor, connect the board and save endpoints there. Browser and native calibration are separate. Release the levers to arm them after connecting or changing calibration. |
 
 ### Bench acceptance
 
@@ -232,6 +232,22 @@ Use this checklist for the completed assembly and record the results with the ac
 
 The firmware build and automated software tests do not validate physical fit or the magnetic gap. Complete and record the remaining bench checks before marking the assembly as verified. This accessory is an **indoor simulator input**; it does not modify the bicycle's real braking system.
 
+## Simulator setup
+
+1. Disconnect the browser bench before connecting from MTB Indoor. The browser is a diagnostic tool; it is not a bridge into the game.
+2. Open **Brake setup**, choose **MTB Brake Bench** and connect. The saved board reconnects through the normal five-second search cycle.
+3. For each lever, hold it still for about half a second and choose **1 · Capture released**, then hold a comfortable full pull equally steadily and choose **2 · Capture full pull**. Completed captures save automatically. Alternatively enter both raw endpoints and choose **Save calibration**. Measure your own assembly; opposite directions and the 4095/0 crossing are handled automatically.
+4. The default is **left = front, right = rear**. Clear the mapping checkbox and save to swap the roles.
+5. Release the levers to arm braking, close setup and resume riding. The HUD shows front/rear travel and connection status.
+
+![Native Brake setup with synthetic QA readings and no Bluetooth connection](images/brake-setup-native.jpg)
+
+*Isolated native UI check with synthetic readings, not a physical Bluetooth session. The displayed endpoints are example test data; capture or enter your own assembly's values.*
+
+Native calibration belongs to the selected board and protocol version and is stored privately in `settings.json`. It is separate from browser storage. Weak or strong magnetic fields retain a visible provisional warning; missing magnets, invalid angles, read failures or **750 ms without advancing telemetry** release the affected input. A multiplexer or connection failure releases both inputs. Each channel re-arms only after fresh, advancing samples show **at most 5% travel for at least 200 ms**. Repeated copies of one packet cannot satisfy this release check. Losing the brake board never pauses the ride.
+
+The encoders measure **travel, not force**. A stronger spring or rubber stop changes finger feel without changing the measured quantity. Endpoint calibration maps the actual travel onto the game's 0–100% input.
+
 ## Working today
 
 - Hold **A** on the right Click 2 to brake; release it to coast. Keyboard **A / Space** and the on-screen brake are also supported.
@@ -244,7 +260,7 @@ The recorded hardware check detected **six presses and six releases**, with no u
 
 The independent two-Click connection and recovery changes from 28 November have software checks; a physical two-controller and reconnect test remains pending.
 
-The existing controller path remains **pressed/released**: the game's `brakePressure` is a simulated response. Continuous lever-angle input needs its own adapter and calibration before it can control a ride.
+The Click/keyboard/on-screen path remains a **pressed/released, balanced brake**. It coexists with the two proportional levers and does not trigger a front-lock fall by itself. Hard proportional braking can create a skid; excessive front braking at speed can tip the camera towards the ground and stop progress for a three-second recovery. See the [gameplay rules](downhill.md#two-proportional-levers).
 
 ### Existing, tested input
 
@@ -266,10 +282,13 @@ The existing controller path remains **pressed/released**: the game's `brakePres
 1. Physical fit, return behavior and exact spring, rubber, magnet, board and sensor-module revisions.
 2. Actual wiring and firmware revision, released/full-travel endpoints, repeatability, latency and disconnect behavior.
 3. Battery operation and power behavior, if the USB bench setup is extended to battery use.
-4. Simulator integration and a dated hardware test report before marking custom proportional braking as supported.
+4. A dated on-bike report for native pairing, endpoint restoration, independent braking, disconnect recovery and the new skid/fall effects.
 
-## Source code for the existing integration
+## Source code for the integration
 
+- [Strict v1 telemetry decoding and ordering](../src/MTBIndoorBern/BrakeProtocol.cs)
+- [Endpoint mapping, magnetic status and release arming](../src/MTBIndoorBern/BrakeCalibration.cs)
+- [Native pairing and calibration screen](../src/MTBIndoorBern/BrakeSetupForm.cs)
 - [Bluetooth discovery, notifications and brake state](../src/MTBIndoorBern/BluetoothDevices.cs)
 - [Input handling and ride state](../src/MTBIndoorBern/RideSession.cs)
 - [Virtual braking, grip and recovery](../src/MTBIndoorBern/TrailHandling.cs)

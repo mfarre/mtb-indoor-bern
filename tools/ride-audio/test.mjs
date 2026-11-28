@@ -30,6 +30,15 @@ assert.equal(audioTargets(demo).speed, 22.32, '8x preview keeps natural audio pl
 assert.deepEqual(audioTargets({ ...demo, audio: { coasting: true } }), audioTargets({ ...demo, audio: { coasting: false } }), 'demo coasting has no drivetrain layer');
 assert.equal(audioTargets({ ...demo, practice: true, speed: 12, grade: 7, cadence: 0, watts: 160 }).speed, 12, 'practice uses simulated speed');
 assert.ok(audioTargets({ ...demo, audio: { brake: .8 } }).brake > 0, 'normal demo brake has an explicit sound path');
+assert.equal(audioTargets({ ...demo, physicalSpeedKmh: 19 }).speed, 19, 'explicit host physical speed wins over accelerated route travel');
+const rearSkid = audioTargets({ ...ride, rearBrake: .95, rearSlip: .8 });
+assert.ok(rearSkid.skid > audioTargets({ ...ride, slip: .8 }).skid, 'host wheel slip has a clear skid layer above ordinary corner scrub');
+assert.equal(audioTargets({ ...ride, frontBrake: 1, rearBrake: 1 }).skid, 0, 'pressure alone never invents a wheel lock');
+assert.ok(audioTargets({ ...ride, frontBrake: 1, frontSlip: .8 }).skid > 0);
+assert.equal(audioTargets({ ...demo, physicalSpeedKmh: 24, rearBrake: .95, rearSlip: .8 }).skid, rearSkid.skid, 'demo acceleration cannot amplify wheel skid');
+assert.equal(audioTargets({ ...demo, speed: 200, physicalSpeedKmh: 0, rearSlip: 1 }).skid, 0, 'a stopped physical wheel cannot skid despite route preview speed');
+for(const mode of ['paused','finished','ready'])assert.equal(audioTargets({...ride,mode,frontBrake:1,rearSlip:1}).skid,0,'host brake effects stop with the ride');
+assert.equal(audioTargets({...ride,frontSlip:NaN,rearSlip:Infinity}).skid,0,'invalid wheel telemetry never creates a skid');
 assert.deepEqual(audioPreferences({ volume: NaN, muted: 'yes' }), { volume: .35, muted: false });
 assert.deepEqual(audioPreferences({ volume: 6, muted: true }), { volume: 1, muted: true });
 
@@ -122,6 +131,17 @@ class Context {
   assert.equal(ctx.sources.length, 8, 'silencing/resume never replays gear events');
   engine.dispose(); engine.dispose(); assert.equal(engine.status(), 'unavailable');
   assert.ok(ctx.sources.every(s => s.stopped !== undefined), 'dispose stops all sources');
+}
+{
+  const ctx = new Context(), engine = createRideAudio({context:ctx,watch:false});
+  await engine.unlock(); engine.update({...ride,rearBrake:1,rearSlip:.9});
+  const skid = ctx.gains[7].gain, master = ctx.gains[0].gain;
+  assert.ok(skid.events.some(e=>e.value>.2),'real persistent skid voice responds to host wheel slip');
+  assert.equal(ctx.sources.length,7,'wheel slip reuses the existing skid source, without a chain/freehub layer');
+  assert.ok(master.events.some(e=>e.time===STALE_SECONDS&&e.value===0),'skid also receives the audio-timeline stale fade');
+  ctx.currentTime=.1;engine.update({...ride,stateSequence:2,rearBrake:0,rearSlip:0});
+  assert.equal(skid.events.find(e=>e.time===.1).value,0,'releasing traction smoothly fades the skid source');
+  engine.dispose();
 }
 {
   const ctx = new Context(); ctx.startRendering = () => {}; ctx.resume = () => { throw new Error('Offline context must not resume'); };
