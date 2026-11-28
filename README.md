@@ -39,6 +39,8 @@ Select a course and choose **Explore in demo**. Pause, click the elevation profi
 
 On **Eiger Bike Challenge 20 km**, choose the whole course or start from any of its three sectors before riding or exploring in demo. [Eiger route and sector guide](docs/EIGER.md).
 
+Left and right Zwift Clicks have separate pairing and status indicators. A lost Click no longer pauses the ride: click the 3D trail with the **left mouse button to shift up** or the **right mouse button to shift down**. Keyboard and on-screen braking remain available. Heart-rate status distinguishes a connected sensor from one that is actually sending pulse readings. [Connection and controls guide](docs/simulator.md#first-connection).
+
 [Full setup and controls](docs/simulator.md) · [Bike profile and calibration](docs/bike-calibration.md) · [Downhill braking and records](docs/downhill.md)
 
 ## From trail recording to new controls
@@ -66,4 +68,4 @@ The **[development log](DEVELOPMENT_LOG.md)** contains the full milestone histor
 
 Start with the [documentation index](docs/README.md) for guides, developer tools and verification reports. Geodata, images and third-party libraries are documented in [Third-party notices](THIRD_PARTY_NOTICES.md).
 
-Built and tested with a **Wahoo KICKR CORE**, **right Zwift Click 2** and **Garmin HRM-Dual**. Other trainers and the left Click have not been validated. This is an independent project; it is not an official Wahoo, Zwift or Garmin integration.
+Previously tested with a **Wahoo KICKR CORE**, **right Zwift Click 2** and **Garmin HRM-Dual**. Independent left/right Click support and connection recovery have software regression coverage; a physical two-Click and reconnect session is still pending. Other trainers have not been validated. This is an independent project; it is not an official Wahoo, Zwift or Garmin integration.

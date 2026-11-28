@@ -17,7 +17,6 @@ internal sealed class RidePanel : Panel
     private double lastTick;
     private DateTime heartbeat = DateTime.UtcNow;
     private bool ready, initialized, captured;
-    private bool controllerWasConnected;
     private readonly Equipment equipment;
     private readonly PreferencesStore preferences;
     private readonly CourseInfo[] courses;
@@ -43,10 +42,9 @@ internal sealed class RidePanel : Panel
         clock.Tick += (_, _) =>
         {
             var now = time.Elapsed.TotalSeconds;
-            var controller = equipment.Connections[SensorRole.Controller];
-            if (controllerWasConnected && !controller.Connected && Ride.Live) _ = Ride.PauseAsync("Click disconnected · ride paused to restore braking");
-            controllerWasConnected = controller.Connected;
-            Ride.SetControllerBrake(controller.Connected && controller.BrakePressed);
+            // Controllers are optional: losing one releases its brake input but keeps the ride running.
+            // Keyboard and on-screen brake input remain independent inside RideSession.
+            Ride.SetControllerBrake(equipment.ControllerBrakePressed);
             double dt=now-lastTick;lastTick=now;
             calibration.Tick(dt);
             if(!calibration.Active)Ride.Tick(dt);

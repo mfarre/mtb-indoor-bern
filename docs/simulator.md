@@ -6,17 +6,17 @@
 
 ![El Tony jump scenery on the Gurten course](images/gurten-el-tony.png)
 
-The simulator interface and documentation are in English. The screenshots show the current English interface.
+The simulator interface and documentation are in English. Screenshots illustrate the English interface; dated captures may predate newer controls.
 
 ## Features
 
 - 3D courses with SWISSIMAGE aerial imagery, elevation data, buildings, vegetation, shadows, textured roads and a handlebar view.
-- Consistent geographical gradient: the road, motion physics and trainer control start from the same elevation profile. Gurten's additional visual jump shapes do not pulse the KICKR load.
+- Consistent geographical gradient: the road, motion physics and trainer control start from the same elevation profile. The trainer averages the surrounding 40 m and ramps terrain-driven load changes; the rendered road, gradient display and virtual motion retain the local slope. Gurten's visual jump shapes do not pulse the KICKR load.
 - Live power, cadence, heart rate, speed, distance, altitude and elevation profile.
 - Configurable MTB gearing: **10–51, 10–52 and 11–46** presets, a custom cassette, and 20–60-tooth chainrings.
-- Direct connection to the right Click 2, without BikeControl.
+- Independent left and right Click connections, without BikeControl, plus mouse and keyboard gear controls.
 - Virtual braking with A / Space, corner warnings, grip and runout penalties; downhill practice, timing and persistent personal records.
-- Remembered devices, connection indicators on the main screen and automatic searches every five seconds.
+- Remembered devices, separate connection indicators on the main screen and automatic searches every five seconds. Optional Click and heart-rate failures do not pause a ride.
 - A saved bike profile and optional guided KICKR response test. Rider/bike weights, wheel, drivetrain, assistance, gradient scaling, course and calibration result are remembered.
 - First-person and aerial views; demo speeds of ×1, ×2, ×4 and ×8 without controlling the trainer.
 - Three selectable starting sectors on Eiger Bike Challenge 20 km, with summer Alpine scenery and race furniture.
@@ -72,14 +72,22 @@ Keep the `Scene` folder beside the executable. Imagery, terrain and Three.js are
 
 ## First connection
 
-1. Power on the KICKR, put on the heart-rate strap and press a Click button to wake it.
-2. Open **Devices**, select each sensor and press **Connect**.
+1. Power on the KICKR, put on the heart-rate strap and press a button on each Click to wake it.
+2. Open **Devices**, select each sensor and press **Connect**. **Right Click** and **Left Click** are separate slots; a previously saved right Click remains in the right slot.
 3. Open **Bike and calibration**, set the weights, wheel and drivetrain, then press **Save profile**. The guided response test is optional.
 4. Pedal for a few seconds until power and cadence arrive, then press **Start ride**.
 
 The public repository starts with no paired sensors. Once connected, devices are remembered in `settings.json` beside the executable; this file is excluded from Git. **Disconnect** pauses reconnection until **Connect** is pressed or the app is reopened. **Forget this device** removes the saved pairing.
 
-![English device pairing and reconnection screen](images/devices.png)
+The main screen shows all four devices. **Waiting for data** means Bluetooth is connected but no usable button or pulse reading has arrived yet; press a Click button to confirm input. **No recent data** on the heart-rate sensor means its last pulse sample is stale. A battery or connection update alone does not count as a pulse reading. Missing or stale heart rate is shown as a dash with a waiting/no-recent-pulse label instead of retaining an old number.
+
+Heart-rate readings become stale after eight seconds; a connection without fresh pulse data is retried after 20 seconds through the normal search loop. A Click stays confirmed during ordinary idle periods. If a Click reports **Zwift activation requested**, it has not yet confirmed usable input: activation through Zwift is not implemented by this app. Use the backup controls until it is activated and sending button events.
+
+The Clicks and heart-rate strap are optional for riding. A Click disconnect releases that controller's held brake input and starts reconnection without pausing the route or changing the gear. The other controller, mouse, keyboard and on-screen controls remain usable. Loss of fresh trainer telemetry or an interrupted 3D view still pauses the ride and releases trainer load.
+
+![Separate KICKR, right Click, left Click and heart-rate configuration cards](images/devices-four-slots-2026-11-28.png)
+
+*Native offline verification capture. Both Click slots are visible; no hardware connection is claimed by this screenshot.*
 
 ## Controls
 
@@ -87,6 +95,9 @@ The public repository starts with no paired sensors. Once connected, devices are
 | --- | --- |
 | Right Click `+` / keyboard `+` | Shift up |
 | Right Click `B` / keyboard `B` or `−` | Shift down |
+| Left Click `−` | Shift down |
+| Left mouse click on the 3D trail | Shift up during a ride or moving demo |
+| Right mouse click on the 3D trail | Shift down during a ride or moving demo |
 | Right Click `A` / keyboard `A` or Space / brake button | Hold to brake; release to coast |
 | Practise the descent · … | Start before the selected course's downhill section, without trainer control or a record |
 | Escape / Pause | Pause and release trainer control |
@@ -102,11 +113,15 @@ The public repository starts with no paired sensors. Once connected, devices are
 
 When the elevation profile has focus, arrows seek 100 m, Shift + arrow seeks 1 km, and Home/End go to the endpoints. Pausing preserves demo speed and position. A seek preserves the paused/running state and does not create a record. See the [downhill guide](downhill.md) for grip, penalties and record eligibility.
 
+Mouse shifting applies only to a click on the 3D scene. Buttons, menus, the map, elevation-profile seeking, brake input and bike/calibration dialogs keep their own behavior. Dragging, touch input and clicks with modifier keys do not shift gears.
+
+The left stream ignores mirrored right-side `+`, `A` and `B` events, so a single physical press cannot shift twice through both connections. Right `B` remains available as a one-controller fallback.
+
 ## MTB gearing and trainer load
 
 Gear 1 is the lowest: **32×51** with the initial profile. Cassette, chainring and wheel circumference are configurable. Load depends on gradient, total weight, surface, gear and cadence; virtual speed comes from measured power and the same force model.
 
-Resistance increases are limited by torque and time; reductions apply immediately. The model retains a 600 W cap and releases load at low cadence. Pausing or closing releases control, and reconnecting does not restart the effort. Gradient scaling affects the KICKR load while the virtual route retains the full geographical gradient.
+Trainer gradient is averaged across 40 m of the route, using its actual horizontal path length through bends. Resistance increases use the saved torque ramp; ordinary terrain-driven reductions are limited to twice that rate. Shifting to an easier gear, low-cadence assistance and a zero target still reduce load promptly. The model retains a 600 W cap. Pausing or closing releases control, and reconnecting the trainer does not restart the effort. Gradient scaling affects KICKR load while the virtual route retains the full geographical gradient. The existing bike profile and calibration remain valid.
 
 The optional guided test refines response transitions without changing measured watts or certifying their accuracy. Read the [bike and calibration guide](bike-calibration.md) for equations, thresholds and model limitations.
 
@@ -133,7 +148,9 @@ build.ps1             Build and basic checks
 
 Tests cover BLE/FTMS packets, gradients across installed courses, uphill starts, gear direction, low-cadence load reduction, load limits, pausing, persistence and sensor identity. A previous physical pedaling test confirmed reduced load when shifting from gear 3 to gear 1 and returning to flat terrain, with acknowledgements for every KICKR command.
 
-The validated equipment is **KICKR CORE**, **right Zwift Click 2** and **Garmin HRM-Dual**. The left Click and other trainers have not been validated. The guided response-calibration milestone used a simulated trainer; a completed physical guided test is not claimed. The project is not a full photogrammetric reconstruction or an official Wahoo, Zwift or Garmin integration.
+Previous physical checks used **KICKR CORE**, **right Zwift Click 2** and **Garmin HRM-Dual**. Separate left/right connections and recovery are implemented; a physical session with both Clicks, repeated disconnect/reconnect and live heart-rate recovery is still pending. Other trainers have not been validated. The guided response-calibration milestone used a simulated trainer; a completed physical guided test is not claimed. The project is not a full photogrammetric reconstruction or an official Wahoo, Zwift or Garmin integration.
+
+Run `node tools/ride-input/test.mjs` for the mouse-input regression checks. They cover gear direction, active versus paused modes, control/dialog isolation, modifiers, drag cancellation and loss of focus without connecting hardware.
 
 Historical build, physics, interface and rendering evidence is linked from the [development log](../DEVELOPMENT_LOG.md). Performance captures and hardware checks describe the conditions actually tested.
 

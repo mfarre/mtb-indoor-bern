@@ -138,17 +138,21 @@ internal sealed class TorqueRamp
     public double TorqueNm { get; private set; }
     public void Reset(double torqueNm = 0) => TorqueNm = double.IsFinite(torqueNm) ? Math.Max(0, torqueNm) : 0;
 
-    // Time-based rise: 5 Nm/s is about 39 W/s at 75 rpm. Reductions release immediately.
+    // Time-based rise: 5 Nm/s is about 39 W/s at 75 rpm. Calibration keeps immediate
+    // reductions; riding can soften terrain reductions at twice the rise rate.
+    // A zero target or stopped/invalid cadence always releases immediately.
     // dt is elapsed control time, not the number of BLE messages or their acknowledgements.
-    public double NextPower(double targetWatts, double cadence, double dt, double increaseNmPerSecond = BikeDynamics.DefaultTorqueRisePerSecond)
+    public double NextPower(double targetWatts, double cadence, double dt, double increaseNmPerSecond = BikeDynamics.DefaultTorqueRisePerSecond, bool smoothReductions = false)
     {
-        if (!double.IsFinite(targetWatts) || !double.IsFinite(cadence) || cadence <= 0)
+        if (!double.IsFinite(targetWatts) || targetWatts <= 0 || !double.IsFinite(cadence) || cadence <= 0)
         { Reset(); return 0; }
         double omega = Math.Clamp(cadence, 0, 170) * 2 * Math.PI / 60;
         double target = Math.Clamp(targetWatts, 0, BikeDynamics.MaximumPower) / omega;
         dt = double.IsFinite(dt) ? Math.Clamp(dt, 0, 1) : 0;
         double rate = double.IsFinite(increaseNmPerSecond) ? Math.Clamp(increaseNmPerSecond, 1, 12) : BikeDynamics.DefaultTorqueRisePerSecond;
-        TorqueNm = Math.Min(target, TorqueNm + rate * dt);
+        TorqueNm = smoothReductions && target < TorqueNm
+            ? Math.Max(target, TorqueNm - 2 * rate * dt)
+            : Math.Min(target, TorqueNm + rate * dt);
         return Math.Clamp(TorqueNm * omega, 0, BikeDynamics.MaximumPower);
     }
 }

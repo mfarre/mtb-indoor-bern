@@ -37,7 +37,13 @@ The black timber-framed **El Tony Jump Line** sign is documented in [TRIEBHAUS i
 
 **Obstacle positions and dimensions are approximate.** The sources establish their design and appearance, but not the coordinates or measurements of each jump. The sign also has a representative position within the simulator. Its logo comes from the [official El Tony website](https://www.eltonymate.com/site/templates/images/El-Tony-Mate-Logo.png), with its proportions preserved; this depiction does not imply sponsorship of the app.
 
-The road and camera use the same continuous profile to pass over each feature. **There is no airborne or flight physics.** These visual volumes do not change the gradient sent to the KICKR: the trainer, elevation profile and movement physics continue to use the smoothed geographical terrain. This avoids artificial load pulses at constructed jump lips.
+The road and camera use the same continuous profile to pass over each feature. **There is no airborne or flight physics.** These visual volumes do not change the gradient sent to the KICKR. Trainer load starts from the geographical terrain and averages elevation rise over the surrounding 40 m of the route. The elevation profile, displayed local gradient and movement physics keep their existing geometry. This avoids artificial load pulses at constructed jump lips.
+
+## Trainer response
+
+The 28 November update softens short load changes found in this map-and-terrain reconstruction. Averaging uses the horizontal length along the road, so bends and switchbacks do not become shortcuts in the slope calculation. Normal terrain-driven reductions also ease out at twice the saved torque-increase rate. Easier gears, low-cadence assistance and zero targets still reduce load promptly.
+
+For adjacent 5 m samples on the Gurten climb, the 95th-percentile trainer-grade change falls from **2.00 to 1.25 percentage points** and the largest change from **4.21 to 1.86**. The peak trainer grade falls from **24.00% to 21.55%**; a separate constant-20% synthetic climb remains exactly 20%. These are numerical route/model checks, not measurements from a new ride. A physical KICKR comparison is pending. The averaging can anticipate or delay very short details by up to 20 m, and the source terrain has not been re-surveyed.
 
 ## Data and limitations
 

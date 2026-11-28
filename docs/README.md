@@ -42,6 +42,7 @@ These reports record checks performed at each milestone. They are not claims tha
 
 | Milestone | Report |
 | --- | --- |
+| Two-Click recovery, mouse shifting and trainer-load smoothing | [28 November 2026](verification-ride-reliability-2026-11-28.json) |
 | Eiger 20 km, summer race scenery and sector starts | [22 November 2026](verification-eiger-2026-11-22.json) |
 | English simulator, Track Lab and screenshots | [22 November 2026](verification-english-ui-2026-11-22.json) |
 | Gurten course and trail features | [19 November 2026](verification-gurten-2026-11-19.json) |

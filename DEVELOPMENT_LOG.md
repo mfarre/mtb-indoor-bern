@@ -4,6 +4,26 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 28 November 2026 · Continuous rides, two Clicks and smoother trainer load
+
+**A lost Zwift Click no longer pauses the ride.** Left and right Clicks now have separate pairing, status and input state, preserving the existing right-side pairing. Right `+` shifts up, left `−` shifts down, and right `B` remains a downshift fallback. Mirrored right-button packets on the left stream are ignored to avoid duplicate actions. Right `A` still controls virtual braking; losing its connection releases its held brake input while keyboard and on-screen braking remain available. Reconnection runs independently of the ride. Loss of trainer telemetry or an interrupted 3D view still pauses and releases load.
+
+**Mouse backup:** a left click on the 3D trail shifts up; a right click shifts down. This works during riding and moving demos. Controls, dialogs, the map, elevation-profile seeking, dragging and modified clicks keep their own behavior. The main screen has a compact four-device status display and a mouse-control hint.
+
+Bluetooth connection and usable input are now distinguished. A Click waits for its first valid button packet; an idle confirmed Click stays confirmed. The controller handshake/keepalive and failed-connection cleanup have been updated. Heart-rate freshness is based on valid pulse measurements, rather than battery or unrelated notifications: missing/stale readings are blank, waiting is explicit, and a stalled stream is retried. A Click reporting a Zwift activation challenge is labelled accordingly; activation through Zwift is not implemented here.
+
+**Gurten load response:** the course is reconstructed from public map and terrain data, not a personal GPX. The trainer now averages elevation rise across 40 m of the actual road path and eases ordinary terrain-driven torque reductions at twice the saved increase rate. Easier shifts, low-cadence assistance and zero targets still reduce load promptly. The rendered route, displayed local slope and avatar physics are unchanged, and existing profiles/calibration results are retained. On adjacent 5 m samples of the Gurten climb, the 95th-percentile grade change drops from **2.00 to 1.25 percentage points**, with the maximum falling from **4.21 to 1.86**. This is load filtering, not a new terrain survey; it can anticipate or delay short slope details by up to 20 m.
+
+**Verified:** public and personal Windows Release builds and full self-tests passed, covering independent Click persistence, subscription recovery state, packet parsing, pulse freshness, calibration, all available routes and the new trainer-load regressions. Mouse-input regression tests and JavaScript syntax checks passed. Native UI checks in an isolated offline copy confirmed the four device cards, left/right mouse shifts, no shifting from paused scene clicks or profile seeking, and demo pause/resume. The local installation was updated after closing the paused session, with settings, calibration, records and private course assets preserved.
+
+![Separate right and left Click cards in the offline verification build](docs/images/devices-four-slots-2026-11-28.png)
+
+*Native screenshot with no sensors connected; it demonstrates the new layout, not hardware connectivity.*
+
+**Still pending:** a physical ride with both Clicks, repeated connection loss/recovery, live heart-rate recovery and a KICKR comparison on Gurten. Previous right-Click and trainer tests do not establish that these new recovery paths work on hardware.
+
+[Connection and controls](docs/simulator.md#first-connection) · [Gurten trainer response](docs/GURTEN.md#trainer-response) · [Load and calibration model](docs/bike-calibration.md) · [Verification results](docs/verification-ride-reliability-2026-11-28.json) · [Mouse regression suite](tools/ride-input/test.mjs).
+
 ## 24 November 2026 · Maneta v01 assembly guide and Bluetooth bench
 
 **The brake project now has an [illustrated assembly guide inside its GitHub Markdown document](docs/bluetooth-brakes.md#maneta-v01) and a [browser tester](https://mfarre.github.io/mtb-indoor-bern/workshop/tester/).** The general English guide covers the original Maneta v01 assembly, sensor mounting, return spring, bill of materials and manufacturer references. Mirrored STL files and editable OpenSCAD are available in the repository and as a download. The instructions describe the design independently of any individual build or private assembly discussion. The full instructions sit directly below **Maneta v01**, with native STL/CAD views replacing the conceptual hero in the project overview and brake document. The separate guide website has been retired; its old address redirects to the Markdown document. Only the interactive Bluetooth tester needs a hosted page.

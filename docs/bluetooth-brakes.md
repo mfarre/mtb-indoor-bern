@@ -227,12 +227,14 @@ The firmware build and automated software tests do not validate physical fit, th
 ## Working today
 
 - Hold **A** on the right Click 2 to brake; release it to coast. Keyboard **A / Space** and the on-screen brake are also supported.
-- **+** and **B** retain their MTB gear functions in this application.
+- **+** and **B** retain their MTB gear functions in this application. Left and right Clicks have independent connection slots; mouse clicks on the 3D trail provide backup shifting (left up, right down).
 - Braking changes virtual speed. It does not actuate the bicycle's physical brake or add braking load to the KICKR.
 - Corner warnings, grip loss and runout penalties make braking useful on descents. [Downhill guide](downhill.md).
-- A live ride pauses when the connected Click is lost, so the rider can recover brake input before continuing.
+- Losing a Click releases its held brake input and starts reconnection without pausing the ride. Keyboard and on-screen braking remain available; the other Click keeps its own connection and input state.
 
 The recorded hardware check detected **six presses and six releases**, with no unintended shifts. This is evidence for the right Click 2 integration, not the custom lever. See the [19 November verification report](verification-downhill-2026-11-19.json).
+
+The independent two-Click connection and recovery changes from 28 November have software checks; a physical two-controller and reconnect test remains pending.
 
 The existing controller path remains **pressed/released**: the game's `brakePressure` is a simulated response. Continuous lever-angle input needs its own adapter and calibration before it can control a ride.
 

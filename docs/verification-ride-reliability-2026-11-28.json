@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-28",
+  "scope": "Ride reliability: offline BLE/state tests, trainer load, Windows builds and native UI verification",
+  "hardwareValidation": {
+    "performed": false,
+    "note": "No new physical ride or BLE hardware validation was performed for the gradient/load changes."
+  },
+  "gurten": {
+    "source": "src/MTBIndoorBern/Scene/courses/gurten/route.json",
+    "sha256": "c014ecf44cc4e0a04496d20b8dbe2e79a35f1feefe5fe81b23eebd97a251f578",
+    "provenance": "Public OpenStreetMap route geometry with swisstopo terrain elevation; reconstructed course rather than a recorded GPX.",
+    "sampling": "Existing route points at nominal 5 m intervals; final interval may be shorter. P95 = sorted adjacent changes[floor(0.95 * count)].",
+    "trainerFilter": {
+      "windowMeters": 40,
+      "alignment": "Centered, clipped at route endpoints",
+      "calculation": "Elevation difference divided by summed rendered horizontal segment length; switchbacks are not shortcut by an endpoint chord.",
+      "unchanged": "Rendered elevation, displayed local grade, avatar physics, calibration signature and saved rise rate.",
+      "tradeoff": "Short terrain transitions are averaged across 20 m on either side; sustained grades are retained."
+    },
+    "climb": {
+      "fromMeters": 0,
+      "throughMeters": 4135,
+      "sampleCount": 828,
+      "raw": {
+        "minGradePercent": -7.8011,
+        "maxGradePercent": 24.0009,
+        "p95AdjacentGradeChangePercentagePoints": 1.9994,
+        "maxAdjacentGradeChangePercentagePoints": 4.2055,
+        "adjacentChangesAbove5PercentagePoints": 0
+      },
+      "filtered": {
+        "minGradePercent": -7.107,
+        "maxGradePercent": 21.5538,
+        "p95AdjacentGradeChangePercentagePoints": 1.2504,
+        "maxAdjacentGradeChangePercentagePoints": 1.8629,
+        "adjacentChangesAbove5PercentagePoints": 0
+      }
+    },
+    "fullRoute": {
+      "fromMeters": 0,
+      "throughMeters": 6526.7844093083595,
+      "sampleCount": 1307,
+      "raw": {
+        "minGradePercent": -22.0434,
+        "maxGradePercent": 24.0009,
+        "p95AdjacentGradeChangePercentagePoints": 2.7677,
+        "maxAdjacentGradeChangePercentagePoints": 6.8042,
+        "adjacentChangesAbove5PercentagePoints": 7
+      },
+      "filtered": {
+        "minGradePercent": -19.3004,
+        "maxGradePercent": 21.5538,
+        "p95AdjacentGradeChangePercentagePoints": 1.5509,
+        "maxAdjacentGradeChangePercentagePoints": 2.51,
+        "adjacentChangesAbove5PercentagePoints": 0
+      }
+    }
+  },
+  "loadControl": {
+    "increase": "Saved calibrated rise rate, or existing default; capped to at most one second of progress per update.",
+    "normalDecrease": "At most twice the configured rise rate.",
+    "immediateRelease": [
+      "Zero filtered power target",
+      "Stopped or invalid cadence",
+      "Low-cadence assistance",
+      "Easier gear selection",
+      "Session stop/reset"
+    ],
+    "calibration": "Default TorqueRamp behavior remains immediate on reductions; no calibration schema or signature changes."
+  },
+  "checks": [
+    {
+      "name": "BikeProfileTests.Verify",
+      "result": "PASS",
+      "coverage": "Existing shared bike dynamics, profile validation, gearing and torque ramp regression."
+    },
+    {
+      "name": "TrainerLoadTests.Verify",
+      "result": "PASS",
+      "coverage": "40 m grade continuity; synthetic 5 m noise; constant 20% climbs; switchback arc length; unchanged geometry; asymmetric calibrated load ramps; easier gears; low-cadence, zero-target, stop and restart release."
+    },
+    {
+      "name": "TrainerLoadTests.VerifyGurten",
+      "result": "PASS",
+      "coverage": "Real public Gurten climb: reduced adjacent grade jumps while retaining steep sections above 20%."
+    },
+    {
+      "name": "Windows Release builds and full application self-tests",
+      "result": "PASS",
+      "coverage": "Public: Uetliberg, Gurten, Eiger. Local: those courses plus preserved private Dentenberg assets. Calibration, physics, sectors, seeking, braking and records regressions."
+    },
+    {
+      "name": "BluetoothReliabilityTests.Verify and PreferencesStore.Verify",
+      "result": "PASS",
+      "coverage": "Independent Click slots/migration, manufacturer/service discovery, mirrored button filtering, malformed packets, invalidated subscriptions, pulse freshness and stale-state recovery policy; no radio fixtures."
+    },
+    {
+      "name": "Node mouse input regressions and scene syntax",
+      "result": "PASS",
+      "coverage": "Scene left/right shifts, demo, paused state, UI boundaries, modifiers, dragging, cancellation and cleanup."
+    },
+    {
+      "name": "Native offline UI",
+      "result": "PASS",
+      "coverage": "Four visible configuration cards and HUD chips; mouse shifts observed 8 to 9 to 10 and back to 9; paused scene click and profile seek retained gear 9; seek moved to 3.263 km; demo resumed with load inactive."
+    },
+    {
+      "name": "Local installation",
+      "result": "PASS",
+      "coverage": "Normal close of paused app; candidate executable/assets installed; 15 protected settings/records/private-course files unchanged by SHA-256. No private data included in this report."
+    }
+  ],
+  "testExecution": "Production Windows Release executables ran --self-test for public and personal course sets. Node mouse regression tests and JavaScript syntax checks passed. Native CUA interactions used an isolated offline copy with auto-search disabled; no physical load tests were performed."
+}

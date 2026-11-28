@@ -22,7 +22,7 @@ The timed **Dentenberg · forest descent** sector covers **km 4.480–6.980 of t
 
 During a real ride, timing starts when you cross the start line and ends at the finish. It includes stops and recoveries. Your best time is saved to `records.json` beside the executable and reappears when the app reopens. Pausing within the sector invalidates the time; practice and demo sessions cannot set records either. Changes to the route or grip model separate older records from new ones.
 
-If a previously connected Click disconnects during a real ride, the route pauses so the controls can be recovered. Keyboard and on-screen braking release when focus is lost; input messages expire to prevent a stuck brake if the view is interrupted.
+If a Click disconnects during a real ride, the route keeps moving and that controller's held brake input is released. The other Click and keyboard/on-screen controls remain available while reconnection runs. For backup shifting, click the 3D trail with the left mouse button to shift up or the right button to shift down. Keyboard and on-screen braking release when focus is lost; input messages expire to prevent a stuck brake if the view is interrupted. Trainer telemetry loss and an interrupted 3D view still release load and pause the ride.
 
 ## Verification
 

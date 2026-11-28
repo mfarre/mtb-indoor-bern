@@ -9,7 +9,7 @@ Open **Bike and calibration** from the top bar or welcome screen. Opening this s
 - **Rider weight** and **Bike weight:** their combined mass enters the gravity and rolling-resistance calculations. Previously saved rider weight and trainer gradient percentage are preserved.
 - **Wheel circumference:** distance travelled in one full wheel revolution, entered in millimetres. The initial value is 2300 mm; replace it with your measured circumference if available.
 - **Virtual chainring** and **Virtual cassette:** a 20–60-tooth chainring; MTB presets of 10–51, 10–52 or 11–46, or a custom list of 4–24 sprockets. Enter sprockets from largest to smallest: the first is gear 1, the easiest gear. The screen shows metres travelled per crank revolution at both ends of the range.
-- **KICKR gradient:** 100% applies the full gradient to the load calculation. Lower percentages reduce its effect on the trainer; terrain and game speed always use the actual route gradient.
+- **KICKR gradient:** 100% applies the full trainer gradient to the load calculation. The trainer averages elevation rise over the surrounding 40 m of road to soften short sampling changes. Lower percentages reduce its effect on the trainer; terrain, the gradient display and game speed always use the actual local route gradient.
 - **Low-cadence assistance:** when enabled, load decreases progressively between 45 and 30 rpm, reaching a 0 W target at 30 rpm. When disabled, these thresholds become 25 and 12 rpm; load release at very low cadence remains active.
 - **Physical gear for the test:** an optional note recording the real chain position during the test. Shifting with the Click changes the virtual transmission; it does not move the physical chain.
 
@@ -25,7 +25,7 @@ Press **Save profile**. The settings apply to the game and persist when the app 
 4. Follow the instructions: **70 → 110 → 70 W** at approximately 70 rpm, transition to **80–90 rpm**, then **110 → 70 W** at approximately 85 rpm. The sequence takes about two minutes, plus the initial wait.
 5. If every stage has enough stable data and the KICKR confirms the final load release, the result is saved automatically. The screen shows **Calibration current** when the same profile and trainer are connected.
 
-The test measures settling time and tracking of the 70–110 W targets. It adjusts the torque increase rate between **3 and 6 Nm/s**, with commands at least one second apart. Without a valid result, the game uses **5 Nm/s**. Load reductions do not wait for this ramp.
+The test measures settling time and tracking of the 70–110 W targets. It adjusts the torque increase rate between **3 and 6 Nm/s**, with commands at least one second apart. Without a valid result, the game uses **5 Nm/s**. In a normal ride, terrain-driven torque reductions are limited to twice the increase rate. Shifting to an easier gear, low-cadence assistance and zero targets reduce load promptly; stopping or pausing still releases trainer control. The response test itself retains its original sequence and load-release behavior.
 
 **Stop and release load**, Esc, closing the screen or losing focus cancels the test. It also stops if fresh telemetry is missing, the trainer disconnects or cadence drops too low. A cancelled test or poor target tracking does not create a new result. Any previously valid result is retained. **Delete this calibration** explicitly restores the standard response.
 
@@ -43,6 +43,8 @@ target power = torque × crank angular velocity
 ```
 
 Avatar speed evolves from **measured power** and the resistive force from the same model, including bicycle mass and surface type. Gravity allows descending at 0 W; game speed is not forced to equal cadence multiplied by rollout.
+
+Only trainer load uses the 40 m averaged gradient; avatar physics and the displayed slope use the local route geometry. The averaging follows the horizontal road segments rather than cutting across switchbacks. It can anticipate or delay a short slope change by up to 20 m. This reduces abrupt load changes from elevation sampling without claiming a new terrain survey. Existing calibration results and their profile signatures are preserved.
 
 The coefficients are simulator assumptions: efficiency 0.96; air density 1.225 kg/m³; CdA 0.51 m²; Crr 0.005 on asphalt, 0.009 on gravel and 0.012 on earth/leaves. They are not measurements of individual route sections. The game retains its limits of 600 W target load and 45 km/h virtual speed.
 

@@ -31,11 +31,11 @@ internal sealed class SensorCard : Panel
     public SensorCard(Equipment equipment,SensorRole role,string title,string subtitle)
     {
         this.equipment=equipment;this.role=role;
-        Dock=DockStyle.Fill;BackColor=Theme.Card;Padding=new Padding(22);Margin=new Padding(0,0,14,0);
+        Dock=DockStyle.Fill;BackColor=Theme.Card;Padding=new Padding(16);Margin=new Padding(0,0,14,0);
         var grid=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=10,Margin=Padding.Empty};
-        foreach(int h in new[]{42,32,40,48,58,62,58,44,72})grid.RowStyles.Add(new RowStyle(SizeType.Absolute,h));
+        foreach(int h in new[]{32,30,32,40,48,46,52,36,76})grid.RowStyles.Add(new RowStyle(SizeType.Absolute,h));
         grid.RowStyles.Add(new RowStyle(SizeType.Percent,100));
-        grid.Controls.Add(Theme.Label(title,23,style:FontStyle.Bold),0,0);
+        grid.Controls.Add(Theme.Label(title,21,style:FontStyle.Bold),0,0);
         grid.Controls.Add(Theme.Label(subtitle,10,Theme.Muted),0,1);
         devices=new ComboBox{Dock=DockStyle.Fill,DropDownStyle=ComboBoxStyle.DropDownList,Font=Theme.Font(10),DropDownWidth=440,BackColor=Theme.Background,ForeColor=Theme.Ink,AccessibleName=title+" · device"};
         grid.Controls.Add(devices,0,2);
@@ -47,7 +47,7 @@ internal sealed class SensorCard : Panel
         metrics=Theme.Label("—",29,Theme.Accent,FontStyle.Bold);grid.Controls.Add(metrics,0,5);
         details=Theme.Label("",10,Theme.Muted);grid.Controls.Add(details,0,6);
         forget=Theme.Button("Forget this device");forget.Font=Theme.Font(9);grid.Controls.Add(forget,0,7);
-        grid.Controls.Add(Theme.Label(role==SensorRole.Controller?"Right Click 2: + shifts up, B shifts down. Gears are set in your bike profile.":role==SensorRole.Trainer?"Reconnects automatically. Load control starts only when you begin a ride.":"Wear the strap to transmit heart rate. It is saved and reconnects automatically.",10,Theme.Muted),0,8);
+        grid.Controls.Add(Theme.Label(role==SensorRole.Controller?"+ shifts up, B shifts down. Hold A to brake.":role==SensorRole.LeftController?"− shifts down. Some firmware needs activation in Zwift; close Zwift before reconnecting here.":role==SensorRole.Trainer?"Reconnects automatically. Load control starts only when you begin a ride.":"Wear the strap to transmit heart rate. It is saved and reconnects automatically.",10,Theme.Muted),0,8);
         Controls.Add(grid);
         connect.Click+=async(_,_)=>{if(devices.SelectedItem is NearbyDevice d)await equipment.ConnectAsync(role,d);else{equipment.ResumeSearch(role);await equipment.ScanAsync();}};
         disconnect.Click+=async(_,_)=>await equipment.DisconnectAsync(role);
@@ -68,11 +68,11 @@ internal sealed class SensorCard : Panel
         var busy=equipment.Busy(role);connect.Enabled=!busy;disconnect.Enabled=!busy&&c.HasSession;forget.Enabled=!busy&&saved is not null;devices.Enabled=!busy&&!c.HasSession;
         connect.Text=c.Connected?"Reconnect":devices.SelectedItem is null?"Search now":"Connect";
         bool fresh=c.Connected&&c.LastPacket.HasValue&&(DateTime.UtcNow-c.LastPacket.Value).TotalSeconds<8;
-        status.ForeColor=c.Connected?Theme.Accent:Theme.Muted;
-        status.Text=busy?"Connecting…":c.Connected?"● Connected · saved":equipment.Paused(role)?"Connection paused. Select Connect to resume.":saved is not null?"◌ Searching for saved device · every 5 s":"Select a device to save it.";
+        status.ForeColor=c.Connected&&c.DataState=="connected"?Theme.Accent:Theme.Muted;
+        status.Text=busy?"Connecting…":c.Connected?c.ActivationRequired&&!c.InputConfirmed?"◌ Zwift activation requested":c.DataState=="waiting"?role.IsController()?"◌ Connected · press a button":"◌ Connected · waiting for bpm":c.DataState=="stale"?"◌ No recent bpm · reconnecting":"● Connected · data confirmed":equipment.Paused(role)?"Connection paused. Select Connect to resume.":saved is not null?"◌ Searching for saved device · every 5 s":"Select a device to save it.";
         if(role==SensorRole.Trainer){metrics.Text=fresh&&c.Power.HasValue?$"{c.Power} W":"— W";details.Text=(fresh&&c.Cadence.HasValue?$"{c.Cadence:0} rpm":"— rpm")+"\n"+(c.Control?.SupportsPower==true?"MTB load control available":c.ControlInfo);}
-        else if(role==SensorRole.HeartRate){metrics.Text=fresh&&c.HeartRate.HasValue?$"{c.HeartRate} bpm":"— bpm";details.Text=c.Battery.HasValue?$"Battery {c.Battery}%":"";}
-        else{metrics.Text=$"{gear} / {gearCount}";details.Text=c.Connected?"Right Click connected · + / B":"Press a button to wake the Click.";}
+        else if(role==SensorRole.HeartRate){metrics.Text=c.HeartRateFresh?$"{c.HeartRate} bpm":"— bpm";details.Text=(c.Battery.HasValue?$"Battery {c.Battery}%\n":"")+(c.HeartRateFresh?"Live heart rate":c.Connected?"Wear/moisten strap · retrying data":"Wear the strap to wake it.");}
+        else{metrics.Text=$"{gear} / {gearCount}";details.Text=c.InputConfirmed?role==SensorRole.LeftController?"Left input confirmed · −":"Right input confirmed · + / B / A":c.Connected?"Bluetooth connected; input unconfirmed.":"Press a button to wake the Click.";}
     }
 }
 
@@ -103,8 +103,8 @@ internal sealed class MainForm : Form
         heading.Controls.Add(Theme.Label("Saved devices",30,style:FontStyle.Bold));scan=Theme.Button("Search now",true);scan.Margin=new Padding(0,12,14,12);heading.Controls.Add(scan);root.Controls.Add(heading,0,1);
         var statusRow=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2};statusRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));statusRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,240));
         scanStatus=Theme.Label("Automatic search every 5 seconds",10,Theme.Muted);showAll=new CheckBox{Text="Show all sensors",Dock=DockStyle.Fill,ForeColor=Theme.Muted,Font=Theme.Font(10)};statusRow.Controls.Add(scanStatus);statusRow.Controls.Add(showAll);root.Controls.Add(statusRow,0,2);
-        cards=[new(equipment,SensorRole.Trainer,"KICKR","Power · cadence · MTB load"),new(equipment,SensorRole.Controller,"Controllers","Right Zwift Click 2"),new(equipment,SensorRole.HeartRate,"Heart rate","Garmin HRM-Dual")];
-        var grid=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=3};for(int i=0;i<3;i++){grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100f/3));grid.Controls.Add(cards[i],i,0);}root.Controls.Add(grid,0,3);
+        cards=[new(equipment,SensorRole.Trainer,"KICKR","Power · cadence · MTB load"),new(equipment,SensorRole.Controller,"Right Click","Zwift Click 2 · + / B / A"),new(equipment,SensorRole.LeftController,"Left Click","Zwift Click 2 · −"),new(equipment,SensorRole.HeartRate,"Heart rate","Garmin HRM-Dual")];
+        var grid=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=cards.Length};for(int i=0;i<cards.Length;i++){grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100f/cards.Length));grid.Controls.Add(cards[i],i,0);}root.Controls.Add(grid,0,3);
         root.Controls.Add(Theme.Label("Devices and settings are saved automatically. Disconnect pauses reconnection until you select Connect or reopen the app.",10,Theme.Muted),0,4);root.Controls.Add(log,0,5);
         var shell=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=2,ColumnCount=1,Margin=Padding.Empty};shell.RowStyles.Add(new RowStyle(SizeType.Absolute,48));shell.RowStyles.Add(new RowStyle(SizeType.Percent,100));
         var nav=new FlowLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(20,4,0,4)};
@@ -118,11 +118,11 @@ internal sealed class MainForm : Form
         devicesButton.Click+=async(_,_)=>{await circuit.PauseAllAsync("Ride paused to configure devices");circuit.Visible=false;root.Visible=true;root.BringToFront();};
         bikeButton.Click+=(_,_)=>{root.Visible=false;circuit.Visible=true;circuit.BringToFront();circuit.OpenProfile();};
         equipment.BeforeTrainerChange=async()=>{await circuit.PauseAllAsync("Ride paused to reconnect the KICKR");};
-        equipment.Connections[SensorRole.Controller].Shift+=d=>Ui(()=>{if(!circuit.CalibrationActive)circuit.Ride.Shift(d);});
+        equipment.Shift+=d=>Ui(()=>{if(!circuit.CalibrationActive)circuit.Ride.Shift(d);});
         equipment.Changed+=()=>Ui(RefreshEquipment);
         scan.Click+=async(_,_)=>await equipment.ScanAsync();showAll.CheckedChanged+=(_,_)=>RefreshEquipment();
         refresh.Tick+=(_,_)=>RefreshEquipment();refresh.Start();
-        search.Tick+=async(_,_)=>{if(Equipment.Roles.Any(r=>!equipment.Connections[r].Connected&&!equipment.Paused(r)))await equipment.ScanAsync();};
+        search.Tick+=async(_,_)=>{if(equipment.ShouldSearch)await equipment.ScanAsync();};
         Shown+=async(_,_)=>{await circuit.InitializeAsync();if(smokeFile is null){search.Start();await equipment.ScanAsync();}};
         KeyDown+=async(_,e)=>{if(e.KeyCode==Keys.Escape){e.Handled=true;await circuit.PauseAllAsync("Ride paused · load released");}else if(e.KeyCode==Keys.F11){WindowState=WindowState==FormWindowState.Maximized?FormWindowState.Normal:FormWindowState.Maximized;e.Handled=true;}};
         Deactivate+=async(_,_)=>await circuit.CancelCalibrationAsync("Test stopped because the window lost focus");

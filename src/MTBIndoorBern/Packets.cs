@@ -71,7 +71,7 @@ internal static class Packets
     public static IEnumerable<(byte Button, byte State)> ReadZwiftClick(byte[] bytes)
     {
         if (bytes.Length < 1 || bytes[0] != 0x37) throw new InvalidDataException();
-        byte plus = 1, minus = 1;
+        byte? plus = null, minus = null;
         int offset = 1;
         while (offset < bytes.Length)
         {
@@ -81,7 +81,12 @@ internal static class Packets
             if (tag == 8) plus = value == 0 ? (byte)1 : (byte)0;
             if (tag == 16) minus = value == 0 ? (byte)1 : (byte)0;
         }
-        return [(1, plus), (2, minus)];
+        // Do not invent a press for a missing protobuf field.
+        var result = new List<(byte, byte)>();
+        if (plus.HasValue) result.Add((1, plus.Value));
+        if (minus.HasValue) result.Add((2, minus.Value));
+        if (result.Count == 0) throw new InvalidDataException();
+        return result;
     }
 
     private static uint ReadVarint(byte[] bytes, ref int offset)
@@ -90,6 +95,7 @@ internal static class Packets
         for (int shift = 0; shift < 32 && offset < bytes.Length; shift += 7)
         {
             byte value = bytes[offset++];
+            if (shift == 28 && (value & 0xf0) != 0) throw new InvalidDataException();
             result |= (uint)(value & 127) << shift;
             if ((value & 128) == 0) return result;
         }
@@ -104,6 +110,7 @@ internal static class Packets
         while (offset < bytes.Length)
         {
             uint tag = ReadVarint(bytes, ref offset);
+            if (tag == 0) throw new InvalidDataException();
             if ((tag & 7) == 0)
             {
                 uint value = ReadVarint(bytes, ref offset);
@@ -111,14 +118,17 @@ internal static class Packets
             }
             else if ((tag & 7) == 2)
             {
-                int length = checked((int)ReadVarint(bytes, ref offset));
-                if (length > bytes.Length - offset) throw new InvalidDataException();
+                uint rawLength = ReadVarint(bytes, ref offset);
+                if (rawLength > bytes.Length - offset) throw new InvalidDataException();
+                int length = (int)rawLength;
                 offset += length;
             }
             else throw new InvalidDataException();
         }
         if (!mask.HasValue) throw new InvalidDataException();
-        byte up = (mask.Value & 0x1000) == 0 ? (byte)1 : (byte)0;
+        // The left stream can mirror right-side buttons. Consume each physical
+        // side only on its own connection, so one + press cannot shift twice.
+        byte up = rightOnly && (mask.Value & 0x1000) == 0 ? (byte)1 : (byte)0;
         byte down = (mask.Value & (rightOnly ? 0x20u : 0x100u)) == 0 ? (byte)1 : (byte)0;
         byte brake = rightOnly && (mask.Value & 0x10u) == 0 ? (byte)1 : (byte)0;
         return [(1, up), (2, down), (3, brake)];

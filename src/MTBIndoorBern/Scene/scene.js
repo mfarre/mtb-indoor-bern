@@ -5,6 +5,7 @@ import {addTrailMarkers} from './trail-markers.js';
 import {setupProfileSeek,updateProfileSeek} from './profile-seek.js';
 import {setupBikeSettings,updateBikeSettings} from './bike-settings.js';
 import {setupCourseSectors,updateCourseSectors,drawSectorProfile} from './course-sectors.js';
+import {setupMouseShifting} from './ride-input.js';
 const $=id=>document.getElementById(id),bridge=window.chrome?.webview;
 const send=(action,extra={})=>bridge?.postMessage({action,...extra});
 const format=(v,n=0)=>Number(v).toLocaleString('en-GB',{minimumFractionDigits:n,maximumFractionDigits:n});
@@ -13,6 +14,7 @@ function fail(error){const message=String(error?.message??error);errors.push(mes
 window.addEventListener('error',e=>fail(e.error??e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
 const clearBrake=setupTrail(send);
 const bikeSettings=setupBikeSettings(send);
+setupMouseShifting($('world'),send,()=>state);
 $('bike-settings').onclick=()=>bikeSettings.open();
 bridge?.addEventListener('message',event=>{if(event.data?.type==='open-profile')bikeSettings.open();else if(event.data?.type==='bike-profile'||event.data?.type==='calibration')updateBikeSettings(event.data);});
 setupProfileSeek($('profile'),send,()=>state,()=>course);
@@ -26,10 +28,24 @@ $('view').onclick=()=>{overview=!overview;$('view').textContent=overview?'First-
 window.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(e.key==='Escape'){send('pause');e.preventDefault();}if(e.key==='+'||e.key==='='){send('gear',{delta:1});e.preventDefault();}if(e.key==='-'||e.key==='b'||e.key==='B'){send('gear',{delta:-1});e.preventDefault();}});
 $('world').addEventListener('webglcontextlost',e=>{e.preventDefault();fail('The graphics engine stopped. Restart MTB Indoor - Bern.');});
 setInterval(()=>send('heartbeat'),1000);
-function refreshDevices(){const snapshot=state.devices??[{label:'KICKR',state:'searching'},{label:'Right Click',state:'searching'},{label:'Heart rate',state:'searching'}],key=JSON.stringify(snapshot);if(key===devicesKey)return;devicesKey=key;$('equipment').replaceChildren();for(const d of snapshot){const b=document.createElement('button');b.className='device-chip '+d.state;b.title=d.name||d.label;const icon=document.createElement('i');icon.className='connection-icon';icon.textContent=d.state==='connected'?'✓':d.state==='paused'?'Ⅱ':'';const label=document.createElement('span'),strong=document.createElement('b'),small=document.createElement('small');strong.textContent=d.label;small.textContent=({connected:'Connected',connecting:'Connecting',searching:'Searching · every 5 s',paused:'Paused',unpaired:'Not paired'})[d.state];label.append(strong,small);b.append(icon,label);b.setAttribute('aria-label',d.label+': '+small.textContent);b.onclick=()=>send('devices');$('equipment').append(b);}}
+function refreshDevices(){
+ const snapshot=state.devices??['KICKR','Right Click','Left Click','Heart rate'].map(label=>({label,state:'searching'})),key=JSON.stringify(snapshot);
+ if(key===devicesKey)return;devicesKey=key;$('equipment').replaceChildren();
+ const labels={connected:'Connected',connecting:'Connecting',searching:'Searching · every 5 s',paused:'Paused',unpaired:'Not paired',waiting:'Waiting for data',stale:'No recent data'};
+ for(const d of snapshot){
+  const b=document.createElement('button');b.className='device-chip '+d.state;
+  const icon=document.createElement('i');icon.className='connection-icon';icon.textContent=d.state==='connected'?'✓':d.state==='paused'?'Ⅱ':d.state==='waiting'||d.state==='stale'?'!':'';
+  const label=document.createElement('span'),strong=document.createElement('b'),small=document.createElement('small');
+  strong.textContent=d.label;small.textContent=d.status??labels[d.state]??'Checking';
+  b.title=[d.name||d.label,small.textContent].join(' · ');
+  label.append(strong,small);b.append(icon,label);b.setAttribute('aria-label',d.label+': '+small.textContent);b.onclick=()=>send('devices');$('equipment').append(b);
+ }
+}
 function refreshHud(){
  const running=state.mode==='ride'||state.mode==='demo',pausedDemo=state.demo&&state.mode==='paused';document.body.classList.toggle('riding',running||pausedDemo);document.body.classList.toggle('demo',state.demo&&(running||pausedDemo));document.body.classList.toggle('paused',state.mode==='paused'||state.mode==='finished');document.body.classList.toggle('demo-paused',pausedDemo);
  for(const id of['watts','cadence','heart'])$(id).textContent=state[id]==null?'—':format(state[id]);$('speed').textContent=format(state.speed,1);$('distance').textContent=format(state.distance/1000,2);
+ const hrDevice=state.devices?.find(d=>d.role==='HeartRate');
+ $('heart-status').textContent=state.heart!=null?'♥ bpm':hrDevice?.state==='waiting'?'Waiting for pulse':hrDevice?.state==='stale'?'No recent pulse':'♥ bpm';
  $('remaining').textContent=`${format(Math.max(0,(state.length??info?.length??0)-state.distance)/1000,2)} km remaining`;
  $('time').textContent=`${Math.floor(state.elapsed/60).toString().padStart(2,'0')}:${Math.floor(state.elapsed%60).toString().padStart(2,'0')}`;
  $('ascent').textContent=`${format(state.climbed)} m`;$('altitude').textContent=`${format(state.altitude??0)} m`;$('gear').innerHTML=`${state.gear}<span>/${state.gearCount??12}</span>`;
