@@ -9,7 +9,10 @@ export function setupTrail(send){
  $('practice').onclick=()=>send('practice');
  $('brake').addEventListener('pointerdown',e=>{e.preventDefault();pointer=true;e.currentTarget.setPointerCapture(e.pointerId);publish();});
  for(const type of['pointerup','pointercancel','lostpointercapture'])$('brake').addEventListener(type,()=>{pointer=false;publish();});
- window.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea'))return;if(e.code==='KeyA'||e.code==='Space'){e.preventDefault();keys.add(e.code);publish();}});
+ // The brake itself keeps its hold shortcut when focused; other buttons retain
+ // native Space activation instead of invoking the global ride shortcut.
+ $('brake').addEventListener('keydown',e=>{if(!$('brake').disabled&&!document.querySelector('dialog[open]')&&(e.code==='KeyA'||e.code==='Space')){e.preventDefault();keys.add(e.code);publish();}});
+ window.addEventListener('keydown',e=>{if(e.defaultPrevented||document.querySelector('dialog[open]')||e.target.closest?.('input,select,textarea,button,a,[role="button"],[contenteditable="true"]'))return;if(e.code==='KeyA'||e.code==='Space'){e.preventDefault();keys.add(e.code);publish();}});
  window.addEventListener('keyup',e=>{if(keys.delete(e.code)){e.preventDefault();publish();}});
  window.addEventListener('blur',clear);document.addEventListener('visibilitychange',()=>{if(document.hidden)clear();});
  setInterval(()=>{if(pressed())publish();},150);

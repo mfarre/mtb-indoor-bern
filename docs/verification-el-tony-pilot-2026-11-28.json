@@ -1,0 +1,257 @@
+{
+  "date": "2026-11-28",
+  "baselineCommit": "47c72fec5c428f9c5ac82fecb66f870476edb650",
+  "scope": {
+    "course": "gurten",
+    "fromMeters": 4970,
+    "toMeters": 5310,
+    "routeAndTrainerModelUnchanged": true,
+    "recreatedNotPhotogrammetry": true
+  },
+  "builds": {
+    "public": "PASS: Uetliberg, Gurten, Eiger Bike Challenge 20 km; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records.",
+    "personal": "PASS: Dentenberg, Uetliberg, Gurten, Eiger Bike Challenge 20 km; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records."
+  },
+  "javascriptSuites": [
+    {
+      "test": "tools/ride-audio/test.mjs",
+      "passed": true
+    },
+    {
+      "test": "tools/ride-presentation/test.mjs",
+      "passed": true
+    },
+    {
+      "test": "tools/ride-presentation/controls-test.mjs",
+      "passed": true
+    },
+    {
+      "test": "tools/ride-input/test.mjs",
+      "passed": true
+    },
+    {
+      "test": "tools/ride-input/brake-test.mjs",
+      "passed": true
+    },
+    {
+      "test": "tools/gurten/verify-pilot.mjs",
+      "passed": true
+    }
+  ],
+  "nativeUi": {
+    "offlineWithoutSensors": true,
+    "englishHeaderAndDialogFit": true,
+    "focusKeepsKeyTelemetry": true,
+    "demoGestureUnlocksAudio": true,
+    "pauseAndResume": true,
+    "volume40PercentRetainedAfterRestart": true,
+    "focusPreferenceRetainedAfterRestart": true,
+    "sceneErrors": []
+  },
+  "benchmarks": {
+    "gurtenBefore": {
+      "fps": 30.043910330483012,
+      "frames": 1353,
+      "seconds": 45.000800000000005,
+      "targetFps": 30,
+      "frameIntervalMs": {
+        "p50": 33.30000000000291,
+        "p95": 33.5,
+        "p99": 33.5,
+        "max": 34.599999999998545
+      },
+      "cpuSubmissionMs": {
+        "p50": 1.300000011920929,
+        "p95": 4.600000023841858,
+        "p99": 5.599999964237213,
+        "max": 35
+      },
+      "stallsOver66ms": 0,
+      "canvas": [
+        1280,
+        720
+      ],
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce GTX 660 (0x000011C0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "course": "gurten",
+      "startMeters": 4970,
+      "speedMps": 6.2,
+      "warmupSeconds": 5,
+      "pixelRatio": 1,
+      "drawCallsRange": [
+        37,
+        76
+      ],
+      "prewarmStatus": null
+    },
+    "gurtenPilotFirstPass": {
+      "fps": 29.932734678639765,
+      "frames": 1348,
+      "seconds": 45.000899999999994,
+      "targetFps": 30,
+      "frameIntervalMs": {
+        "p50": 33.30000000000291,
+        "p95": 33.5,
+        "p99": 33.5,
+        "max": 133.20000000000073
+      },
+      "cpuSubmissionMs": {
+        "p50": 3.5,
+        "p95": 5.699999988079071,
+        "p99": 7,
+        "max": 143.5
+      },
+      "stallsOver66ms": 1,
+      "canvas": [
+        1280,
+        720
+      ],
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce GTX 660 (0x000011C0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "course": "gurten",
+      "startMeters": 4970,
+      "speedMps": 6.2,
+      "warmupSeconds": 5,
+      "pixelRatio": 1,
+      "drawCallsRange": [
+        167,
+        205
+      ],
+      "prewarmStatus": null
+    },
+    "gurtenPilotRelease": {
+      "fps": 29.932801194645428,
+      "frames": 1348,
+      "seconds": 45.000800000000005,
+      "targetFps": 30,
+      "frameIntervalMs": {
+        "p50": 33.30000000000291,
+        "p95": 33.400000000001455,
+        "p99": 33.5,
+        "max": 149.79999999999927
+      },
+      "cpuSubmissionMs": {
+        "p50": 4.699999988079071,
+        "p95": 6.199999988079071,
+        "p99": 7.599999964237213,
+        "max": 151.89999997615814
+      },
+      "stallsOver66ms": 1,
+      "canvas": [
+        1280,
+        720
+      ],
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce GTX 660 (0x000011C0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "course": "gurten",
+      "startMeters": 4970,
+      "speedMps": 6.2,
+      "warmupSeconds": 5,
+      "pixelRatio": 1,
+      "drawCallsRange": [
+        167,
+        205
+      ],
+      "prewarmStatus": "complete"
+    },
+    "eigerBefore": {
+      "fps": 29.999300016332953,
+      "frames": 901,
+      "seconds": 30.000700000000002,
+      "targetFps": 30,
+      "frameIntervalMs": {
+        "p50": 33.30000000000291,
+        "p95": 33.400000000001455,
+        "p99": 33.5,
+        "max": 50
+      },
+      "cpuSubmissionMs": {
+        "p50": 4.100000023841858,
+        "p95": 6.199999988079071,
+        "p99": 7.199999988079071,
+        "max": 12
+      },
+      "stallsOver66ms": 0,
+      "canvas": [
+        1280,
+        720
+      ],
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce GTX 660 (0x000011C0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "course": "eiger-20",
+      "startMeters": 8800,
+      "speedMps": 6.2,
+      "warmupSeconds": 5,
+      "pixelRatio": 1,
+      "drawCallsRange": [
+        69,
+        93
+      ],
+      "prewarmStatus": null
+    },
+    "eigerAfter": {
+      "fps": 29.999500008333197,
+      "frames": 901,
+      "seconds": 30.000499999999995,
+      "targetFps": 30,
+      "frameIntervalMs": {
+        "p50": 33.30000000000291,
+        "p95": 33.400000000001455,
+        "p99": 33.5,
+        "max": 34.20000000000073
+      },
+      "cpuSubmissionMs": {
+        "p50": 4,
+        "p95": 6.099999964237213,
+        "p99": 7.199999988079071,
+        "max": 13.399999976158142
+      },
+      "stallsOver66ms": 0,
+      "canvas": [
+        1280,
+        720
+      ],
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce GTX 660 (0x000011C0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "course": "eiger-20",
+      "startMeters": 8800,
+      "speedMps": 6.2,
+      "warmupSeconds": 5,
+      "pixelRatio": 1,
+      "drawCallsRange": [
+        69,
+        93
+      ],
+      "prewarmStatus": null
+    }
+  },
+  "benchmarkMethod": "Renderer only, real-time requestAnimationFrame pacing, fixed pixel ratio 1, no screenshot work during timing; CPU submission is not GPU time. Full connected rides and a 60 fps target were not benchmarked.",
+  "remainingPerformanceLimit": "One frame interval around 150 ms remains in the 45-second release pilot pass. Shader prewarm completed but did not eliminate the isolated hitch; its cause is not established.",
+  "media": {
+    "course": "gurten",
+    "mp4Bytes": 24325862,
+    "gifBytes": 9124725,
+    "gifFrames": 80,
+    "seconds": 45,
+    "fps": 12,
+    "gifStartSeconds": 14.0,
+    "gifSeconds": 8.0,
+    "startMeters": 4970,
+    "endMeters": 5248.483333333334,
+    "width": 800,
+    "height": 280,
+    "method": "Deterministic engine capture; not a real-time performance measurement",
+    "audio": "Same application graph rendered offline against the coasting capture trajectory"
+  },
+  "audio": {
+    "type": "audio-complete",
+    "method": "Application Web Audio graph rendered offline against the deterministic coasting capture trajectory, using actual under-wheel surface metadata. Synthetic sounds; not a microphone recording.",
+    "sampleRate": 48000,
+    "channels": 2,
+    "seconds": 45,
+    "peak": 0.2717669606208801,
+    "rms": 0.04841123398148678,
+    "bytes": 8640044
+  },
+  "installation": {
+    "settingsCalibrationRecordsAndPrivateCourseFilesPreserved": true,
+    "protectedFiles": 15,
+    "rollbackBackupCreated": true
+  },
+  "physicalHardwareTest": false
+}

@@ -101,12 +101,16 @@ internal sealed class RidePanel : Panel
             using var json = JsonDocument.Parse(e.WebMessageAsJson);
             var message = json.RootElement;
             var action = message.GetProperty("action").GetString();
-            if(calibration.Active && action is not ("heartbeat" or "stats" or "error" or "pause" or "stop" or "devices" or "profile-request" or "profile-close" or "calibration-cancel" or "profile-save")) {PostCalibration();return;}
+            if(calibration.Active && action is not ("heartbeat" or "stats" or "error" or "pause" or "stop" or "devices" or "profile-request" or "profile-close" or "calibration-cancel" or "profile-save" or "presentation-settings")) {PostCalibration();return;}
             if(profileOpen && action is ("start" or "demo" or "practice" or "resume" or "course" or "settings" or "preview" or "start-sector"))return;
             switch (action)
             {
-                case "ready": web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type="catalog", ids=courses.Select(c=>c.Id).ToArray() })); ready = true; heartbeat = DateTime.UtcNow; web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
+                case "ready": web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type="catalog", ids=courses.Select(c=>c.Id).ToArray() })); ready = true; heartbeat = DateTime.UtcNow; PostPresentation(); web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(Ride.Trail.Snapshot())); if (smokeFile is not null && smokeDemo) { await Ride.StartAsync(true); Ride.JumpDemo(selectedCourse.PreviewDistance); } break;
                 case "heartbeat": heartbeat = DateTime.UtcNow; break;
+                case "presentation-settings":
+                    if (message.TryGetProperty("preferences", out var patch))
+                    { preferences.Data.Presentation.ApplyPatch(patch); preferences.Save(); }
+                    PostPresentation(); break;
                 case "profile-request":
                     profileOpen=true;
                     if(!calibration.Active)await Ride.PauseAsync("Ride paused · bike setup");
@@ -168,6 +172,12 @@ internal sealed class RidePanel : Panel
             }
         }
         catch (Exception ex) { log("Course: " + ex.Message); }
+    }
+
+    private void PostPresentation()
+    {
+        if (web.CoreWebView2 is not null)
+            web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "presentation-settings", preferences = preferences.Data.Presentation.Snapshot(), settingsWarning = preferences.Warning }));
     }
 
     private void PostProfile(string? notice=null,string? error=null,bool saved=false)

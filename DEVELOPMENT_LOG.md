@@ -4,6 +4,28 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 28 November 2026 · El Tony woodland, ride sound and focus view
+
+**A 340 m visual pilot now surrounds the El Tony jump on Gurtentrail.** The same route gains compacted-earth materials with separate colour, normal and roughness maps, irregular shoulders, broadleaf crowns, saplings, ferns and dappled shade. Trailnet and TRIEBHAUS photographs guided the appearance; generic Poly Haven materials are CC0. This is a recreation rather than photogrammetry. The existing logo, route elevations, jump shapes, gearing and trainer-load model are retained.
+
+![Previous renderer and El Tony woodland pilot at matching positions](docs/images/el-tony-pilot-comparison.gif)
+
+[Watch the 45-second comparison with ride sound](docs/images/el-tony-pilot-comparison.mp4) · [Before still](docs/images/el-tony-pilot-before.png) · [After still](docs/images/el-tony-pilot-after.png).
+
+The comparison follows identical positions and camera timing. It is exported at 12 fps and is separate from the real-time benchmark. Its soundtrack uses the same Web Audio graph as the application, rendered offline against a coasting trajectory and the actual surface metadata. The GIF is silent.
+
+**Ride sound and presentation:** original synthesized tyre textures, wind, coasting freehub, confirmed gear clicks and restrained braking/scrub respond to host snapshots. Sound starts after a user gesture, fades on pause or stale data and cannot pause the ride if audio initialization fails. Focus view keeps watts, speed, heart rate, gear and gradient while folding away larger panels. Volume, stable camera and the 30/60 fps target persist separately from bike calibration. Interpolation resets on seeking and never extrapolates stale motion. Dialogs retain their keyboard controls; brake release remains reliable when focus changes.
+
+| Focus view in demo | Saved preferences |
+| --- | --- |
+| ![Essential riding telemetry in an offline demo](docs/images/el-tony-focus-view.png) | ![English view and sound settings](docs/images/view-sound-preferences.png) |
+
+**Measured on this PC:** the GTX 660 delivered approximately 30 fps before and after at 1280×720. The release pilot's frame-interval p95 was 33.4 ms and CPU submission p95 6.2 ms, compared with 33.5 ms and 4.6 ms before. One approximately 150 ms hitch remains in the 45-second pilot run; shader prewarming did not eliminate it. The Eiger control stayed at 30 fps. These are renderer-only measurements, not a connected training-session or 60 fps claim.
+
+**Verified:** public and personal Windows Release builds and full self-tests, including Dentenberg in the private installation; audio, interpolation, settings, mouse and brake-key regressions; local geometry/grade invariants; optional missing-texture and shader-prewarm failure fallbacks; English native UI, gesture sound activation, demo pause/resume and preferences retained across restart. The installed app retains settings, calibration, records and private course assets, with rollback copies. No new physical Bluetooth or trainer test was performed.
+
+[Pilot, sources and detailed performance](docs/el-tony-pilot.md) · [Verification record](docs/verification-el-tony-pilot-2026-11-28.json) · [Reusable capture, audio and benchmark tool](tools/render-comparison/README.md).
+
 ## 28 November 2026 · Continuous rides, two Clicks and smoother trainer load
 
 **A lost Zwift Click no longer pauses the ride.** Left and right Clicks now have separate pairing, status and input state, preserving the existing right-side pairing. Right `+` shifts up, left `−` shifts down, and right `B` remains a downshift fallback. Mirrored right-button packets on the left stream are ignored to avoid duplicate actions. Right `A` still controls virtual braking; losing its connection releases its held brake input while keyboard and on-screen braking remain available. Reconnection runs independently of the ride. Loss of trainer telemetry or an interrupted 3D view still pauses and releases load.

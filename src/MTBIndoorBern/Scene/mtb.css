@@ -43,3 +43,40 @@ body.riding .vignette{background:linear-gradient(180deg,#0b1c2130,transparent 23
  .has-sectors .settings{margin:6px 0}
 }
 @media(max-height:800px){.has-sectors #map{height:80px}}
+
+/* Riding preferences stay reachable while the detailed HUD is folded. */
+body .top-right,body.riding .top-right{max-width:330px;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+body .top-right .tag{display:none}
+body .top-right button{padding:8px 10px;font-size:11px;min-height:33px}
+#immersive-toggle[aria-pressed="true"]{border-color:#d1ef9190;color:var(--lime)}
+#sound-toggle[aria-pressed="false"]{color:#c6cdbd}
+#presentation-dialog{width:min(440px,calc(100vw - 36px));max-height:calc(100vh - 36px);overflow:auto;border:1px solid #a7c28d66;border-radius:15px;background:#162a22;color:var(--ink);padding:25px;box-shadow:0 25px 100px #0008}
+#presentation-dialog::backdrop{background:#08150fb5;backdrop-filter:blur(4px)}
+.presentation-heading{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.presentation-heading h2{font-size:27px;font-weight:550;margin:7px 0 0}
+.presentation-intro,.presentation-help{font-size:11px;line-height:1.6;color:#bbcdb3}
+.presentation-intro{margin:15px 0 24px}.presentation-help{margin:8px 0 20px}
+.presentation-setting{display:flex;flex-direction:column;gap:12px;font-size:13px}
+.presentation-setting>span{display:flex;justify-content:space-between;gap:10px}
+.presentation-setting output{color:var(--lime);font-variant-numeric:tabular-nums}
+.presentation-setting input[type="range"]{width:100%;accent-color:var(--lime);cursor:pointer}
+.presentation-setting select{padding:10px;border:1px solid #aec79960;border-radius:6px;background:#203a2c;color:var(--ink)}
+.presentation-check{display:flex;gap:12px;align-items:flex-start;font-size:13px;margin:20px 0 26px}
+.presentation-check input{accent-color:var(--lime);margin:3px 0 0;width:16px;height:16px}
+.presentation-check small{display:block;font-size:11px;color:#bbcdb3;margin-top:5px}
+body.immersive.riding .route-panel,body.immersive.riding .profile,body.immersive.riding #ride-focus,body.immersive.riding #descent-card,body.immersive.riding #ratio,body.immersive.riding .gear-panel .applied{display:none}
+body.immersive.riding #equipment{grid-template-columns:repeat(2,minmax(80px,1fr));width:236px;gap:4px;top:100px}
+body.immersive.riding .device-chip{padding:7px 8px;min-height:32px;gap:6px}
+body.immersive.riding .device-chip b{font-size:9px}
+body.immersive.riding .device-chip.connected small{display:none}
+body.immersive.riding .device-chip:not(.connected) small{font-size:8px}
+body.immersive.riding .gear-panel{bottom:116px;width:210px;padding:12px 14px;grid-template-columns:1fr 72px;gap:7px}
+body.immersive.riding .gear-panel .label{font-size:8px;letter-spacing:1px}
+body.immersive.riding .gear-panel strong{font-size:31px}
+body.immersive.riding .grade-row span{font-size:8px;letter-spacing:.6px}
+body.immersive.riding .grade-row b{font-size:22px}
+body.immersive.riding .bottom-row{justify-content:flex-end}
+body.immersive.riding .ride-actions{max-width:none}
+body.immersive.riding .status-row{margin-bottom:10px}
+body.immersive.riding #corner-card{top:112px;background:#12251ed9}
+@media(max-width:1150px){body .top-right,body.riding .top-right{max-width:295px}body .top-right button{font-size:10px;padding:7px 8px}body.immersive.riding #equipment{width:218px}body.immersive.riding .telemetry{left:49%}body.immersive.riding .telemetry>div{min-width:80px;padding:0 10px}}

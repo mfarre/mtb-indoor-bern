@@ -6,9 +6,9 @@ A Windows MTB simulator with real elevation data, aerial imagery, direct Bluetoo
 
 [Simulator](docs/simulator.md) · [Data acquisition](docs/data-acquisition.md) · [Bluetooth brakes](docs/bluetooth-brakes.md) · [Development log](DEVELOPMENT_LOG.md) · [Documentation index](docs/README.md)
 
-![Animated ride through the Gurtentrail, featuring the El Tony jump and signage](docs/images/gurten-trail.gif)
+![Before and after: the El Tony forest rendering pilot on Gurtentrail](docs/images/el-tony-pilot-comparison.gif)
 
-*Gurten: Il Brunello → Gurten → Gurtentrail. Real map and elevation data, recreated vegetation and approximate jump geometry.*
+*El Tony on Gurtentrail: the previous renderer and the new woodland pilot at matching positions. Real map and elevation data, recreated vegetation and approximate jump geometry. [45-second comparison with ride sound](docs/images/el-tony-pilot-comparison.mp4) · [Pilot details and performance](docs/el-tony-pilot.md).*
 
 ## Three parts of the project
 
@@ -36,6 +36,8 @@ On Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/1
 ```
 
 Select a course and choose **Explore in demo**. Pause, click the elevation profile to seek, resume, or accelerate up to ×8. On Gurten, **El Tony ↗** jumps directly to the featured section. Demo does not control the trainer.
+
+**Focus view** keeps the key riding numbers visible while folding away the map and profile. **View & sound** saves volume, stable-camera and frame-rate preferences independently of bike calibration. Ride audio includes the ground under your tyres, wind, coasting and gear changes. [Visual and audio pilot](docs/el-tony-pilot.md).
 
 On **Eiger Bike Challenge 20 km**, choose the whole course or start from any of its three sectors before riding or exploring in demo. [Eiger route and sector guide](docs/EIGER.md).
 

@@ -61,6 +61,9 @@ internal sealed class RideSession
     private TrainerControl? activeControl;
     private readonly TrainerLoad trainerLoad;
     private bool easierShiftPending;
+    private string presentationEpoch = Guid.NewGuid().ToString("N");
+    private long stateSequence;
+    private void NewPresentationEpoch() { presentationEpoch = Guid.NewGuid().ToString("N"); stateSequence = 0; }
     public BikeProfile Bike { get; private set; } = new();
     public int GearCount => Bike.Sprockets.Length;
     public Func<string> TrainerIdentity { get; set; } = () => "";
@@ -131,6 +134,7 @@ internal sealed class RideSession
     public void SeekDemo(double distance)
     {
         if (!CanSeek || !double.IsFinite(distance)) return;
+        NewPresentationEpoch();
         bool wasFinished = Mode == "finished";
         Distance = Math.Clamp(distance, 0, course.Length); Velocity = 0;
         Handling.Reset(); Descent.ResetAt(Distance); screenBrake = controllerBrake = false;
@@ -181,6 +185,7 @@ internal sealed class RideSession
             }
             trainerLoad.Reset(); easierShiftPending = false;
             Mode = demo ? "demo" : "ride";
+            NewPresentationEpoch();
             Message = Practice ? "PRACTICE · hold A / Space to brake · no KICKR control or record" : demo ? "DEMO · automatic ride, without KICKR control" : $"MTB 1×{GearCount} · + shifts up · B shifts down";
             pedalled = demo || pedalled; lastControl = DateTime.MinValue; lastConfirmation = DateTime.UtcNow;
             log(demo ? "3D demo started. KICKR control is inactive." : "Ride started. KICKR control confirmed.");
@@ -212,7 +217,7 @@ internal sealed class RideSession
         await PauseAsync("Ride stopped");
         ResetProgress(); Mode = "ready";
     }
-    private void ResetProgress() { Distance = StartDistance; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); if(StartDistance>0)Descent.ResetAt(StartDistance);else Descent.Reset(); screenBrake = controllerBrake = false; }
+    private void ResetProgress() { NewPresentationEpoch(); Distance = StartDistance; Elapsed = 0; Velocity = 0; Climbed = 0; pedalled = false; DemoSpeed = 1; Practice = false; Handling.Reset(); if(StartDistance>0)Descent.ResetAt(StartDistance);else Descent.Reset(); screenBrake = controllerBrake = false; }
     private async Task<string?> ReleaseControlAsync()
     {
         rideToken?.Cancel();
@@ -277,7 +282,14 @@ internal sealed class RideSession
     {
         var p = course.At(Distance);
         bool hrFresh = heart.HeartRateFresh;
+        // Demo cadence/power are display values, not drivetrain telemetry. Supply explicit
+        // presentation semantics without feeding the sound adapter back into ride physics.
+        bool coasting = IsDemo ? (p.Grade <= -1.3 || BrakePressed) : Fresh && (trainer.Power <= 5 || trainer.Cadence <= 2);
+        double audioBrake = IsDemo && !Practice ? (BrakePressed ? 1 : 0) : Handling.Brake;
         return new { type = "state", mode = Mode, message = Message, distance = Distance, speed = Velocity * 3.6, elapsed = Elapsed,
+            presentationEpoch, stateSequence = ++stateSequence, hostTimeMs = Environment.TickCount64,
+            presentation = (preferences?.Data.Presentation ?? new PresentationPreferences()).Snapshot(),
+            surface = Trail.SurfaceAt(Distance), audio = new { coasting, brake = audioBrake, synthetic = IsDemo },
             climbed = Climbed, grade = p.Grade, altitude = p.Alt, gear = Gear, weight = RiderKg, difficulty = Difficulty, busy = Busy,
             devices,chainring=Chainring,sprocket=Bike.Sprockets[Gear-1],development=BikeDynamics.Development(Gear,Chainring,Bike),gearCount=GearCount,bikeName=Bike.Name,bikeKg=Bike.BikeKg,calibrated=ValidCalibration is not null,settingsWarning=preferences?.Warning,
             watts = Practice ? (Running && p.Grade > -1.3 ? 160 : 0) : IsDemo && Running ? 170 : Fresh ? trainer.Power : null,
@@ -325,12 +337,22 @@ internal sealed class RideSession
         using var trainer = new SensorConnection(SensorRole.Trainer);
         using var heart = new SensorConnection(SensorRole.HeartRate);
         var ride = new RideSession(course, trainer, heart, _ => { });
+        var initialView = JsonSerializer.SerializeToElement(ride.Snapshot());
+        var nextView = JsonSerializer.SerializeToElement(ride.Snapshot());
+        if (initialView.GetProperty("presentationEpoch").GetString() != nextView.GetProperty("presentationEpoch").GetString() ||
+            nextView.GetProperty("stateSequence").GetInt64() <= initialView.GetProperty("stateSequence").GetInt64() ||
+            nextView.GetProperty("hostTimeMs").GetInt64() < initialView.GetProperty("hostTimeMs").GetInt64() ||
+            nextView.GetProperty("surface").GetString() != ride.Trail.SurfaceAt(ride.Distance))
+            throw new Exception("Presentation snapshot sequence, clock and current surface");
         ride.SeekDemo(100); if(ride.Distance!=0||ride.CanSeek)throw new Exception("Seeking before demo");
         ride.CycleDemoSpeed(); if(ride.DemoSpeed != 1) throw new Exception("Demo speed outside demo");
         ride.StartAsync(false).GetAwaiter().GetResult();
         if (ride.Running || ride.Distance != 0) throw new Exception("Live start without trainer");
         ride.SeekDemo(100); if(ride.Distance!=0||ride.CanSeek)throw new Exception("Seeking a real paused session");
         ride.StartAsync(true).GetAwaiter().GetResult();
+        var demoView = JsonSerializer.SerializeToElement(ride.Snapshot());
+        if (demoView.GetProperty("presentationEpoch").GetString() == initialView.GetProperty("presentationEpoch").GetString() ||
+            !demoView.GetProperty("audio").GetProperty("synthetic").GetBoolean()) throw new Exception("Demo must start a new presentation epoch with explicit synthetic audio semantics");
         for(int i=0;i<100;i++) ride.Tick(.1);
         if (Math.Abs(ride.Distance - 62) > .01 || trainer.Control is not null) throw new Exception("Demo must advance without controlling trainer");
         foreach(int multiplier in new[]{2,4,8,1})
@@ -345,9 +367,13 @@ internal sealed class RideSession
         ride.CycleDemoSpeed(); ride.Tick(.1);
         if(ride.DemoSpeed!=2 || ride.Distance!=pausedDistance)throw new Exception("Paused demo speed must not advance");
         double savedElapsed=ride.Elapsed;
+        string? epochBeforeSeek = JsonSerializer.SerializeToElement(ride.Snapshot()).GetProperty("presentationEpoch").GetString();
         ride.SeekDemo(course.Length*.4); pausedDistance=ride.Distance; ride.Tick(.1);
+        string? epochAfterSeek = JsonSerializer.SerializeToElement(ride.Snapshot()).GetProperty("presentationEpoch").GetString();
+        if (epochBeforeSeek == epochAfterSeek) throw new Exception("Seek must invalidate presentation interpolation and old audio events");
         if(ride.Mode!="paused"||ride.Distance!=pausedDistance||ride.Elapsed!=savedElapsed||ride.Velocity!=0)throw new Exception("Paused seeking must preserve pause and time");
         foreach(var invalid in new[]{double.NaN,double.PositiveInfinity,double.NegativeInfinity})ride.SeekDemo(invalid);
+        if (JsonSerializer.SerializeToElement(ride.Snapshot()).GetProperty("presentationEpoch").GetString() != epochAfterSeek) throw new Exception("Ignored seek must not reset presentation");
         if(ride.Distance!=pausedDistance)throw new Exception("Non-finite seek");
         ride.ResumeAsync().GetAwaiter().GetResult(); ride.Tick(.1);
         if(ride.DemoSpeed!=2 || Math.Abs(ride.Distance-pausedDistance-1.24)>.001)throw new Exception("Resume demo speed");

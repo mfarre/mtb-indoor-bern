@@ -156,8 +156,8 @@ function meshFromRows(rows,positions,uvs,indices){
  }));
 }
 
-function buildEarth(engine,data,group){
- const positions=[],uvs=[],indices=[];
+export function buildGurtenEarth(engine,data,group){
+ const positions=[],uvs=[],indices=[],materialGroups=[];
  for(const jump of data.jumps){
   const steps=Math.max(12,Math.ceil(jump.length/.45)),rows=[];
   for(let i=0;i<=steps;i++){
@@ -165,7 +165,8 @@ function buildEarth(engine,data,group){
    const lateral=[-edge,-(half+edge)/2,-half,-half*.5,0,half*.5,half,(half+edge)/2,edge];
    rows.push(lateral.map(off=>pileSurface(engine,jump,d,off)));
   }
-  meshFromRows(rows,positions,uvs,indices);
+  const start=indices.length;meshFromRows(rows,positions,uvs,indices);
+  materialGroups.push({start,count:indices.length-start,materialIndex:engine.pilotAt?.(jump.distance+jump.length/2)?1:0});
  }
  for(const berm of data.berms){
   const steps=Math.max(12,Math.ceil(berm.length/.7)),half=berm.width/2,rows=[];
@@ -182,12 +183,14 @@ function buildEarth(engine,data,group){
    }
    if(berm.side<0)row.reverse();rows.push(row);
   }
-  meshFromRows(rows,positions,uvs,indices);
+  const start=indices.length;meshFromRows(rows,positions,uvs,indices);
+  materialGroups.push({start,count:indices.length-start,materialIndex:engine.pilotAt?.(berm.distance+berm.length/2)?1:0});
  }
  if(!positions.length)return 0;
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);geometry.computeVertexNormals();geometry.computeBoundingSphere();
  const material=new T.MeshStandardMaterial({map:engine.gurtenEarthTexture,bumpMap:engine.gurtenEarthTexture,bumpScale:.018,roughness:1,color:'#ffffff',side:T.DoubleSide});
- const mesh=new T.Mesh(geometry,material);mesh.name='Gurten · compacted earth tables and berms';mesh.castShadow=mesh.receiveShadow=true;group.add(mesh);
+ if(engine.elTonyPilot)for(const g of materialGroups)geometry.addGroup(g.start,g.count,g.materialIndex);
+ const mesh=new T.Mesh(geometry,engine.elTonyPilot?[material,engine.elTonyPilot.materials.featureEarth]:material);mesh.name='Gurten · compacted earth tables and berms';mesh.castShadow=mesh.receiveShadow=true;group.add(mesh);
  return indices.length/3;
 }
 
@@ -247,7 +250,7 @@ function addFeather(engine,group,material,distance,offset){
 
 export async function addGurtenFeatures(engine,descriptors=engine.gurtenFeatures){
  const data=engine.gurtenFeatures??prepareGurtenFeatures(engine,descriptors),group=new T.Group();group.name='Gurtentrail · reference-based features';engine.scene.add(group);engine.gurtenFeatureGroup=group;
- const triangles=buildEarth(engine,data,group),wood=new T.MeshStandardMaterial({map:timberTexture(),color:'#d3c6ac',roughness:1});
+ const triangles=buildGurtenEarth(engine,data,group),wood=new T.MeshStandardMaterial({map:timberTexture(),color:'#d3c6ac',roughness:1});
  for(const mark of data.landmarks)addBoard(engine,group,wood,labelTexture(mark.label,mark.detail),mark);
  let logo=null,logoTexture=null,brandBoard=null,flagCount=0;
  if(data.branding){

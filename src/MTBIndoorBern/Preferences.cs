@@ -24,6 +24,7 @@ internal sealed class Preferences
     public double Difficulty { get; set; } = .5;
     public int Chainring { get; set; } = 32;
     public BikeProfile Bike { get; set; } = new();
+    public PresentationPreferences Presentation { get; set; } = new();
     public CalibrationResult? Calibration { get; set; }
     public string CourseId { get; set; } = "al-dente";
     public List<SavedSensor> Sensors { get; set; } = [];
@@ -45,6 +46,7 @@ internal sealed class PreferencesStore
         Data.Difficulty = double.IsFinite(Data.Difficulty) ? Math.Clamp(Data.Difficulty, 0, 1) : .5;
         Data.Chainring = Data.Chainring is >=20 and <=60 ? Data.Chainring : 32;
         Data.Bike = (Data.Bike ?? new()).Normalize();
+        Data.Presentation = (Data.Presentation ?? new()).Normalize();
         Data.Version = 4;
         Data.Sensors ??= [];
         // Existing Controller records remain the right slot. A positively identified

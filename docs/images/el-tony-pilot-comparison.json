@@ -1,0 +1,16 @@
+{
+  "course": "gurten",
+  "mp4Bytes": 24325862,
+  "gifBytes": 9124725,
+  "gifFrames": 80,
+  "seconds": 45,
+  "fps": 12,
+  "gifStartSeconds": 14.0,
+  "gifSeconds": 8.0,
+  "startMeters": 4970,
+  "endMeters": 5248.483333333334,
+  "width": 800,
+  "height": 280,
+  "method": "Deterministic engine capture; not a real-time performance measurement",
+  "audio": "Same application graph rendered offline against the coasting capture trajectory"
+}

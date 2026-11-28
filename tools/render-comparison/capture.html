@@ -12,6 +12,48 @@ try{
  const [course,world]=await Promise.all(['route.json','world.json'].map(file=>fetch(`./${info.folder}/${file}`).then(r=>r.json())));
  const engine=new ForestRenderer(document.getElementById('world'),course,world,info);await engine.initialize();
  engine.renderer.setPixelRatio(1);
+ window.exportRideAudio=async({start,speed,seconds})=>{
+  try{
+   const {createRideAudio}=await import('./ride-audio.js');
+   const context=new OfflineAudioContext(2,48000*seconds,48000),audio=createRideAudio({context,watch:false});
+   if(!await audio.unlock())throw Error('Could not initialize the application audio graph');
+   for(let n=0;n<=seconds*10;n++){
+    const time=n/10;engine.distance=start+speed*time;
+    audio.update({mode:time>=seconds-.4?'paused':'demo',demo:true,demoSpeed:1,gear:8,gearCount:12,distance:engine.distance,speed:speed*3.6,surface:engine.stats().surface,presentationEpoch:'comparison',stateSequence:n+1,audio:{coasting:true,brake:0,synthetic:true}},time);
+   }
+   const buffer=await context.startRendering(),length=buffer.length*4,raw=new Uint8Array(44+length),view=new DataView(raw.buffer);
+   const text=(offset,value)=>[...value].forEach((c,i)=>view.setUint8(offset+i,c.charCodeAt(0)));
+   text(0,'RIFF');view.setUint32(4,36+length,true);text(8,'WAVE');text(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,2,true);view.setUint32(24,48000,true);view.setUint32(28,192000,true);view.setUint16(32,4,true);view.setUint16(34,16,true);text(36,'data');view.setUint32(40,length,true);
+   let peak=0,sum=0;
+   for(let i=0;i<buffer.length;i++)for(let c=0;c<2;c++){const sample=buffer.getChannelData(c)[i];peak=Math.max(peak,Math.abs(sample));sum+=sample*sample;view.setInt16(44+i*4+c*2,Math.round(Math.max(-1,Math.min(1,sample))*32767),true);}
+   for(let offset=0,index=0;offset<raw.length;offset+=32768,index++)send({type:'audio-chunk',index,data:btoa(String.fromCharCode(...raw.subarray(offset,offset+32768)))});
+   send({type:'audio-complete',method:'Application Web Audio graph rendered offline against the deterministic coasting capture trajectory, using actual under-wheel surface metadata. Synthetic sounds; not a microphone recording.',sampleRate:48000,channels:2,seconds,peak,rms:Math.sqrt(sum/(buffer.length*2)),bytes:raw.length});
+  }catch(error){send({error:String(error.stack??error)});}
+ };
+ window.runRenderBenchmark=({start,speed,seconds,fps,warmup})=>{
+  const interval=1000/fps,intervals=[],submission=[],samples=[];
+  let began=null,previous=null,lastRendered=null,measuredStart=null,frames=0;
+  const percentile=(values,p)=>{const v=[...values].sort((a,b)=>a-b);return v.length?v[Math.min(v.length-1,Math.floor((v.length-1)*p))]:0;};
+  const summarize=v=>({p50:percentile(v,.5),p95:percentile(v,.95),p99:percentile(v,.99),max:v.length?Math.max(...v):0});
+  function tick(now){
+   began??=now;previous??=now-interval;
+   if(now-previous<interval-.5){requestAnimationFrame(tick);return;}
+   previous=now-((now-previous)%interval);
+   const elapsed=(now-began)/1000,measuring=elapsed>=warmup;
+   const d=start+Math.max(0,elapsed-warmup)*speed;
+   engine.distance=d;const before=performance.now();engine.render(d,interval/1000,'demo',false);const cpu=performance.now()-before;
+   if(measuring){
+    measuredStart??=now;
+    if(lastRendered!==null)intervals.push(now-lastRendered);
+    lastRendered=now;submission.push(cpu);frames++;
+    if(frames%fps===0)samples.push(engine.stats());
+   }
+   if(elapsed<warmup+seconds){requestAnimationFrame(tick);return;}
+   const gl=engine.renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
+   send({type:'benchmark',method:'Real-time renderer-only benchmark; fixed pixel ratio 1; no screenshot work in measured loop; CPU submission is not GPU time',frames,seconds:(now-measuredStart)/1000,fps:(frames-1)*1000/(now-measuredStart),targetFps:fps,frameIntervalMs:summarize(intervals),cpuSubmissionMs:summarize(submission),stallsOver66ms:intervals.filter(x=>x>66.7).length,canvas:[engine.renderer.domElement.width,engine.renderer.domElement.height],gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),samples,lastFrame:engine.stats()});
+  }
+  requestAnimationFrame(tick);
+ };
  window.renderCaptureFrame=({distance,dt})=>{
   if(distance>=course.length){send({error:'Capture exceeds course length'});return;}
   // Fixed positions and camera timing make both renderer versions directly comparable.

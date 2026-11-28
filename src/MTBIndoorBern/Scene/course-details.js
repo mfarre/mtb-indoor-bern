@@ -1,4 +1,5 @@
 import * as T from './vendor/three.module.js';
+import {pilotEdgeOffset,pilotWeight} from './el-tony-profile.js';
 const rng=(seed=61)=>()=>((seed=(1664525*seed+1013904223)>>>0)/4294967296);
 function texture(paint){const c=document.createElement('canvas');c.width=c.height=512;paint(c.getContext('2d'),512);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=8;return t;}
 function aggregate(kind){const r=rng(kind==='asphalt'?44:97);return texture((c,s)=>{c.fillStyle=kind==='asphalt'?'#555955':'#827e6d';c.fillRect(0,0,s,s);for(let i=0;i<45000;i++){const v=r()*65+35;c.fillStyle=kind==='asphalt'?`rgba(${v},${v+3},${v+2},.35)`:`rgba(${v+45},${v+40},${v+25},.6)`;const w=kind==='asphalt'?.4+r()*1.5:1+r()*4;c.fillRect(r()*s,r()*s,w,w*.65);}if(kind==='asphalt'){c.strokeStyle='#323735';c.lineWidth=.8;for(let i=0;i<4;i++){c.beginPath();let x=r()*s;c.moveTo(x,0);for(let y=0;y<s;y+=20){x+=(r()-.5)*12;c.lineTo(x,y);}c.stroke();}}});}
@@ -39,30 +40,32 @@ export function buildSurveyRoad(renderer){
  buildSurveyGround(renderer);
  // Segment groups share the same centreline and elevations as the physics model.
  const order=['asphalt','gravel','leaves','earth'];
- const mesh=ribbon(renderer,q=>{const s=surfaceAt(renderer,q.d);const w=(renderer.featureWidth?.(q.d,s.width)??s.width)*(1+(s.surface==='earth'?0:s.forest?.07:.015)*Math.sin(q.d*.13));return [-1,-.82,0,.82,1].map(side=>({off:side*w/2,lift:.062,color:s.surface==='leaves'?'#a09b8c':s.surface==='earth'?'#ffffff':'#dedbd0'}));},order.map(k=>renderer.surveyMaterials[k]),true);
+ const roadKind=d=>{const kind=order.indexOf(surfaceAt(renderer,d).surface);return kind===3&&renderer.pilotAt?.(d)?4:kind;};
+ const roadMaterials=order.map(k=>renderer.surveyMaterials[k]);if(renderer.elTonyPilot)roadMaterials.push(renderer.elTonyPilot.materials.earth);
+ const mesh=ribbon(renderer,q=>{const s=surfaceAt(renderer,q.d);const w=(renderer.featureWidth?.(q.d,s.width)??s.width)*(1+(s.surface==='earth'?0:s.forest?.07:.015)*Math.sin(q.d*.13));return [-1,-.82,0,.82,1].map(side=>({off:side*w/2+(Math.abs(side)===1?pilotEdgeOffset(q.d,side,!!renderer.elTonyPilot):0),lift:.062,color:s.surface==='leaves'?'#a09b8c':s.surface==='earth'?(renderer.pilotAt?.(q.d)&&Math.abs(side)===1?'#b7ad96':'#ffffff'):'#dedbd0'}));},roadMaterials,true);
  renderer.roadMesh=mesh;
  mesh.geometry.clearGroups();let previous=-1,start=0,count=0;
- for(let i=1;i<ps.length;i++){const kind=order.indexOf(surfaceAt(renderer,(ps[i-1].d+ps[i].d)/2).surface);if(kind!==previous&&count){mesh.geometry.addGroup(start,count,previous);start+=count;count=0;}previous=kind;count+=24;}if(count)mesh.geometry.addGroup(start,count,previous);
+ for(let i=1;i<ps.length;i++){const kind=roadKind((ps[i-1].d+ps[i].d)/2);if(kind!==previous&&count){mesh.geometry.addGroup(start,count,previous);start+=count;count=0;}previous=kind;count+=24;}if(count)mesh.geometry.addGroup(start,count,previous);
  // The recorded route revisits the same path with slightly different GPS/barometric heights.
  // Keep its original elevations, but hide the other pass immediately around the rider.
  const original=mesh.geometry.index.array.slice(),visible=new original.constructor(original.length);
  renderer.updateRoadVisibility=(distance,overview=false)=>{const rider=renderer.at(distance);let n=0,group=-1,groupStart=0;mesh.geometry.clearGroups();
   for(let i=1;i<ps.length;i++){const a=ps[i-1],b=ps[i],d=(a.d+b.d)/2,near=Math.hypot((a.x+b.x)/2-rider.x,(a.z+b.z)/2-rider.z);
    if(!overview&&near<20&&Math.abs(d-distance)>near*2+8)continue;
-   const kind=order.indexOf(surfaceAt(renderer,d).surface);if(kind!==group){if(n>groupStart)mesh.geometry.addGroup(groupStart,n-groupStart,group);group=kind;groupStart=n;}
+   const kind=roadKind(d);if(kind!==group){if(n>groupStart)mesh.geometry.addGroup(groupStart,n-groupStart,group);group=kind;groupStart=n;}
    visible.set(original.subarray((i-1)*24,i*24),n);n+=24;
   }
   if(n>groupStart)mesh.geometry.addGroup(groupStart,n-groupStart,group);mesh.geometry.index.array.set(visible);mesh.geometry.index.needsUpdate=true;mesh.geometry.setDrawRange(0,n);
  };
 }
 function buildSurveyGround(renderer){
- const spacing=2,cells=new Set(),vertices=new Map(),p=[],uv=[],color=[],indices=[[],[]];
+ const spacing=2,cells=new Set(),vertices=new Map(),p=[],uv=[],color=[],indices=[[],[],[]];
  for(const q of renderer.course.points){const cx=Math.floor(q.x/spacing),cz=Math.floor(q.z/spacing);for(let dz=-15;dz<=15;dz++)for(let dx=-15;dx<=15;dx++)cells.add(`${cx+dx},${cz+dz}`);}
- function vertex(ix,iz,forest){const key=`${ix},${iz},${forest}`;if(vertices.has(key))return vertices.get(key);const x=ix*spacing,z=iz*spacing,index=p.length/3;p.push(x,renderer.localGround(x,z)-.025,z);uv.push(...(forest?[x/1.6,z/1.6]:renderer.uv(x,z)));const c=new T.Color(renderer.survey?.season==='summer'?(forest?'#c4c7ab':'#ffffff'):(forest?'#b9b09a':'#e1dece'));color.push(c.r,c.g,c.b);vertices.set(key,index);return index;}
- for(const cell of cells){const [ix,iz]=cell.split(',').map(Number),x=(ix+.5)*spacing,z=(iz+.5)*spacing,n=renderer.nearestRoad(x,z);if(n.distance>28)continue;const s=surfaceAt(renderer,n.d),forest=s.forest&&n.distance<17,kind=forest?1:0,a=vertex(ix,iz,forest),b=vertex(ix+1,iz,forest),c=vertex(ix,iz+1,forest),d=vertex(ix+1,iz+1,forest);indices[kind].push(a,c,b,b,c,d);}
- const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('color',new T.Float32BufferAttribute(color,3));g.setIndex([...indices[0],...indices[1]]);g.addGroup(0,indices[0].length,0);g.addGroup(indices[0].length,indices[1].length,1);g.computeVertexNormals();
- const material=new T.MeshStandardMaterial({map:renderer.aerial,roughness:1,vertexColors:true});const mesh=new T.Mesh(g,[material,renderer.surveyMaterials.floor]);mesh.receiveShadow=true;renderer.scene.add(mesh);
- renderer.localGroundVertices=p.length/3;renderer.localGroundMesh=mesh;renderer.localGroundAerialMaterial=material;renderer.localGroundForestUv=g.getAttribute("uv");const photoUv=[];for(let i=0;i<p.length;i+=3)photoUv.push(...renderer.uv(p[i],p[i+2]));renderer.localGroundPhotoUv=new T.Float32BufferAttribute(photoUv,2);
+ function vertex(ix,iz,forest){const key=`${ix},${iz},${forest}`;if(vertices.has(key))return vertices.get(key);const x=ix*spacing,z=iz*spacing,index=p.length/3;p.push(x,renderer.localGround(x,z)-.025,z);uv.push(...(forest?[x/1.6,z/1.6]:renderer.uv(x,z)));const c=new T.Color(forest===2?'#ffffff':renderer.survey?.season==='summer'?(forest?'#c4c7ab':'#ffffff'):(forest?'#b9b09a':'#e1dece'));color.push(c.r,c.g,c.b);vertices.set(key,index);return index;}
+ for(const cell of cells){const [ix,iz]=cell.split(',').map(Number),x=(ix+.5)*spacing,z=(iz+.5)*spacing,n=renderer.nearestRoad(x,z);if(n.distance>28)continue;const s=surfaceAt(renderer,n.d),forest=s.forest&&n.distance<17,kind=forest?(renderer.pilotAt?.(n.d,n.distance)?2:1):0,a=vertex(ix,iz,kind),b=vertex(ix+1,iz,kind),c=vertex(ix,iz+1,kind),d=vertex(ix+1,iz+1,kind);indices[kind].push(a,c,b,b,c,d);}
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('color',new T.Float32BufferAttribute(color,3));g.setIndex([...indices[0],...indices[1],...indices[2]]);g.addGroup(0,indices[0].length,0);g.addGroup(indices[0].length,indices[1].length,1);if(indices[2].length)g.addGroup(indices[0].length+indices[1].length,indices[2].length,2);g.computeVertexNormals();
+ const material=new T.MeshStandardMaterial({map:renderer.aerial,roughness:1,vertexColors:true});const mesh=new T.Mesh(g,[material,renderer.surveyMaterials.floor,...(renderer.elTonyPilot?[renderer.elTonyPilot.materials.floor]:[])]);mesh.receiveShadow=true;renderer.scene.add(mesh);
+ renderer.localGroundVertices=p.length/3;renderer.localGroundMesh=mesh;renderer.localGroundAerialMaterial=material;renderer.localGroundForestUv=g.getAttribute("uv");const photoUv=[];for(let i=0;i<p.length;i+=3)photoUv.push(...renderer.uv(p[i],p[i+2]));renderer.localGroundPhotoUv=new T.Float32BufferAttribute(photoUv,2);if(renderer.elTonyPilot){const blend=[];for(let i=0;i<p.length;i+=3){const x=p[i],z=p[i+2],n=renderer.nearestRoad(x,z),edge=9+Math.sin(x*.37)*1.6+Math.cos(z*.29)*1.2;blend.push(pilotWeight(n.d)*(1-T.MathUtils.smoothstep(n.distance,edge,17)));}g.setAttribute("pilotPhotoUv",renderer.localGroundPhotoUv);g.setAttribute("pilotBlend",new T.Float32BufferAttribute(blend,1));}
 }
 export function addSurveyTrees(renderer){
  const r=rng(153),ps=renderer.course.points,cells=new Map(),size=16;
@@ -78,7 +81,7 @@ export function addSurveyTrees(renderer){
 }
 export function buildSurveyDetails(renderer){
  const r=rng(29),ps=renderer.course.points,rocks=[],roots=[],shrubs=[],saplings=[];
- for(let i=2;i<ps.length-2;i+=2){const q=ps[i],s=surfaceAt(renderer,q.d),a=ps[i-1],b=ps[i+1],dx=b.x-a.x,dz=b.z-a.z,l=Math.hypot(dx,dz)||1;
+ for(let i=2;i<ps.length-2;i+=2){const q=ps[i];if(renderer.pilotAt?.(q.d))continue;const s=surfaceAt(renderer,q.d),a=ps[i-1],b=ps[i+1],dx=b.x-a.x,dz=b.z-a.z,l=Math.hypot(dx,dz)||1;
   for(let k=0;k<(s.forest?5:1);k++){const featureLift=renderer.featureHeight?.(q.d)??0;const off=((renderer.featureWidth?.(q.d,s.width)??s.width)/2+(featureLift>0?1.7+featureLift*.6:.6)+r()*(s.forest?6:1.4))*(k%2?1:-1),x=q.x-dz/l*off,z=q.z+dx/l*off,y=renderer.localGround(x,z); if(renderer.gurtenKeepClear?.(x,z))continue; if(s.forest){shrubs.push([x,y+.05,z,.35+r()*.75,r()*6]);if(k===3&&i%6===0)saplings.push([x,y,z,2+r()*2]);}else if(s.surface==='gravel')rocks.push([x,y+.06,z,.07+r()*.13]);}
   // Root placement is illustrative, not a surveyed obstacle. Restrict to observed forest sections.
   if(s.surface==='leaves'&&s.confidence==='observed'&&i%18===0)roots.push([q.x,q.y+.09,q.z,Math.atan2(dx,dz),s.width*.95]);

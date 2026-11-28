@@ -6,10 +6,30 @@ import {setupProfileSeek,updateProfileSeek} from './profile-seek.js';
 import {setupBikeSettings,updateBikeSettings} from './bike-settings.js';
 import {setupCourseSectors,updateCourseSectors,drawSectorProfile} from './course-sectors.js';
 import {setupMouseShifting} from './ride-input.js';
+import {PresentationTimeline,FrameMetrics} from './ride-presentation.js';
+import {setupPresentationControls} from './presentation-controls.js';
+import {createRideAudio} from './ride-audio.js';
 const $=id=>document.getElementById(id),bridge=window.chrome?.webview;
-const send=(action,extra={})=>bridge?.postMessage({action,...extra});
+// Sound is optional. An unavailable audio device must never reach fail(), which
+// deliberately pauses the host for actual scene/renderer failures.
+let rideAudio,audioUnavailable=false;
+try{rideAudio=createRideAudio();}catch{audioUnavailable=true;}
+const audio=Object.fromEntries(['unlock','update','setPreferences','silence','dispose','status'].map(method=>[method,(...args)=>{
+ if(audioUnavailable)return method==='status'?'unavailable':undefined;
+ try{const result=rideAudio[method](...args);result?.catch?.(()=>{audioUnavailable=true;});return result;}catch{audioUnavailable=true;return method==='status'?'unavailable':undefined;}
+}]));
+const send=(action,extra={})=>{
+ if(['start','demo','practice','resume','preview'].includes(action))audio.unlock();
+ if(['pause','stop','devices','course','profile-request','error'].includes(action))audio.silence();
+ return bridge?.postMessage({action,...extra});
+};
 const format=(v,n=0)=>Number(v).toLocaleString('en-GB',{minimumFractionDigits:n,maximumFractionDigits:n});
-let state={mode:'ready',distance:0,speed:0,elapsed:0,climbed:0,gear:8,demo:false},course,world,info,engine,overview=false,lastFrame=0,lastStats=performance.now(),frames=0,totalFrames=0,errors=[],devicesKey='';
+let state={mode:'ready',distance:0,speed:0,elapsed:0,climbed:0,gear:8,demo:false},course,world,info,engine,overview=false,lastFrame=0,nextFrameAt=0,lastStats=performance.now(),totalFrames=0,errors=[],devicesKey='',lastDetailDraw=-Infinity,lastVisualDistance=0,lastFrameMetrics={};
+const timeline=new PresentationTimeline(),frameMetrics=new FrameMetrics();
+const presentation=setupPresentationControls(send,audio,(next,previous)=>{
+ if(next.targetFps!==previous.targetFps){frameMetrics.reset();lastFrame=0;nextFrameAt=0;lastStats=performance.now();}
+ if(next.immersive!==previous.immersive){lastDetailDraw=-Infinity;if(course)refreshHud();}
+},()=>clearBrake());
 function fail(error){const message=String(error?.message??error);errors.push(message);$('loading').style.display='flex';$('loading').querySelector('h2').textContent='Could not load the course';$('loading').querySelector('p').textContent=message;send('error',{message});}
 window.addEventListener('error',e=>fail(e.error??e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
 const clearBrake=setupTrail(send);
@@ -18,16 +38,28 @@ setupMouseShifting($('world'),send,()=>state);
 $('bike-settings').onclick=()=>bikeSettings.open();
 bridge?.addEventListener('message',event=>{if(event.data?.type==='open-profile')bikeSettings.open();else if(event.data?.type==='bike-profile'||event.data?.type==='calibration')updateBikeSettings(event.data);});
 setupProfileSeek($('profile'),send,()=>state,()=>course);
-bridge?.addEventListener('message',event=>{if(event.data?.type==='state'){const wasRunning=state.mode==='ride'||state.mode==='demo';state=event.data;if(wasRunning&&state.mode!=='ride'&&state.mode!=='demo')clearBrake();refreshHud();}else if(event.data?.type==='catalog'){for(const option of [...$('course-choice').options])if(!event.data.ids.includes(option.value))option.remove();}else if(event.data?.type==='trail'){addTrailMarkers(engine,event.data);$('practice').hidden=!event.data.stage;if(event.data.stage)$('practice').textContent='↓ Practise the descent · '+event.data.stage.name;}});
+bridge?.addEventListener('message',event=>{
+ if(event.data?.type==='state'){
+  if(!timeline.push(event.data,performance.now()))return;
+  const wasRunning=state.mode==='ride'||state.mode==='demo';state=event.data;
+  presentation.receive(state.presentation);audio.update({...state,presentation:presentation.value});
+  if(wasRunning&&state.mode!=='ride'&&state.mode!=='demo')clearBrake();refreshHud();
+ }else if(event.data?.type==='presentation-settings')presentation.receive(event.data.preferences);
+ else if(event.data?.type==='catalog'){for(const option of [...$('course-choice').options])if(!event.data.ids.includes(option.value))option.remove();}
+ else if(event.data?.type==='trail'){addTrailMarkers(engine,event.data);$('practice').hidden=!event.data.stage;if(event.data.stage)$('practice').textContent='↓ Practise the descent · '+event.data.stage.name;}
+});
 $('start').onclick=()=>send('start');$('demo').onclick=()=>send('demo');$('pause').onclick=()=>send(state.mode==='paused'?'resume':'pause');$('stop').onclick=()=>send('stop');$('devices').onclick=()=>send('devices');
 $('up').onclick=()=>send('gear',{delta:1});$('down').onclick=()=>send('gear',{delta:-1});
 $('demo-speed').onclick=()=>send('demo-speed');
 $('course-highlight').onclick=()=>send('preview',{distance:engine?.gurtenFeatures?.previewDistance??info.previewDistance});
 $('course-choice').onchange=()=>send('course',{id:$('course-choice').value});
 $('view').onclick=()=>{overview=!overview;$('view').textContent=overview?'First-person view ↙':'Aerial view ↗';};
-window.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(e.key==='Escape'){send('pause');e.preventDefault();}if(e.key==='+'||e.key==='='){send('gear',{delta:1});e.preventDefault();}if(e.key==='-'||e.key==='b'||e.key==='B'){send('gear',{delta:-1});e.preventDefault();}});
+window.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||document.querySelector('dialog[open]'))return;if(e.key==='Escape'){send('pause');e.preventDefault();}if(e.key==='+'||e.key==='='){send('gear',{delta:1});e.preventDefault();}if(e.key==='-'||e.key==='b'||e.key==='B'){send('gear',{delta:-1});e.preventDefault();}});
 $('world').addEventListener('webglcontextlost',e=>{e.preventDefault();fail('The graphics engine stopped. Restart MTB Indoor - Bern.');});
 setInterval(()=>send('heartbeat'),1000);
+document.addEventListener('visibilitychange',()=>{frameMetrics.reset();timeline.clear();lastFrame=0;nextFrameAt=0;lastStats=performance.now();if(document.hidden)audio.silence();});
+window.addEventListener('pagehide',()=>audio.dispose());
+window.mtbPresentationDiagnostics=()=>({...lastFrameMetrics,...engine?.stats(),totalFrames,distance:state.distance,visualDistance:lastVisualDistance,presentation:presentation.value,audio:audio.status()});
 function refreshDevices(){
  const snapshot=state.devices??['KICKR','Right Click','Left Click','Heart rate'].map(label=>({label,state:'searching'})),key=JSON.stringify(snapshot);
  if(key===devicesKey)return;devicesKey=key;$('equipment').replaceChildren();
@@ -60,7 +92,9 @@ function refreshHud(){
  demoSpeed.textContent=`⏩ Demo ×${rate}`;demoSpeed.title=`Speed ×${rate}. Click to switch to ×${nextRate}`;
  demoSpeed.setAttribute('aria-label',`Demo speed ×${rate}. Switch to ×${nextRate}`);
  $('bike-summary').textContent=`${state.bikeName??'My MTB'} · ${format(state.weight??75)} + ${format(state.bikeKg??14)} kg · ${state.gearCount??12} gears`;
- $('course-choice').disabled=running||state.busy;$('course-highlight').disabled=running||state.busy;refreshDevices();updateTrail(state);updateCourseSectors(info,state);updateProfileSeek($('profile'),state);if(course){drawMap();drawProfile();}
+ $('course-choice').disabled=running||state.busy;$('course-highlight').disabled=running||state.busy;refreshDevices();updateTrail(state);updateCourseSectors(info,state);updateProfileSeek($('profile'),state);presentation.refreshAudio();
+ const detailsVisible=!(presentation.value.immersive&&(running||pausedDemo)),now=performance.now();
+ if(course&&detailsVisible&&(!running||now-lastDetailDraw>=250)){drawMap();drawProfile();lastDetailDraw=now;}
 }
 function pointAt(d){
  const ps=course.points;d=THREE.MathUtils.clamp(d,0,course.length);let l=0,r=ps.length-1;while(r-l>1){const m=(l+r)>>1;if(ps[m].d<=d)l=m;else r=m;}const a=ps[l],b=ps[r],t=(d-a.d)/(b.d-a.d);return new THREE.Vector3(THREE.MathUtils.lerp(a.x,b.x,t),THREE.MathUtils.lerp(a.y,b.y,t),THREE.MathUtils.lerp(a.z,b.z,t));
@@ -81,8 +115,26 @@ function drawProfile(){
  const px=x(state.distance),sx=x(state.startDistance??0);c.save();c.beginPath();c.rect(sx,0,Math.max(0,px-sx),h);c.clip();c.fillStyle='#b7db8350';c.fill();c.restore();drawSectorProfile(c,w,h,course.length,info.sectors,state.startSector);c.strokeStyle='#d7f69b';c.lineWidth=3;c.beginPath();c.moveTo(px,4);c.lineTo(px,h);c.stroke();
 }
 
-function animate(now){requestAnimationFrame(animate);if(!engine||errors.length)return;if(now-lastFrame<1000/30-.4)return;const dt=Math.min(.12,(now-lastFrame)/1000);lastFrame=now;engine.render(state.distance,dt,state.mode==='ready'&&state.startSector?'paused':state.mode,overview,state);frames++;totalFrames++;
- if(now-lastStats>=3000){const fps=Math.round(frames*1000/(now-lastStats));frames=0;lastStats=now;$('performance').textContent=`${fps} fps · ${overview?'real aerial imagery':'first-person view'}`;engine.adjustQuality(fps);send('stats',{fps,...engine.stats(),width:innerWidth,height:innerHeight,routePoints:course.points.length,trees:engine.world.trees.length,distance:state.distance,mode:state.mode,maxGradeErrorPercent:gradeError,errors});}}
+function animate(now){
+ requestAnimationFrame(animate);if(!engine||errors.length||document.hidden)return;
+ const targetFps=presentation.value.targetFps,interval=1000/targetFps;
+ if(now<nextFrameAt-.4)return;
+ if(!nextFrameAt)nextFrameAt=now;
+ nextFrameAt+=interval;if(nextFrameAt<now-.4)nextFrameAt=now+interval;
+ const dt=lastFrame?Math.min(.12,(now-lastFrame)/1000):1/targetFps;lastFrame=now;
+ const visual=timeline.sample(now)??{...state,presentationInterpolated:true};visual.presentation=presentation.value;lastVisualDistance=visual.distance;
+ const started=performance.now();
+ engine.render(visual.distance,dt,visual.mode==='ready'&&visual.startSector?'paused':visual.mode,overview,visual);
+ frameMetrics.record(now,performance.now()-started);totalFrames++;
+ if(now-lastStats>=3000){
+  lastFrameMetrics=frameMetrics.snapshot(targetFps);frameMetrics.reset({preserveLastAt:true});lastStats=now;
+  const fps=Math.round(lastFrameMetrics.fps);
+  $('performance').textContent=`${fps} fps · ${overview?'real aerial imagery':'first-person view'}`;
+  $('performance').title=`Target ${targetFps} fps · frame p95 ${lastFrameMetrics.frameMsP95.toFixed(1)} ms · CPU submission p95 ${lastFrameMetrics.renderSubmitMsP95.toFixed(1)} ms · ${lastFrameMetrics.stallsOver100Ms} stalls over 100 ms`;
+  engine.adjustQuality(fps,{targetFps,frameMsP95:lastFrameMetrics.frameMsP95,renderMsP95:lastFrameMetrics.renderSubmitMsP95});
+  send('stats',{...lastFrameMetrics,...engine.stats(),width:innerWidth,height:innerHeight,routePoints:course.points.length,trees:engine.world.trees.length,distance:state.distance,visualDistance:visual.distance,mode:state.mode,immersive:presentation.value.immersive,stableCamera:presentation.value.stableCamera,audio:audio.status(),maxGradeErrorPercent:gradeError,errors});
+ }
+}
 let gradeError=0;
 try{
  const catalog=await fetch('./courses.json').then(r=>r.json()),id=new URLSearchParams(location.search).get('course');info=catalog.find(c=>c.id===id)??catalog[0];
@@ -91,5 +143,5 @@ try{
  $('world').setAttribute('aria-label','3D course: '+info.name);document.querySelectorAll('.profile-axis span').forEach((el,i)=>el.textContent=i===0?'0':format(course.length/1000*i/4,i===4?2:1)+' km');$('course-name').textContent=info.name;$('course-description').textContent=info.description;$('map-title').textContent=info.name.toUpperCase()+' / RIDE 01';$('course-km').textContent=format(course.length/1000,2);$('total-km').textContent='/ '+format(course.length/1000,2)+' km';$('course-ascent').textContent=format(course.ascent);
  const xs=course.points.map(p=>p.x),zs=course.points.map(p=>p.z),alts=course.points.map(p=>p.alt);mapBounds={minX:Math.min(...xs),maxX:Math.max(...xs),minZ:Math.min(...zs),maxZ:Math.max(...zs)};profileBounds={min:Math.min(...alts)-10,max:Math.max(...alts)+10};
  for(let i=0;i<course.points.length-1;i++){const a=course.points[i],b=course.points[i+1];gradeError=Math.max(gradeError,Math.abs(a.grade-(b.y-a.y)/Math.hypot(b.x-a.x,b.z-a.z)*100));}if(gradeError>.002)throw Error('The gradient does not match the course geometry.');
- engine=new ForestRenderer($('world'),course,world,info);await engine.initialize();$('course-highlight').hidden=!engine.gurtenFeatures?.branding;$('loading').style.display='none';refreshHud();lastStats=performance.now();send('ready');requestAnimationFrame(animate);
+ engine=new ForestRenderer($('world'),course,world,info);engine.setElTonyPilotEnabled(new URLSearchParams(location.search).get('pilot')!=='off');await engine.initialize();$('course-highlight').hidden=!engine.gurtenFeatures?.branding;$('loading').style.display='none';refreshHud();lastStats=performance.now();send('ready');requestAnimationFrame(animate);
 }catch(e){fail(e);}
