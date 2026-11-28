@@ -26,7 +26,11 @@ A Windows MTB simulator with real elevation data, aerial imagery, direct Bluetoo
 | [Gurten](docs/GURTEN.md) | 6.53 km | Climb from Kehrsatz, then descend the Gurtentrail to Wabern |
 | [Uetliberg](docs/simulator.md#courses-and-data) | 25.75 km | Zurich, Triemli, Uto Kulm and Ringlikon |
 | [Eiger Bike Challenge 20 km](docs/EIGER.md) | 19.48 km | Alpine summer around Grindelwald, race scenery and three selectable starting sectors |
-| Dentenberg / Al Dente | 12.24 km | Local woodland loop, informed by a recorded ride |
+| [Dentenberg / Al Dente](docs/dentenberg-visuals.md) | 12.24 km | Autumn woodland, leaf-covered singletrack and quieter ride sound |
+
+[![Dentenberg autumn woodland: previous and current renderer](docs/images/dentenberg-woodland-comparison.gif)](docs/dentenberg-visuals.md)
+
+*Dentenberg: a more open autumn canopy, young conifers and a worn leaf-covered trail. Drivetrain noise has been removed. [Comparison, sources and measured performance](docs/dentenberg-visuals.md).*
 
 On Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) installed:
 

@@ -1,5 +1,5 @@
 // Pure presentation adapter. None of these values control the trainer or the simulation.
-export const AUDIO_VERSION = 1;
+export const AUDIO_VERSION = 2;
 export const STALE_SECONDS = .9;
 export const AUDIO_DEFAULTS = Object.freeze({ volume: .35, muted: false });
 const finite = (v, fallback = 0) => typeof v === 'number' && Number.isFinite(v) ? v : fallback;
@@ -18,23 +18,21 @@ export function audioTargets(state = {}) {
   const previewMultiplier = state.demo && !state.practice ? clamp(finite(state.demoSpeed, 1), 1, 8) : 1;
   const speed = running ? clamp(finite(state.speed) / previewMultiplier, 0, 80) : 0;
   const moving = clamp((speed - .3) / 4, 0, 1), intensity = clamp(speed / 35, 0, 1.8);
-  const synthetic = state.demo === true || state.mode === 'demo';
-  const coasting = typeof state.audio?.coasting === 'boolean' ? state.audio.coasting : synthetic
-    ? finite(state.grade) <= -1.3 || state.brake === true
-    : ((Number.isFinite(state.watts) && state.watts <= 5) || (Number.isFinite(state.cadence) && state.cadence <= 2));
   const brake = clamp(state.audio?.brake ?? state.brakePressure ?? (state.brake ? 1 : 0), 0, 1);
   // Slip is the game's corner-grip model, not a wheel-lock measurement; use a restrained scrub texture.
   const slip = state.demo && !state.practice ? 0 : clamp(finite(state.slip) - .12, 0, 1);
-  return { running, speed, surface: audioSurface(state.surface), coasting,
+  // Drivetrain sounds are intentionally absent: cadence, coasting and gear changes
+  // must not reintroduce the freehub buzz or shift clacks removed at rider request.
+  return { running, speed, surface: audioSurface(state.surface),
     tire: moving * (.19 + .27 * Math.sqrt(intensity)), wind: moving * .16 * intensity ** 1.45,
-    freehub: moving * (coasting ? .25 : 0), brake: moving * brake * .105,
-    skid: moving * slip * .14, rate: clamp(.6 + speed / 42, .6, 2), hubRate: clamp(speed / 23, .3, 2.8) };
+    brake: moving * brake * .105,
+    skid: moving * slip * .14, rate: clamp(.6 + speed / 42, .6, 2) };
 }
 
 export class RideAudioState {
   constructor() { this.reset(); }
   reset() { this.previous = null; this.retiredEpochs = new Set(); }
-  update(state = {}, at = 0) {
+  update(state = {}) {
     const targets = audioTargets(state), epoch = String(state.presentationEpoch ?? ''), previous = this.previous;
     const sequence = Number.isSafeInteger(state.stateSequence) ? state.stateSequence : null;
     if (this.retiredEpochs.has(epoch) || (previous && epoch === previous.epoch && sequence !== null && previous.sequence !== null && sequence <= previous.sequence)) return null;
@@ -43,12 +41,7 @@ export class RideAudioState {
       this.retiredEpochs.add(previous.epoch);
       if (this.retiredEpochs.size > 16) this.retiredEpochs.delete(this.retiredEpochs.values().next().value);
     }
-    const gear = Number.isInteger(state.gear) && state.gear >= 1 && state.gear <= clamp(finite(state.gearCount, 32), 1, 32) ? state.gear : null;
-    const distance = finite(state.distance), time = finite(at);
-    const continuous = previous && !changedEpoch && time >= previous.time && time - previous.time < STALE_SECONDS &&
-      Math.abs(distance - previous.distance) < Math.max(25, targets.speed / 3.6 * (time - previous.time) * 9 + 8);
-    const gearClick = !!(continuous && previous.running && targets.running && gear !== null && previous.gear !== null && previous.gear !== gear);
-    this.previous = { epoch, sequence, gear, distance, time, running: targets.running };
-    return { ...targets, gearClick, discontinuity: !continuous };
+    this.previous = { epoch, sequence };
+    return targets;
   }
 }

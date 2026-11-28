@@ -23,6 +23,7 @@ sessions/
 *.MP4
 *.mp4
 !docs/images/el-tony-pilot-comparison.mp4
+!docs/images/dentenberg-woodland-comparison.mp4
 *.LRF
 *.lrf
 src/MTBIndoorBern/Scene/courses/*/route.json

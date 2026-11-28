@@ -16,6 +16,7 @@
 - [Downhill braking, grip, practice and records](downhill.md)
 - [Gurten route, visual references and limitations](GURTEN.md)
 - [El Tony graphics pilot, focus view and ride sound](el-tony-pilot.md)
+- [Dentenberg autumn woodland and quieter ride sound](dentenberg-visuals.md)
 - [Eiger Bike Challenge 20 km, summer scenery and starting sectors](EIGER.md)
 - [Track Lab: import, align, annotate and export](track-lab.md)
 - [Maneta v01: assembly, wiring and firmware](bluetooth-brakes.md#maneta-v01)
@@ -43,6 +44,7 @@ These reports record checks performed at each milestone. They are not claims tha
 
 | Milestone | Report |
 | --- | --- |
+| Dentenberg autumn woodland and drivetrain-noise removal | [28 November 2026](verification-dentenberg-2026-11-28.json) |
 | El Tony woodland pilot, audio and riding presentation | [28 November 2026](verification-el-tony-pilot-2026-11-28.json) |
 | Two-Click recovery, mouse shifting and trainer-load smoothing | [28 November 2026](verification-ride-reliability-2026-11-28.json) |
 | Eiger 20 km, summer race scenery and sector starts | [22 November 2026](verification-eiger-2026-11-22.json) |

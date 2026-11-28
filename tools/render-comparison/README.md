@@ -76,13 +76,13 @@ This soundtrack is original procedural synthesis. It is not a microphone recordi
 
 ## Compose the comparison
 
-Use 960×540 source frames with the current compositor. It validates matching trajectory, frame counts and dimensions, then combines the versions side by side with **Previous version** and **El Tony pilot** labels. Pass the matching `ride-audio.wav` for the MP4 soundtrack:
+Use 960×540 source frames with the current compositor. It validates matching trajectory, frame counts and dimensions, then combines the versions side by side with configurable before/after labels. Pass the matching `ride-audio.wav` for the MP4 soundtrack:
 
 ```powershell
-python tools/render-comparison/compose.py C:/MTB/captures/el-tony-before C:/MTB/captures/el-tony-after docs/images/el-tony-pilot-comparison.mp4 --ffmpeg C:/Tools/ffmpeg/bin/ffmpeg.exe --audio C:/MTB/captures/el-tony-audio/ride-audio.wav --gif-start 14 --gif-seconds 8
+python tools/render-comparison/compose.py C:/MTB/captures/el-tony-before C:/MTB/captures/el-tony-after docs/images/el-tony-pilot-comparison.mp4 --ffmpeg C:/Tools/ffmpeg/bin/ffmpeg.exe --audio C:/MTB/captures/el-tony-audio/ride-audio.wav --gif-start 14 --gif-seconds 8 --before-label "PREVIOUS VERSION" --after-label "EL TONY PILOT"
 ```
 
-The output argument must end in `.mp4`. This example exports the complete 45-second sequence at its captured 12 fps, plus an 8-second silent GIF excerpt beginning at 14 seconds. The MP4 is 1120 pixels wide; the GIF is 800 pixels wide. The MP4 uses H.264 video and AAC audio; the GIF uses 10 fps and a 128-colour palette. The same output stem also produces a comparison PNG from the middle of the GIF excerpt and a JSON manifest with trajectory, timing, file sizes and method. `--audio` is optional; omit it for a silent MP4. `--font` selects an alternative TrueType font if Segoe UI is unavailable.
+The output argument must end in `.mp4`. This example exports the complete 45-second sequence at its captured 12 fps, plus an 8-second silent GIF excerpt beginning at 14 seconds. The MP4 is 1120 pixels wide; the GIF is 800 pixels wide. The MP4 uses H.264 video and AAC audio; the GIF uses 10 fps and a 128-colour palette. The same output stem also produces a comparison PNG from the middle of the GIF excerpt and a JSON manifest with trajectory, timing, file sizes and method. `--audio` is optional; omit it for a silent MP4. `--before-label` and `--after-label` set the captions (defaults: **Previous version** and **Current version**). `--course-label` overrides the displayed course name without changing its internal ID. `--font` selects an alternative TrueType font if Segoe UI is unavailable.
 
 Before publishing, verify the output duration, inspect the image around the sign, and listen to the MP4 soundtrack. Published El Tony media:
 

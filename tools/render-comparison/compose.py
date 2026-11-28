@@ -11,6 +11,9 @@ def main():
     parser.add_argument('--audio',type=Path)
     parser.add_argument('--gif-start',type=float,default=14)
     parser.add_argument('--gif-seconds',type=float,default=8)
+    parser.add_argument('--before-label',default='PREVIOUS VERSION')
+    parser.add_argument('--after-label',default='CURRENT VERSION')
+    parser.add_argument('--course-label',default=None)
     args=parser.parse_args()
     reports=[json.loads((p/'capture-report.json').read_text(encoding='utf-8-sig')) for p in [args.before,args.after]]
     before,after=[r['spec'] for r in reports]
@@ -29,15 +32,15 @@ def main():
         temporary=Path(temporary)
         for index in range(count):
             canvas=Image.new('RGB',(1120,391),'#14231c');draw=ImageDraw.Draw(canvas)
-            draw.text((20,13),'PREVIOUS VERSION',font=font,fill='#dbe3d4')
-            draw.text((580,13),'EL TONY PILOT',font=font,fill='#d1ef91')
+            draw.text((20,13),args.before_label,font=font,fill='#dbe3d4')
+            draw.text((580,13),args.after_label,font=font,fill='#d1ef91')
             for side,folder in enumerate([args.before,args.after]):
                 with Image.open(folder/f'{index:04d}.png') as frame:
                     if frame.size!=(960,540):raise ValueError(f'Unexpected capture dimensions: {frame.size}')
                     canvas.paste(frame.convert('RGB').resize((560,315),Image.Resampling.LANCZOS),(side*560,48))
             draw.line((560,0,560,363),fill='#14231c',width=3)
             distance=before['StartMeters']+index*before['SpeedMps']/before['Fps']
-            draw.text((20,369),f"{before['CourseId'].upper()} · Forest singletrack · km {distance/1000:.2f}",font=small,fill='#dbe3d4')
+            draw.text((20,369),f"{args.course_label or before['CourseId'].upper()} · Forest singletrack · km {distance/1000:.2f}",font=small,fill='#dbe3d4')
             draw.text((580,369),'Same route, position and speed · 3D engine capture',font=small,fill='#b8c5b3')
             canvas.save(temporary/f'{index:04d}.png')
             if index==round((args.gif_start+args.gif_seconds/2)*before['Fps']):canvas.save(args.output.with_suffix('.png'))
@@ -50,7 +53,7 @@ def main():
             '-loop','0',str(args.output.with_suffix('.gif'))],check=True)
     with Image.open(args.output.with_suffix('.gif')) as gif:
         dimensions=gif.size;gif_frames=gif.n_frames
-    proof={'course':before['CourseId'],'mp4Bytes':args.output.stat().st_size,'gifBytes':args.output.with_suffix('.gif').stat().st_size,'gifFrames':gif_frames,
+    proof={'course':before['CourseId'],'courseLabel':args.course_label or before['CourseId'].upper(),'beforeLabel':args.before_label,'afterLabel':args.after_label,'mp4Bytes':args.output.stat().st_size,'gifBytes':args.output.with_suffix('.gif').stat().st_size,'gifFrames':gif_frames,
            'seconds':seconds,'fps':before['Fps'],'gifStartSeconds':args.gif_start,'gifSeconds':args.gif_seconds,'startMeters':before['StartMeters'],
            'endMeters':distance,'width':dimensions[0],'height':dimensions[1],'method':'Deterministic engine capture; not a real-time performance measurement',
            'audio':'Same application graph rendered offline against the coasting capture trajectory' if args.audio else None}

@@ -4,6 +4,22 @@
 
 This log records completed project milestones, their evidence and their limitations. It replaces the development history previously embedded in the README. Entries are newest first; interface screenshots have been refreshed on 22 November 2026 to show the English application. Dated verification reports remain unchanged. Planning work is identified explicitly when it has not been implemented or tested.
 
+## 28 November 2026 · Dentenberg autumn woodland and quieter rides
+
+**Dentenberg now has a more detailed autumn forest across its annotated woodland sections.** The existing DJI recording guided pale retained leaves, exposed branches, darker conifer saplings and a narrow worn trail through fallen leaves. Nearby three-dimensional trees use fixed spatial budgets; distant trees remain lightweight. Softer ground margins and less repetitive materials improve the transition into the surrounding imagery. The route, elevation, surface annotations, gearing and KICKR load are unchanged.
+
+![Dentenberg before and after at matching positions](docs/images/dentenberg-woodland-comparison.gif)
+
+[Before still](docs/images/dentenberg-woodland-before.png) · [After still](docs/images/dentenberg-woodland-after.png) · [30-second comparison video](docs/images/dentenberg-woodland-comparison.mp4) · [English in-app demo](docs/images/dentenberg-woodland-in-app.png).
+
+**The chain/freehub buzz and gear-shift clacks have been removed at rider request.** Tyres, wind, braking and corner scrub remain at their previous levels. Repeated gear changes and coasting cannot create drivetrain sound sources. Earlier El Tony media retains its historical soundtrack; the new Dentenberg video uses the quieter current graph.
+
+**Measured and verified:** approximately 30 fps before and after in the 45-second GTX 660 renderer benchmark at 1280×720, with no frames above 66.7 ms. CPU submission p95 changed from 3.7 to 4.9 ms. Public/personal Release builds and self-tests, geometry and forest-boundary invariants, spatial limits, fallback handling, other-course isolation and audio/input regressions passed. Native offline demo renders the new scene without errors. The first short startup check contained a long stalled frame while export was finishing; the separate sustained measurement does not promise hitch-free startup or connected-session performance.
+
+The personal installation is updated with calibration, saved devices, records and private course assets preserved. Raw footage, extracted reference photographs and personal route data remain local; public CC0 material files have source/checksum records. No new physical hardware test was performed.
+
+[Visual changes, references and measurements](docs/dentenberg-visuals.md) · [Verification record](docs/verification-dentenberg-2026-11-28.json) · [Development checks](tools/dentenberg/README.md).
+
 ## 28 November 2026 · El Tony woodland, ride sound and focus view
 
 **A 340 m visual pilot now surrounds the El Tony jump on Gurtentrail.** The same route gains compacted-earth materials with separate colour, normal and roughness maps, irregular shoulders, broadleaf crowns, saplings, ferns and dappled shade. Trailnet and TRIEBHAUS photographs guided the appearance; generic Poly Haven materials are CC0. This is a recreation rather than photogrammetry. The existing logo, route elevations, jump shapes, gearing and trainer-load model are retained.

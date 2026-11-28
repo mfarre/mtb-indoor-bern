@@ -1,0 +1,227 @@
+{
+  "date": "2026-11-28",
+  "baselineCommit": "cc8a6824d0f1be552edfd6c99cb3d7dd21314db3",
+  "scope": {
+    "course": "al-dente",
+    "appearance": "late-autumn forest spans",
+    "routeAndTrainerModelUnchanged": true,
+    "recreatedNotPhotogrammetry": true,
+    "privateDataPublished": false
+  },
+  "builds": {
+    "public": "PASS: Uetliberg, Gurten, Eiger Bike Challenge 20 km; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records.",
+    "personal": "PASS: Dentenberg, Uetliberg, Gurten, Eiger Bike Challenge 20 km; shared bike physics and custom gearing; terrain filtering and calibrated torque ramp; guided calibration success, cancellation and failure cases (fake trainer); profile migration, validation and persistence; route geometry; BLE packet/state recovery and independent Click slots (offline); demo speed, pause/resume, seeking and finish; sector validation, preview, start, reset and teleport guards; braking, grip and personal records."
+  },
+  "woodlandChecks": {
+    "ok": true,
+    "synthetic": {
+      "routeUnchanged": true,
+      "roadCentreAndElevationsUnchanged": true,
+      "sourceWorldUnchanged": true,
+      "forestScoped": true,
+      "fixedPools": true,
+      "treeChunks": 26,
+      "maxNear": {
+        "trees": 96,
+        "shrubs": 52,
+        "ferns": 16,
+        "litter": 14
+      },
+      "aerialSilhouettesAndFog": "passed",
+      "forestEntryLegacyBudget": "passed"
+    },
+    "privateCourse": {
+      "checkedReadOnly": true,
+      "routeUnchanged": true,
+      "roadCentreAndElevationsUnchanged": true,
+      "sourceWorldUnchanged": true,
+      "forestScoped": true,
+      "fixedPools": true,
+      "treeChunks": 91,
+      "maxNear": {
+        "trees": 96,
+        "shrubs": 104,
+        "ferns": 31,
+        "litter": 24
+      }
+    },
+    "optionalAssets": {
+      "allStockMapsMissing": "passed",
+      "localGroundAndFoliageMissing": "passed",
+      "missingAlbedoReliefMismatch": "passed",
+      "localVideoPrecedence": "passed",
+      "shaderPrewarmFailure": "passed"
+    },
+    "otherCourses": {
+      "gurten": "untouched",
+      "elTonyState": "untouched",
+      "eiger": "untouched",
+      "uetliberg": "untouched",
+      "explicitlyDisabledDentenberg": "untouched"
+    }
+  },
+  "javascriptSuites": [
+    "ride-audio/test.mjs",
+    "ride-input/test.mjs",
+    "ride-input/brake-test.mjs",
+    "ride-presentation/test.mjs",
+    "ride-presentation/controls-test.mjs",
+    "gurten/verify-pilot.mjs"
+  ],
+  "javascriptSuitesPassed": true,
+  "benchmark": {
+    "method": "Real-time renderer-only benchmark; fixed pixel ratio 1; no screenshot work in measured loop; CPU submission is not GPU time",
+    "startMeters": 4000,
+    "speedMps": 6.2,
+    "warmupSeconds": 5,
+    "before": {
+      "fps": 29.99946667614798,
+      "frames": 1351,
+      "seconds": 45.000800000000005,
+      "targetFps": 30,
+      "frameIntervalMs": {
+        "p50": 33.30000000000291,
+        "p95": 33.400000000001455,
+        "p99": 33.5,
+        "max": 33.700000000004366
+      },
+      "cpuSubmissionMs": {
+        "p50": 2.099999964237213,
+        "p95": 3.699999988079071,
+        "p99": 5,
+        "max": 22.099999964237213
+      },
+      "stallsOver66ms": 0,
+      "canvas": [
+        1280,
+        720
+      ],
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce GTX 660 (0x000011C0) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    },
+    "after": {
+      "fps": 29.99953334059248,
+      "frames": 1351,
+      "seconds": 45.0007,
+      "targetFps": 30,
+      "frameIntervalMs": {
+        "p50": 33.30000000000291,
+        "p95": 33.400000000001455,
+        "p99": 33.5,
+        "max": 34.29999999999927
+      },
+      "cpuSubmissionMs": {
+        "p50": 3.100000023841858,
+        "p95": 4.900000035762787,
+        "p99": 5.900000035762787,
+        "max": 14.100000023841858
+      },
+      "stallsOver66ms": 0,
+      "canvas": [
+        1280,
+        720
+      ],
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce GTX 660 (0x000011C0) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    },
+    "afterStalls": [],
+    "connectedSessionTest": false
+  },
+  "native": {
+    "installedDemo": {
+      "ready": true,
+      "errors": [],
+      "renderVersion": "dentenberg-autumn-2026-11-28"
+    },
+    "isolated45SecondDemo": {
+      "fps": 29.999000033332162,
+      "frameMsP95": 33.400000000001455,
+      "renderSubmitMsP95": 5.600000023841858,
+      "width": 1440,
+      "height": 852,
+      "mode": "demo",
+      "woodland": {
+        "nearTrees": 96,
+        "nearShrubs": 105,
+        "nearFerns": 28,
+        "totalTrees": 2519,
+        "chunkCount": 91,
+        "limits": {
+          "chunkSize": 64,
+          "treeRadius": 94,
+          "treeBudget": 96,
+          "shrubRadius": 65,
+          "shrubBudget": 110,
+          "fernRadius": 36,
+          "fernBudget": 64,
+          "lateralLimit": 25
+        },
+        "groundSource": "private-video",
+        "assetsLoaded": 3,
+        "assetFallbacks": [],
+        "prewarmStatus": "complete"
+      },
+      "errors": []
+    },
+    "hardwareConnected": false,
+    "startupNote": "The initial installed smoke captured a short startup window while media export was finishing (10.2 fps, maximum frame interval 1783.7 ms). It is not a sustained benchmark. The isolated 45-second demo above and renderer-only benchmark were measured separately."
+  },
+  "audio": {
+    "version": 2,
+    "freehubAndGearSourcesRemoved": true,
+    "retainedSources": [
+      "earth",
+      "gravel",
+      "asphalt",
+      "leaves",
+      "wind",
+      "brake",
+      "skid"
+    ],
+    "retainedBuffersUnchanged": true,
+    "export": {
+      "type": "audio-complete",
+      "method": "Application Web Audio graph rendered offline against the deterministic coasting capture trajectory, using actual under-wheel surface metadata. Synthetic sounds; not a microphone recording.",
+      "sampleRate": 48000,
+      "channels": 2,
+      "seconds": 30,
+      "peak": 0.21791960299015045,
+      "rms": 0.022097193622045038,
+      "bytes": 5760044
+    }
+  },
+  "installation": {
+    "protectedFilesUnchanged": 15,
+    "rollbackCopiesSaved": true,
+    "audioHotfixFilesVerified": 6,
+    "appFilesUpdated": 11,
+    "sourceFilesUpdated": 9
+  },
+  "physicalHardwareTest": false,
+  "sourceSha256": {
+    "course-details.js": "784335697085f7678ea14b44a5a8653b89e142a2a0029e5007631350593c426b",
+    "dentenberg-profile.js": "eb49cef6f855a77ed9fe4c6d6741c9da5289ab14c9c26b1a5ebdc2dd9da5fda7",
+    "dentenberg-woodland.js": "d3d5562bfe5515c9ecf50b4fdb12bde3319745c7917fdc1d2ab3e2f4a0e00711",
+    "forest.js": "d6f400ab723624cf14614022447f674d9bdb818548edff2ef461df506cac33b7",
+    "ride-audio-state.js": "c453b8eb4d3fa304a340c33d1fa2ce4781e154db511ef1b450d0e0dd40d92939",
+    "ride-audio-synthesis.js": "4d68e16f76a35fab65dbbc30375fb65adf7171f4e7cb69a346ffbd795bb76ae1",
+    "ride-audio.js": "b2d5def34b146fcfa0d39d14865b79f7e9aa1b9ab8f322a79df507a4e502ab3a"
+  },
+  "media": {
+    "course": "al-dente",
+    "courseLabel": "DENTENBERG",
+    "beforeLabel": "PREVIOUS VERSION",
+    "afterLabel": "DENTENBERG \u00b7 NEW",
+    "mp4Bytes": 23478517,
+    "gifBytes": 11470382,
+    "gifFrames": 80,
+    "seconds": 30,
+    "fps": 10,
+    "gifStartSeconds": 12.0,
+    "gifSeconds": 8.0,
+    "startMeters": 4000,
+    "endMeters": 4185.38,
+    "width": 800,
+    "height": 280,
+    "method": "Deterministic engine capture; not a real-time performance measurement",
+    "audio": "Same application graph rendered offline against the coasting capture trajectory"
+  }
+}

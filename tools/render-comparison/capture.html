@@ -31,7 +31,7 @@ try{
   }catch(error){send({error:String(error.stack??error)});}
  };
  window.runRenderBenchmark=({start,speed,seconds,fps,warmup})=>{
-  const interval=1000/fps,intervals=[],submission=[],samples=[];
+  const interval=1000/fps,intervals=[],submission=[],samples=[],stalls=[];
   let began=null,previous=null,lastRendered=null,measuredStart=null,frames=0;
   const percentile=(values,p)=>{const v=[...values].sort((a,b)=>a-b);return v.length?v[Math.min(v.length-1,Math.floor((v.length-1)*p))]:0;};
   const summarize=v=>({p50:percentile(v,.5),p95:percentile(v,.95),p99:percentile(v,.99),max:v.length?Math.max(...v):0});
@@ -44,13 +44,13 @@ try{
    engine.distance=d;const before=performance.now();engine.render(d,interval/1000,'demo',false);const cpu=performance.now()-before;
    if(measuring){
     measuredStart??=now;
-    if(lastRendered!==null)intervals.push(now-lastRendered);
+    if(lastRendered!==null){intervals.push(now-lastRendered);if(now-lastRendered>66.7&&stalls.length<20)stalls.push({seconds:elapsed-warmup,distance:d,frameIntervalMs:now-lastRendered,cpuSubmissionMs:cpu});}
     lastRendered=now;submission.push(cpu);frames++;
     if(frames%fps===0)samples.push(engine.stats());
    }
    if(elapsed<warmup+seconds){requestAnimationFrame(tick);return;}
    const gl=engine.renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
-   send({type:'benchmark',method:'Real-time renderer-only benchmark; fixed pixel ratio 1; no screenshot work in measured loop; CPU submission is not GPU time',frames,seconds:(now-measuredStart)/1000,fps:(frames-1)*1000/(now-measuredStart),targetFps:fps,frameIntervalMs:summarize(intervals),cpuSubmissionMs:summarize(submission),stallsOver66ms:intervals.filter(x=>x>66.7).length,canvas:[engine.renderer.domElement.width,engine.renderer.domElement.height],gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),samples,lastFrame:engine.stats()});
+   send({type:'benchmark',method:'Real-time renderer-only benchmark; fixed pixel ratio 1; no screenshot work in measured loop; CPU submission is not GPU time',frames,seconds:(now-measuredStart)/1000,fps:(frames-1)*1000/(now-measuredStart),targetFps:fps,frameIntervalMs:summarize(intervals),cpuSubmissionMs:summarize(submission),stallsOver66ms:intervals.filter(x=>x>66.7).length,stalls,canvas:[engine.renderer.domElement.width,engine.renderer.domElement.height],gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),samples,lastFrame:engine.stats()});
   }
   requestAnimationFrame(tick);
  };

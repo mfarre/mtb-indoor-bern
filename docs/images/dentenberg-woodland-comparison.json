@@ -1,0 +1,19 @@
+{
+  "course": "al-dente",
+  "courseLabel": "DENTENBERG",
+  "beforeLabel": "PREVIOUS VERSION",
+  "afterLabel": "DENTENBERG \u00b7 NEW",
+  "mp4Bytes": 23478517,
+  "gifBytes": 11470382,
+  "gifFrames": 80,
+  "seconds": 30,
+  "fps": 10,
+  "gifStartSeconds": 12.0,
+  "gifSeconds": 8.0,
+  "startMeters": 4000,
+  "endMeters": 4185.38,
+  "width": 800,
+  "height": 280,
+  "method": "Deterministic engine capture; not a real-time performance measurement",
+  "audio": "Same application graph rendered offline against the coasting capture trajectory"
+}

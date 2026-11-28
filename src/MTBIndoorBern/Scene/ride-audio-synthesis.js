@@ -1,17 +1,17 @@
-// Original deterministic procedural sound design, v1. These are not field recordings.
+// Original deterministic procedural sound design, v2. These are not field recordings.
+// Version 2 removes drivetrain buzz and gear clacks; the other buffers are unchanged.
 // Buffers are generated once; persistent looping voices are crossfaded by ride-audio.js.
 export function synthesizeRideBuffer(kind, sampleRate = 48000) {
-  const durations = { earth: 7.13, gravel: 6.71, asphalt: 5.83, leaves: 7.79, wind: 8.37, hub: 1.5, brake: 4.53, skid: 5.37, gear: .095 };
+  const durations = { earth: 7.13, gravel: 6.71, asphalt: 5.83, leaves: 7.79, wind: 8.37, brake: 4.53, skid: 5.37 };
   const seconds = durations[kind];
   if (!seconds || !Number.isFinite(sampleRate) || sampleRate < 8000 || sampleRate > 192000) throw new Error('Invalid ride buffer');
   const count = Math.round(seconds * sampleRate), data = new Float32Array(count);
   let seed = [...kind].reduce((s, ch) => Math.imul(s, 31) + ch.charCodeAt(0), 20261128) >>> 0;
   const random = () => { seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; return (seed >>> 0) / 4294967296; };
-  let low = 0, slow = 0, grain = 0, envelope = 0, pulse = 0;
+  let low = 0, slow = 0, grain = 0;
   const lowAlpha = 1 - Math.exp(-2 * Math.PI * 1200 / sampleRate), slowAlpha = 1 - Math.exp(-2 * Math.PI * 120 / sampleRate);
-  const grainDecay = Math.exp(-1 / (sampleRate * (kind === 'leaves' ? .024 : .004))), pulseDecay = Math.exp(-1 / (sampleRate * .0011));
-  const grainRate = { earth: 29, gravel: 110, asphalt: 0, leaves: 40, wind: 0, hub: 0, brake: 0, skid: 48, gear: 0 }[kind];
-  let nextHub = 0;
+  const grainDecay = Math.exp(-1 / (sampleRate * (kind === 'leaves' ? .024 : .004)));
+  const grainRate = { earth: 29, gravel: 110, asphalt: 0, leaves: 40, wind: 0, brake: 0, skid: 48 }[kind];
   for (let i = 0; i < count; i++) {
     const t = i / sampleRate, white = random() * 2 - 1;
     low += (white - low) * lowAlpha;
@@ -26,15 +26,8 @@ export function synthesizeRideBuffer(kind, sampleRate = 48000) {
       case 'earth': value = (.55 * low + .8 * slow + white * grain * .18) * undulate; break;
       case 'gravel': value = (.6 * low + white * grain * .6 + slow * .45) * undulate; break;
       case 'leaves': value = (white - .6 * low) * (.11 + grain * .7) * undulate; break;
-      case 'hub':
-        if (i >= nextHub) { pulse = .65 + random() * .35; nextHub += sampleRate / 120; }
-        pulse *= pulseDecay;
-        value = pulse * (white * .45 + .55 * Math.sin(t * Math.PI * 2 * 2900)); break;
       case 'brake': value = (white - low) * (.35 + .1 * Math.sin(t * 67)) + low * .15; break;
       case 'skid': value = (white - slow) * (.2 + grain * .3) * undulate; break;
-      case 'gear':
-        envelope = Math.exp(-t * 115) + (t > .024 ? .45 * Math.exp(-(t - .024) * 190) : 0);
-        value = (white * .5 + Math.sin(t * 2 * Math.PI * 1250) * .35 + low * .2) * envelope; break;
     }
     data[i] = value;
   }
@@ -42,7 +35,7 @@ export function synthesizeRideBuffer(kind, sampleRate = 48000) {
   let mean = 0, energy = 0; for (const v of data) mean += v; mean /= count;
   for (const v of data) energy += (v - mean) ** 2;
   const scale = .22 / Math.max(.001, Math.sqrt(energy / count));
-  const seam = Math.round(sampleRate * (kind === 'gear' ? .001 : .012));
+  const seam = Math.round(sampleRate * .012);
   for (let i = 0; i < count; i++) {
     const fade = Math.min(1, i / seam, (count - i - 1) / seam);
     data[i] = Math.tanh((data[i] - mean) * scale) * fade;

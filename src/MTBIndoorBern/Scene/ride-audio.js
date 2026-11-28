@@ -9,7 +9,7 @@ export function createRideAudio({ context = null, watch = true } = {}) {
   let ctx = context, owned = false, graph = null, failed = false, disposed = false;
   let preferences = { ...AUDIO_DEFAULTS }, latest = null, lastAcceptedAt = -Infinity;
   let lastArrival = -Infinity, timer = null;
-  const state = new RideAudioState(), activeClicks = new Set();
+  const state = new RideAudioState();
   const doc = watch && typeof document !== 'undefined' ? document : null;
   const offline = () => !!ctx && typeof ctx.startRendering === 'function';
   const wallNow = () => (globalThis.performance?.now?.() ?? Date.now()) / 1000;
@@ -19,8 +19,6 @@ export function createRideAudio({ context = null, watch = true } = {}) {
   function releaseNodes() {
     if (!graph) return;
     for (const voice of Object.values(graph.voices)) { try { voice.source.stop(); voice.source.disconnect(); voice.filter.disconnect(); voice.gain.disconnect(); } catch {} }
-    for (const click of activeClicks) { try { click.source.stop(); click.source.disconnect(); click.gain.disconnect(); } catch {} }
-    activeClicks.clear();
     try { graph.master.disconnect(); graph.compressor.disconnect(); } catch {}
     graph = null;
   }
@@ -42,17 +40,16 @@ export function createRideAudio({ context = null, watch = true } = {}) {
     compressor.ratio.value = 2.5; compressor.attack.value = .005; compressor.release.value = .2;
     master.connect(compressor); compressor.connect(ctx.destination);
     // Assign early so partial initialization can always be disconnected on error.
-    graph = { master, compressor, voices: {}, gear: null };
-    for (const kind of ['earth', 'gravel', 'asphalt', 'leaves', 'wind', 'hub', 'brake', 'skid']) {
+    graph = { master, compressor, voices: {} };
+    for (const kind of ['earth', 'gravel', 'asphalt', 'leaves', 'wind', 'brake', 'skid']) {
       const source = ctx.createBufferSource(), gain = ctx.createGain(), filter = ctx.createBiquadFilter();
       graph.voices[kind] = { source, gain, filter };
       source.buffer = buffer(kind); source.loop = true; gain.gain.value = 0;
       filter.type = 'lowpass'; filter.Q.value = .55;
-      filter.frequency.value = { earth: 2600, gravel: 4300, asphalt: 1800, leaves: 4600, wind: 650, hub: 5400, brake: 3800, skid: 3600 }[kind];
+      filter.frequency.value = { earth: 2600, gravel: 4300, asphalt: 1800, leaves: 4600, wind: 650, brake: 3800, skid: 3600 }[kind];
       source.connect(filter); filter.connect(gain); gain.connect(master);
       source.start(atNow());
     }
-    graph.gear = buffer('gear');
   }
   function masterAt(time, active) {
     if (!graph) return;
@@ -62,37 +59,22 @@ export function createRideAudio({ context = null, watch = true } = {}) {
     // A new host packet cancels this future fade before rearming it. Pauses never need a timer.
     if (active) graph.master.gain.setTargetAtTime(0, time + STALE_SECONDS, .05);
   }
-  function clickAt(time) {
-    if (!graph || preferences.muted || doc?.hidden) return;
-    const source = ctx.createBufferSource(), gain = ctx.createGain();
-    source.buffer = graph.gear; gain.gain.value = .09;
-    source.connect(gain); gain.connect(graph.master);
-    const click = { source, gain }; activeClicks.add(click);
-    source.onended = () => { try { source.disconnect(); gain.disconnect(); } catch {} activeClicks.delete(click); };
-    source.start(time); source.stop(time + graph.gear.duration + .01);
-  }
   function apply(snapshot, time) {
     const values = state.update(snapshot, time);
     if (!values) return;
     lastAcceptedAt = time;
-    if (values.discontinuity) {
-      for (const click of activeClicks) { try { click.source.stop(time); } catch {} }
-    }
     for (const kind of ['earth', 'gravel', 'asphalt', 'leaves']) {
       target(graph.voices[kind].gain.gain, values.surface === kind ? values.tire : 0, time, .18);
       target(graph.voices[kind].source.playbackRate, values.rate, time, .2);
     }
-    for (const [kind, value] of [['wind', values.wind], ['hub', values.freehub], ['brake', values.brake], ['skid', values.skid]])
-      target(graph.voices[kind].gain.gain, value, time, kind === 'hub' ? .13 : .1);
-    target(graph.voices.hub.source.playbackRate, values.hubRate, time, .2);
+    for (const [kind, value] of [['wind', values.wind], ['brake', values.brake], ['skid', values.skid]])
+      target(graph.voices[kind].gain.gain, value, time, .1);
     target(graph.voices.wind.filter.frequency, 350 + values.speed * 15, time, .3);
     masterAt(time, values.running);
-    if (values.gearClick) clickAt(time);
   }
   function silence() {
     safe(() => {
       if (graph) target(graph.master.gain, 0, atNow(), .025);
-      for (const click of activeClicks) { try { click.source.stop(atNow()); } catch {} }
       state.reset(); lastAcceptedAt = -Infinity;
     });
   }

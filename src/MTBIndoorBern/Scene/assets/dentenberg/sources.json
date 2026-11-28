@@ -1,0 +1,49 @@
+{
+  "license": "CC0 1.0",
+  "licenseIdentifier": "CC0-1.0",
+  "licenseUrl": "https://polyhaven.com/license",
+  "legalCodeUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+  "verifiedOn": "2026-11-28",
+  "method": "Exact cached originals restored; byte lengths and MD5 verified against Poly Haven file metadata, SHA-256 computed locally. No image modifications.",
+  "scope": "Generic public ground-material fallback. Owner video frames, private texture and personal route are not included.",
+  "assets": [
+    {
+      "id": "forest_floor",
+      "author": "eye-candy.xyz",
+      "source": "https://polyhaven.com/a/forest_floor",
+      "metadataSource": "https://api.polyhaven.com/files/forest_floor",
+      "files": [
+        {
+          "file": "forest_floor_diff_1k.jpg",
+          "map": "Diffuse",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_floor/forest_floor_diff_1k.jpg",
+          "bytes": 1329853,
+          "md5": "d67f308e4b8be6a65989e8dc76ec40fe",
+          "sha256": "f12e5adea1741f9eb7a528bfc621f8267885b9530b74c3a8afdb823899bdbf0b",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "forest_floor_nor_gl_1k.jpg",
+          "map": "nor_gl",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_floor/forest_floor_nor_gl_1k.jpg",
+          "bytes": 1380104,
+          "md5": "7cb480d082527766acdf3b6c8cba50f4",
+          "sha256": "681f3de8c756c4d19bcda33039f953295498f38b1425ce9d56b37d6f97f6e518",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "forest_floor_rough_1k.jpg",
+          "map": "Rough",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_floor/forest_floor_rough_1k.jpg",
+          "bytes": 736353,
+          "md5": "446092b42424c7bcf15994d651949546",
+          "sha256": "ece0b331f08c03f3edcd8ab6815b74a5ae20768beef64cd4f96a5b2fa26e116e",
+          "width": 1024,
+          "height": 1024
+        }
+      ]
+    }
+  ]
+}
